@@ -25,6 +25,8 @@ interface Trade {
   notes?: string | null
   marketType?: string | null
   createdAt: string
+  entryTime?: string | null
+  exitTime?: string | null
 }
 
 interface Database {

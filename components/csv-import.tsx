@@ -191,6 +191,13 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
         const COLUMN_PATTERNS = getMarketSpecificMappings(marketType)
         
         // Debug info
+        console.log('Market detection debug:', {
+          headers,
+          sampleData: sampleData.slice(0, 3),
+          detectedFromHeaders: marketType,
+          symbolsFound: sampleData.map(d => d.symbol || d.Symbol || d.ticker || d.Ticker).filter(Boolean)
+        })
+        
         setCsvDebugInfo({
           headers: headers,
           detectedMarket: marketType,
@@ -293,7 +300,7 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
 
         // Step 7: Parse data with market context
         const trades = []
-        for (let i = 1; i < Math.min(lines.length, 1000); i++) { // Limit to 1000 trades
+        for (let i = 1; i < lines.length; i++) { // Process all trades
           const values = lines[i].split(',').map(v => v.trim())
           if (values.length < 2) continue // Skip empty lines
           
@@ -342,16 +349,19 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
             }
           }
 
-          // Extract date
+          // Extract dates
           if (columnMap.date) {
             const dateIndex = headers.indexOf(columnMap.date)
+            trade.entryTime = parseDate(values[dateIndex]).toISOString()
             trade.date = parseDate(values[dateIndex])
-          } else if (columnMap.exitDate) {
-            // Use exit date if no entry date
-            const exitDateIndex = headers.indexOf(columnMap.exitDate)
-            trade.date = parseDate(values[exitDateIndex])
           } else {
             trade.date = new Date()
+            trade.entryTime = new Date().toISOString()
+          }
+          
+          if (columnMap.exitDate) {
+            const exitDateIndex = headers.indexOf(columnMap.exitDate)
+            trade.exitTime = parseDate(values[exitDateIndex]).toISOString()
           }
 
           // Build comprehensive notes including all extra data
@@ -469,8 +479,11 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
                   trade.quantity = Math.abs(parseFloat(value) || 0)
                   break
                 case 'date':
-                case 'exitDate':
+                  trade.entryTime = parseDate(value).toISOString()
                   trade.createdAt = parseDate(value).toISOString()
+                  break
+                case 'exitDate':
+                  trade.exitTime = parseDate(value).toISOString()
                   break
               }
             }

@@ -115,6 +115,8 @@ interface Trade {
   notes?: string | null
   marketType?: string | null
   createdAt: string
+  entryTime?: string | null
+  exitTime?: string | null
 }
 
 // Check if Clerk is configured
@@ -198,17 +200,20 @@ function TradeHistoryContent({ user }: { user: any }) {
   }
 
   const exportToCSV = () => {
-    const headers = ['Date', 'Symbol', 'Type', 'Entry', 'Exit', 'Quantity', 'Market', 'P&L', 'Notes']
+    const headers = ['Entry Time', 'Exit Time', 'Symbol', 'Type', 'Entry Price', 'Exit Price', 'Quantity', 'Market', 'Result', 'P&L', 'Notes']
     const rows = filteredTrades.map(trade => {
       const pnl = calculateMarketPnL(trade, trade.marketType || null)
+      const result = pnl !== null ? (pnl >= 0 ? 'WIN' : 'LOSS') : ''
       return [
-        new Date(trade.createdAt).toLocaleDateString(),
+        new Date(trade.createdAt).toLocaleString(),
+        trade.exit ? new Date(trade.createdAt).toLocaleString() : '',
         trade.symbol,
         trade.type,
         trade.entry,
         trade.exit || '',
         trade.quantity,
         trade.marketType || '',
+        result,
         pnl ? pnl.toFixed(2) : '',
         trade.notes || ''
       ]
@@ -420,7 +425,10 @@ function TradeHistoryContent({ user }: { user: any }) {
                       <thead className="bg-gray-50 border-b">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date
+                            Entry Time
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Exit Time
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Symbol
@@ -429,16 +437,19 @@ function TradeHistoryContent({ user }: { user: any }) {
                             Type
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Entry
+                            Entry Price
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Exit
+                            Exit Price
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Qty
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Market
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Result
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             P&L
@@ -451,10 +462,14 @@ function TradeHistoryContent({ user }: { user: any }) {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {filteredTrades.map((trade) => {
                           const pnl = calculateMarketPnL(trade, trade.marketType || null)
+                          const result = pnl !== null ? (pnl >= 0 ? 'WIN' : 'LOSS') : '-'
                           return (
                             <tr key={trade.id} className="hover:bg-gray-50">
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {new Date(trade.createdAt).toLocaleDateString()}
+                                {trade.entryTime ? new Date(trade.entryTime).toLocaleString() : new Date(trade.createdAt).toLocaleString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {trade.exitTime ? new Date(trade.exitTime).toLocaleString() : '-'}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 {trade.symbol}
@@ -481,6 +496,19 @@ function TradeHistoryContent({ user }: { user: any }) {
                                 <span className="px-2 py-1 bg-gray-100 rounded text-xs">
                                   {trade.marketType || 'Unknown'}
                                 </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                {result !== '-' ? (
+                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                    result === 'WIN' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    {result}
+                                  </span>
+                                ) : (
+                                  '-'
+                                )}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm">
                                 {pnl !== null ? (
