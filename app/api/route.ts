@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
-
-const prisma = new PrismaClient()
+import * as db from '@/lib/db'
 
 // Check if Clerk is configured
 const isClerkConfigured = !!(
@@ -31,38 +29,29 @@ export async function POST(request: NextRequest) {
   // Giant switch statement - fight me
   switch (body.action) {
     case 'getTrades': {
-      const user = await prisma.user.findUnique({
-        where: { clerkId: userId },
-        include: { trades: true }
-      })
+      const { user, trades } = await db.getUserWithTrades(userId)
       
       return NextResponse.json({
-        trades: user?.trades || [],
+        trades: trades || [],
         isPaid: user?.isPaid || false
       })
     }
     
     case 'addTrade': {
-      const trade = await prisma.trade.create({
-        data: {
-          symbol: body.trade.symbol,
-          type: body.trade.type,
-          entry: body.trade.entry,
-          exit: body.trade.exit || null,
-          quantity: body.trade.quantity,
-          notes: body.trade.notes || null,
-          marketType: body.trade.marketType || null,
-          user: {
-            connectOrCreate: {
-              where: { clerkId: userId },
-              create: { 
-                clerkId: userId, 
-                email: body.email || `${userId}@placeholder.com`
-              }
-            }
-          }
-        }
+      const user = await db.upsertUser(userId, body.email || `${userId}@placeholder.com`)
+      
+      const trade = await db.createTrade({
+        userId: user.id,
+        symbol: body.trade.symbol,
+        type: body.trade.type,
+        entry: body.trade.entry,
+        exit: body.trade.exit || null,
+        quantity: body.trade.quantity,
+        notes: body.trade.notes || null,
+        marketType: body.trade.marketType || null,
+        createdAt: body.trade.createdAt || new Date().toISOString()
       })
+      
       return NextResponse.json({ trade })
     }
     
@@ -109,18 +98,11 @@ export async function POST(request: NextRequest) {
       }
 
       // Get or create user
-      const user = await prisma.user.upsert({
-        where: { clerkId: userId },
-        update: {},
-        create: {
-          clerkId: userId,
-          email: body.email || `${userId}@placeholder.com`
-        }
-      })
+      const user = await db.upsertUser(userId, body.email || `${userId}@placeholder.com`)
 
       // Import all trades
-      const importedTrades = await prisma.trade.createMany({
-        data: trades.map(trade => ({
+      const importedTrades = await db.createManyTrades(
+        trades.map(trade => ({
           userId: user.id,
           symbol: trade.symbol,
           type: trade.type,
@@ -129,15 +111,12 @@ export async function POST(request: NextRequest) {
           quantity: trade.quantity,
           notes: trade.notes || null,
           marketType: trade.marketType || null,
-          createdAt: trade.createdAt || new Date()
+          createdAt: trade.createdAt || new Date().toISOString()
         }))
-      })
+      )
 
       // Fetch and return all trades
-      const allTrades = await prisma.trade.findMany({
-        where: { userId: user.id },
-        orderBy: { createdAt: 'desc' }
-      })
+      const allTrades = await db.findTradesByUserId(user.id)
 
       return NextResponse.json({ 
         trades: allTrades,
