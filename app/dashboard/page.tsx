@@ -292,9 +292,14 @@ function AuthenticatedDashboard() {
 }
 
 export default function Dashboard() {
-  if (!isClerkConfigured) {
-    return <DemoMode />
+  // Redirect to history page which has the full interface
+  if (typeof window !== 'undefined') {
+    window.location.href = '/history'
   }
   
-  return <AuthenticatedDashboard />
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p>Redirecting to Trade History...</p>
+    </div>
+  )
 }
