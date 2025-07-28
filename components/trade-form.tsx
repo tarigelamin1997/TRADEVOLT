@@ -9,6 +9,7 @@ interface Trade {
   entry: string
   exit: string
   quantity: string
+  date: string
 }
 
 interface TradeFormProps {
@@ -21,7 +22,8 @@ export function TradeForm({ onAdd }: TradeFormProps) {
     type: 'BUY',
     entry: '',
     exit: '',
-    quantity: ''
+    quantity: '',
+    date: new Date().toISOString().split('T')[0] // Default to today
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +40,8 @@ export function TradeForm({ onAdd }: TradeFormProps) {
           ...trade,
           entry: parseFloat(trade.entry),
           exit: trade.exit ? parseFloat(trade.exit) : null,
-          quantity: parseFloat(trade.quantity)
+          quantity: parseFloat(trade.quantity),
+          createdAt: new Date(trade.date).toISOString()
         }
       })
     })
@@ -47,7 +50,7 @@ export function TradeForm({ onAdd }: TradeFormProps) {
     onAdd(data.trade)
     
     // Reset form
-    setTrade({ symbol: '', type: 'BUY', entry: '', exit: '', quantity: '' })
+    setTrade({ symbol: '', type: 'BUY', entry: '', exit: '', quantity: '', date: new Date().toISOString().split('T')[0] })
   }
 
   return (
@@ -95,6 +98,19 @@ export function TradeForm({ onAdd }: TradeFormProps) {
           value={trade.quantity}
           onChange={(e) => setTrade({ ...trade, quantity: e.target.value })}
           className="p-2 border rounded"
+          required
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Trade Date
+        </label>
+        <input
+          type="date"
+          value={trade.date}
+          onChange={(e) => setTrade({ ...trade, date: e.target.value })}
+          className="w-full p-2 border rounded"
           required
         />
       </div>

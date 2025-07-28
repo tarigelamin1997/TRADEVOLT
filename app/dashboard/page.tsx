@@ -216,6 +216,9 @@ export default function Dashboard() {
                 <div>
                   <span className="font-semibold">{trade.symbol}</span>
                   <span className="ml-2 text-sm text-gray-600">{trade.type}</span>
+                  <span className="ml-2 text-xs text-gray-500">
+                    {new Date(trade.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
                 <div>
                   {pnl !== null && (
