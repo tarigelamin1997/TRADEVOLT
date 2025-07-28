@@ -42,7 +42,8 @@ export function TradeForm({ onAdd }: TradeFormProps) {
           exit: trade.exit ? parseFloat(trade.exit) : null,
           quantity: parseFloat(trade.quantity),
           createdAt: new Date(trade.date).toISOString()
-        }
+        },
+        email: 'user@example.com' // This will be replaced by actual user email from dashboard
       })
     })
     

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-// import { useUser } from '@clerk/nextjs'
+import { useUser, UserButton } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { TradeForm } from '@/components/trade-form'
@@ -27,8 +27,7 @@ interface Trade {
 }
 
 export default function Dashboard() {
-  // const { user } = useUser()
-  const user = { id: 'demo-user', emailAddresses: [{ emailAddress: 'demo@example.com' }] } // Mock user for now
+  const { user } = useUser()
   const [trades, setTrades] = useState<Trade[]>([])
   const [isPaid, setIsPaid] = useState(false)
   const [aiInsight, setAiInsight] = useState('')
@@ -124,14 +123,25 @@ export default function Dashboard() {
     a.click()
   }
   
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-6xl mx-auto p-4">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Your Trading Journal</h1>
-        <p className="text-gray-600">
-          {isPaid ? '✨ Ultra Member' : `Free: ${freeFeatures.join(' & ')} this week`}
-        </p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Your Trading Journal</h1>
+          <p className="text-gray-600">
+            {isPaid ? '✨ Ultra Member' : `Free: ${freeFeatures.join(' & ')} this week`}
+          </p>
+        </div>
+        <UserButton afterSignOutUrl="/" />
       </div>
       
       {/* Stats */}

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-// import { auth } from '@clerk/nextjs/server'
+import { auth } from '@clerk/nextjs/server'
 // import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -8,9 +8,8 @@ const prisma = new PrismaClient()
 
 // ONE endpoint for EVERYTHING
 export async function POST(request: NextRequest) {
-  // const { userId } = auth()
-  // if (!userId) return new NextResponse('Unauthorized', { status: 401 })
-  const userId = 'demo-user' // Mock user for now
+  const { userId } = auth()
+  if (!userId) return new NextResponse('Unauthorized', { status: 401 })
   
   const body = await request.json()
   
