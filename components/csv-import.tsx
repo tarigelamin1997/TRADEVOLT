@@ -420,6 +420,7 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
   }
 
   const handleImport = async () => {
+    console.log('handleImport called', { file, previewLength: preview.length })
     if (!file || preview.length === 0) return
 
     setIsProcessing(true)
@@ -440,7 +441,9 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
           const values = lines[i].split(',').map(v => v.trim())
           if (values.length < 3) continue // Skip empty lines
           
-          const trade: any = {}
+          const trade: any = {
+            marketType: detectedMarket || 'UNKNOWN'
+          }
           
           // Use detected columns to extract data
           Object.entries(detectedColumns).forEach(([field, column]) => {
@@ -494,6 +497,9 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
           }
         }
 
+        console.log('Importing trades:', trades.length, 'trades')
+        console.log('Sample trade:', trades[0])
+        
         // Import trades via API
         const response = await fetch('/api', {
           method: 'POST',
@@ -505,13 +511,16 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
         })
 
         if (!response.ok) {
-          throw new Error('Failed to import trades')
+          const errorText = await response.text()
+          console.error('Import failed:', response.status, errorText)
+          throw new Error(`Failed to import trades: ${response.status} ${errorText}`)
         }
 
         const result = await response.json()
+        console.log('Import result:', result)
         
         // Call parent callback with imported trades
-        onImport(result.trades)
+        onImport(result.trades || [])
         onClose()
       }
 
