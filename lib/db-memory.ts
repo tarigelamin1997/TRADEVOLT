@@ -38,7 +38,8 @@ function generateId(): string {
 
 // User operations
 export async function findUserByClerkId(clerkId: string): Promise<User | null> {
-  for (const user of memoryDB.users.values()) {
+  const users = Array.from(memoryDB.users.values())
+  for (const user of users) {
     if (user.clerkId === clerkId) {
       return user
     }
