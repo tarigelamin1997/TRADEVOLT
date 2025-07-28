@@ -45,7 +45,13 @@ export async function POST(request: NextRequest) {
     case 'addTrade': {
       const trade = await prisma.trade.create({
         data: {
-          ...body.trade,
+          symbol: body.trade.symbol,
+          type: body.trade.type,
+          entry: body.trade.entry,
+          exit: body.trade.exit || null,
+          quantity: body.trade.quantity,
+          notes: body.trade.notes || null,
+          marketType: body.trade.marketType || null,
           user: {
             connectOrCreate: {
               where: { clerkId: userId },
@@ -122,6 +128,7 @@ export async function POST(request: NextRequest) {
           exit: trade.exit || null,
           quantity: trade.quantity,
           notes: trade.notes || null,
+          marketType: trade.marketType || null,
           createdAt: trade.createdAt || new Date()
         }))
       })
