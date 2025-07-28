@@ -5,8 +5,17 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { TradeForm } from '@/components/trade-form'
 
-// Import Clerk hooks at the top level
-import { useUser as clerkUseUser, UserButton as ClerkUserButton } from '@clerk/nextjs'
+// Try to import Clerk components
+let useUser: any = () => null
+let UserButton: any = null
+
+try {
+  const clerk = require('@clerk/nextjs')
+  useUser = clerk.useUser
+  UserButton = clerk.UserButton
+} catch (e) {
+  // Clerk not available
+}
 
 // Check if we should use Clerk
 const isClerkConfigured = !!(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
@@ -32,8 +41,14 @@ interface Trade {
 }
 
 export default function Dashboard() {
-  // Always call the hook, but use the result conditionally
-  const clerkUser = clerkUseUser()
+  // Try to use Clerk user
+  let clerkUser = null
+  try {
+    clerkUser = useUser()
+  } catch (e) {
+    // Clerk not available
+  }
+  
   const user = isClerkConfigured && clerkUser ? clerkUser : { id: 'demo-user' }
   
   const [trades, setTrades] = useState<Trade[]>([])
@@ -133,7 +148,7 @@ export default function Dashboard() {
             {isPaid ? '✨ Ultra Member' : `Free: ${freeFeatures.join(' & ')} this week`}
           </p>
         </div>
-        {isClerkConfigured && <ClerkUserButton afterSignOutUrl="/" />}
+        {isClerkConfigured && UserButton && <UserButton afterSignOutUrl="/" />}
       </div>
       
       {/* Stats */}
