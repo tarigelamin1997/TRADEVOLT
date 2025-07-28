@@ -120,7 +120,7 @@ interface Trade {
 // Check if Clerk is configured
 const isClerkConfigured = !!(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
 
-export default function TradeHistoryPage() {
+function TradeHistoryContent({ user }: { user: any }) {
   const router = useRouter()
   const [trades, setTrades] = useState<Trade[]>([])
   const [filteredTrades, setFilteredTrades] = useState<Trade[]>([])
@@ -129,9 +129,6 @@ export default function TradeHistoryPage() {
   const [filterMarket, setFilterMarket] = useState('ALL')
   const [sortBy, setSortBy] = useState('date')
   const [isLoading, setIsLoading] = useState(true)
-  
-  // Get user info
-  const { user } = isClerkConfigured ? useUser() : { user: null }
 
   useEffect(() => {
     fetchTrades()
@@ -139,7 +136,7 @@ export default function TradeHistoryPage() {
 
   useEffect(() => {
     filterAndSortTrades()
-  }, [trades, searchTerm, filterMarket, sortBy])
+  }, [trades, searchTerm, filterMarket, sortBy]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchTrades = async () => {
     try {
@@ -181,8 +178,8 @@ export default function TradeHistoryPage() {
         case 'symbol':
           return a.symbol.localeCompare(b.symbol)
         case 'pnl':
-          const pnlA = calculateMarketPnL(a, a.marketType) || 0
-          const pnlB = calculateMarketPnL(b, b.marketType) || 0
+          const pnlA = calculateMarketPnL(a, a.marketType || null) || 0
+          const pnlB = calculateMarketPnL(b, b.marketType || null) || 0
           return pnlB - pnlA
         default:
           return 0
@@ -203,7 +200,7 @@ export default function TradeHistoryPage() {
   const exportToCSV = () => {
     const headers = ['Date', 'Symbol', 'Type', 'Entry', 'Exit', 'Quantity', 'Market', 'P&L', 'Notes']
     const rows = filteredTrades.map(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType)
+      const pnl = calculateMarketPnL(trade, trade.marketType || null)
       return [
         new Date(trade.createdAt).toLocaleDateString(),
         trade.symbol,
@@ -234,15 +231,15 @@ export default function TradeHistoryPage() {
   const stats = {
     totalTrades: filteredTrades.length,
     totalPnL: filteredTrades.reduce((sum, trade) => {
-      const pnl = calculateMarketPnL(trade, trade.marketType) || 0
+      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
       return sum + pnl
     }, 0),
     winningTrades: filteredTrades.filter(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType) || 0
+      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
       return pnl > 0
     }).length,
     losingTrades: filteredTrades.filter(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType) || 0
+      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
       return pnl < 0
     }).length,
   }
@@ -453,7 +450,7 @@ export default function TradeHistoryPage() {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {filteredTrades.map((trade) => {
-                          const pnl = calculateMarketPnL(trade, trade.marketType)
+                          const pnl = calculateMarketPnL(trade, trade.marketType || null)
                           return (
                             <tr key={trade.id} className="hover:bg-gray-50">
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -526,4 +523,17 @@ export default function TradeHistoryPage() {
       )}
     </SidebarProvider>
   )
+}
+
+function AuthenticatedHistoryPage() {
+  const { user } = useUser()
+  return <TradeHistoryContent user={user} />
+}
+
+export default function TradeHistoryPage() {
+  if (!isClerkConfigured) {
+    return <TradeHistoryContent user={null} />
+  }
+  
+  return <AuthenticatedHistoryPage />
 }
