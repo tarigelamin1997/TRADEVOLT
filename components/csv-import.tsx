@@ -524,9 +524,17 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
         })
 
         if (!response.ok) {
-          const errorText = await response.text()
-          console.error('Import failed:', response.status, errorText)
-          throw new Error(`Failed to import trades: ${response.status} ${errorText}`)
+          let errorMessage = `Failed to import trades: ${response.status}`
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorMessage
+            console.error('Import failed:', response.status, errorData)
+          } catch {
+            const errorText = await response.text()
+            console.error('Import failed:', response.status, errorText)
+            errorMessage += ` ${errorText}`
+          }
+          throw new Error(errorMessage)
         }
 
         const result = await response.json()

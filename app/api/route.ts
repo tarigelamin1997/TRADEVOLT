@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import * as db from '@/lib/db'
+// Use in-memory database for Vercel deployment
+import * as db from '@/lib/db-memory'
 
 // Check if Clerk is configured
 const isClerkConfigured = !!(
