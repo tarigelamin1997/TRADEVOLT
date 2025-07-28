@@ -1,10 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useUser, UserButton } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { TradeForm } from '@/components/trade-form'
+
+// Check if we should use Clerk
+const isClerkConfigured = typeof window !== 'undefined' && 
+  !!(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
+
+// Conditionally import Clerk hooks
+let useUser: any = null
+let UserButton: any = null
+
+if (isClerkConfigured) {
+  const clerk = require('@clerk/nextjs')
+  useUser = clerk.useUser
+  UserButton = clerk.UserButton
+}
 
 // Hardcoded feature rotation - fight me
 const WEEKLY_FEATURES: Record<number, string[]> = {
@@ -27,80 +40,64 @@ interface Trade {
 }
 
 export default function Dashboard() {
-  const { user } = useUser()
+  const user = isClerkConfigured && useUser ? useUser() : { user: { id: 'demo-user' } }
   const [trades, setTrades] = useState<Trade[]>([])
   const [isPaid, setIsPaid] = useState(false)
   const [aiInsight, setAiInsight] = useState('')
   
-  // Get current week number
-  const weekNumber = Math.floor((Date.now() - new Date('2025-01-01').getTime()) / (7 * 24 * 60 * 60 * 1000))
-  const freeFeatures = WEEKLY_FEATURES[weekNumber % 20] || ['add-trades', 'basic-pnl']
+  // Get current week's features
+  const weekNumber = Math.floor((Date.now() / 1000 / 60 / 60 / 24 / 7) % 20)
+  const freeFeatures = WEEKLY_FEATURES[weekNumber] || ['add-trades', 'basic-pnl']
   
-  // Fetch everything on load
+  const hasFeature = (feature: string) => isPaid || freeFeatures.includes(feature)
+  
   useEffect(() => {
-    if (!user) return
-    
+    // Load trades
     fetch('/api', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action: 'getTrades', userId: user.id })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getTrades' })
     })
-    .then(r => r.json())
-    .then(data => {
-      setTrades(data.trades || [])
-      setIsPaid(data.isPaid || false)
-    })
+      .then(res => res.json())
+      .then(data => {
+        setTrades(data.trades)
+        setIsPaid(data.isPaid)
+      })
   }, [user])
   
-  // Calculate P&L (right here, no service layer)
-  const totalPnL = trades.reduce((sum, trade) => {
-    if (trade.exit) {
-      const pnl = (trade.exit - trade.entry) * trade.quantity * (trade.type === 'BUY' ? 1 : -1)
+  const stats = {
+    totalTrades: trades.length,
+    totalPnL: trades.reduce((sum, t) => {
+      if (!t.exit) return sum
+      const pnl = (t.exit - t.entry) * t.quantity * (t.type === 'BUY' ? 1 : -1)
       return sum + pnl
-    }
-    return sum
-  }, 0)
-  
-  const winRate = trades.filter(t => {
-    if (!t.exit) return false
-    const pnl = (t.exit - t.entry) * (t.type === 'BUY' ? 1 : -1)
-    return pnl > 0
-  }).length / trades.filter(t => t.exit).length * 100 || 0
-  
-  // Feature check
-  const hasFeature = (feature: string) => {
-    return isPaid || freeFeatures.includes(feature)
+    }, 0),
+    winRate: trades.length ? 
+      (trades.filter(t => {
+        if (!t.exit) return false
+        const pnl = (t.exit - t.entry) * (t.type === 'BUY' ? 1 : -1)
+        return pnl > 0
+      }).length / trades.length * 100) : 0
   }
   
-  // Get AI insight
-  const getAIInsight = async () => {
-    if (!hasFeature('ai-insights')) {
-      alert('Upgrade to use AI insights!')
-      return
-    }
+  const getAI = async () => {
+    if (!hasFeature('ai-insights')) return
     
     const res = await fetch('/api', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
         action: 'getAI',
-        trades: trades.slice(-20) // Last 20 trades
+        trades: trades 
       })
     })
+    
     const data = await res.json()
     setAiInsight(data.insight)
   }
   
-  // Export CSV (inline, no libraries)
   const exportCSV = () => {
-    if (!hasFeature('csv-export')) {
-      alert('This feature is not in your weekly rotation!')
-      return
-    }
+    if (!hasFeature('csv-export')) return
     
     const csv = [
       ['Date', 'Symbol', 'Type', 'Entry', 'Exit', 'Quantity', 'P&L'],
@@ -123,7 +120,7 @@ export default function Dashboard() {
     a.click()
   }
   
-  if (!user) {
+  if (!user || (isClerkConfigured && useUser && !user.user)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>
@@ -141,28 +138,28 @@ export default function Dashboard() {
             {isPaid ? '✨ Ultra Member' : `Free: ${freeFeatures.join(' & ')} this week`}
           </p>
         </div>
-        <UserButton afterSignOutUrl="/" />
+        {isClerkConfigured && UserButton && <UserButton afterSignOutUrl="/" />}
       </div>
       
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <Card className="p-4">
           <h3 className="text-sm text-gray-600">Total P&L</h3>
-          <p className={`text-2xl font-bold ${totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            ${totalPnL.toFixed(2)}
+          <p className={`text-2xl font-bold ${stats.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            ${stats.totalPnL.toFixed(2)}
           </p>
         </Card>
         <Card className="p-4">
           <h3 className="text-sm text-gray-600">Win Rate</h3>
-          <p className="text-2xl font-bold">{winRate.toFixed(1)}%</p>
+          <p className="text-2xl font-bold">{stats.winRate.toFixed(1)}%</p>
         </Card>
         <Card className="p-4">
           <h3 className="text-sm text-gray-600">Total Trades</h3>
-          <p className="text-2xl font-bold">{trades.length}</p>
+          <p className="text-2xl font-bold">{stats.totalTrades}</p>
         </Card>
       </div>
       
-      {/* Add Trade */}
+      {/* Trade Entry */}
       {hasFeature('add-trades') ? (
         <Card className="p-4 mb-8">
           <h2 className="text-xl font-bold mb-4">Add Trade</h2>
@@ -179,13 +176,9 @@ export default function Dashboard() {
         <h2 className="text-xl font-bold mb-4">AI Insights</h2>
         {hasFeature('ai-insights') ? (
           <>
-            <Button onClick={getAIInsight} className="mb-4">
-              Get AI Analysis
-            </Button>
+            <Button onClick={getAI} className="mb-4">Get AI Analysis</Button>
             {aiInsight && (
-              <div className="p-4 bg-gray-50 rounded">
-                <p>{aiInsight}</p>
-              </div>
+              <p className="p-4 bg-gray-100 rounded">{aiInsight}</p>
             )}
           </>
         ) : (
@@ -245,16 +238,17 @@ export default function Dashboard() {
       
       {/* Upgrade CTA */}
       {!isPaid && (
-        <div className="fixed bottom-4 right-4">
-          <Card className="p-4">
-            <p className="text-sm mb-2">Unlock all 20 features</p>
-            <Button asChild>
-              <a href="https://buy.stripe.com/your-link">
-                Upgrade - $25/mo
-              </a>
-            </Button>
-          </Card>
-        </div>
+        <Card className="p-8 mt-8 text-center">
+          <h2 className="text-2xl font-bold mb-4">Unlock Everything</h2>
+          <p className="mb-6 text-gray-600">
+            Get all 20 features instantly. Stop waiting for weekly rotations.
+          </p>
+          <Button asChild size="lg">
+            <a href="https://buy.stripe.com/your-link">
+              Upgrade Now - $25/mo
+            </a>
+          </Button>
+        </Card>
       )}
     </div>
   )
