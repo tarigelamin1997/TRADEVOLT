@@ -49,7 +49,9 @@ export async function POST(request: NextRequest) {
         quantity: body.trade.quantity,
         notes: body.trade.notes || null,
         marketType: body.trade.marketType || null,
-        createdAt: body.trade.createdAt || new Date().toISOString()
+        createdAt: body.trade.createdAt || new Date().toISOString(),
+        entryTime: body.trade.entryTime || null,
+        exitTime: body.trade.exitTime || null
       })
       
       return NextResponse.json({ trade })
@@ -92,36 +94,48 @@ export async function POST(request: NextRequest) {
     }
     
     case 'importTrades': {
-      const trades = body.trades
-      if (!trades || !Array.isArray(trades)) {
-        return new NextResponse('Invalid trades data', { status: 400 })
+      try {
+        const trades = body.trades
+        if (!trades || !Array.isArray(trades)) {
+          return new NextResponse('Invalid trades data', { status: 400 })
+        }
+
+        console.log(`Importing ${trades.length} trades for user ${userId}`)
+
+        // Get or create user
+        const user = await db.upsertUser(userId, body.email || `${userId}@placeholder.com`)
+
+        // Import all trades
+        const importedTrades = await db.createManyTrades(
+          trades.map(trade => ({
+            userId: user.id,
+            symbol: trade.symbol,
+            type: trade.type,
+            entry: trade.entry,
+            exit: trade.exit || null,
+            quantity: trade.quantity,
+            notes: trade.notes || null,
+            marketType: trade.marketType || null,
+            createdAt: trade.createdAt || new Date().toISOString(),
+            entryTime: trade.entryTime || null,
+            exitTime: trade.exitTime || null
+          }))
+        )
+
+        // Fetch and return all trades
+        const allTrades = await db.findTradesByUserId(user.id)
+
+        return NextResponse.json({ 
+          trades: allTrades,
+          imported: importedTrades.count 
+        })
+      } catch (error) {
+        console.error('Import trades error:', error)
+        return new NextResponse(
+          JSON.stringify({ error: error instanceof Error ? error.message : 'Failed to import trades' }), 
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        )
       }
-
-      // Get or create user
-      const user = await db.upsertUser(userId, body.email || `${userId}@placeholder.com`)
-
-      // Import all trades
-      const importedTrades = await db.createManyTrades(
-        trades.map(trade => ({
-          userId: user.id,
-          symbol: trade.symbol,
-          type: trade.type,
-          entry: trade.entry,
-          exit: trade.exit || null,
-          quantity: trade.quantity,
-          notes: trade.notes || null,
-          marketType: trade.marketType || null,
-          createdAt: trade.createdAt || new Date().toISOString()
-        }))
-      )
-
-      // Fetch and return all trades
-      const allTrades = await db.findTradesByUserId(user.id)
-
-      return NextResponse.json({ 
-        trades: allTrades,
-        imported: importedTrades.count 
-      })
     }
     
     default:
