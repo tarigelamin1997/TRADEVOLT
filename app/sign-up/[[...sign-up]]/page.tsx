@@ -2,14 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-
-// Try to import SignUp
-let SignUp: any = null
-try {
-  SignUp = require('@clerk/nextjs').SignUp
-} catch (e) {
-  // Clerk not available
-}
+import { SignUp } from '@clerk/nextjs'
 
 // Check if Clerk is configured
 const isClerkConfigured = !!(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
@@ -18,7 +11,7 @@ export default function SignUpPage() {
   const router = useRouter()
   
   // If Clerk is not configured, show a demo signup
-  if (!isClerkConfigured || !SignUp) {
+  if (!isClerkConfigured) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white p-8 rounded-lg shadow-md w-96">

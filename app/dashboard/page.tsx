@@ -4,18 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { TradeForm } from '@/components/trade-form'
-
-// Try to import Clerk components
-let useUser: any = () => null
-let UserButton: any = null
-
-try {
-  const clerk = require('@clerk/nextjs')
-  useUser = clerk.useUser
-  UserButton = clerk.UserButton
-} catch (e) {
-  // Clerk not available
-}
+import { useUser, UserButton } from '@clerk/nextjs'
 
 // Check if we should use Clerk
 const isClerkConfigured = !!(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
@@ -40,17 +29,7 @@ interface Trade {
   createdAt: string
 }
 
-export default function Dashboard() {
-  // Try to use Clerk user
-  let clerkUser = null
-  try {
-    clerkUser = useUser()
-  } catch (e) {
-    // Clerk not available
-  }
-  
-  const user = isClerkConfigured && clerkUser ? clerkUser : { id: 'demo-user' }
-  
+function DashboardContent({ userId }: { userId: string }) {
   const [trades, setTrades] = useState<Trade[]>([])
   const [isPaid, setIsPaid] = useState(false)
   const [aiInsight, setAiInsight] = useState('')
@@ -70,10 +49,11 @@ export default function Dashboard() {
     })
       .then(res => res.json())
       .then(data => {
-        setTrades(data.trades)
-        setIsPaid(data.isPaid)
+        setTrades(data.trades || [])
+        setIsPaid(data.isPaid || false)
       })
-  }, [user])
+      .catch(err => console.error('Failed to load trades:', err))
+  }, [])
   
   const stats = {
     totalTrades: trades.length,
@@ -129,14 +109,6 @@ export default function Dashboard() {
     a.download = 'trades.csv'
     a.click()
   }
-  
-  if (isClerkConfigured && !clerkUser) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    )
-  }
 
   return (
     <div className="max-w-6xl mx-auto p-4">
@@ -148,7 +120,7 @@ export default function Dashboard() {
             {isPaid ? '✨ Ultra Member' : `Free: ${freeFeatures.join(' & ')} this week`}
           </p>
         </div>
-        {isClerkConfigured && UserButton && <UserButton afterSignOutUrl="/" />}
+        {isClerkConfigured && <UserButton afterSignOutUrl="/" />}
       </div>
       
       {/* Stats */}
@@ -262,4 +234,38 @@ export default function Dashboard() {
       )}
     </div>
   )
+}
+
+function DemoMode() {
+  return <DashboardContent userId="demo-user" />
+}
+
+function AuthenticatedDashboard() {
+  const { user, isLoaded } = useUser()
+  
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    )
+  }
+  
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Please sign in to continue</p>
+      </div>
+    )
+  }
+  
+  return <DashboardContent userId={user.id} />
+}
+
+export default function Dashboard() {
+  if (!isClerkConfigured) {
+    return <DemoMode />
+  }
+  
+  return <AuthenticatedDashboard />
 }
