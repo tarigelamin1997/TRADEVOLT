@@ -56,6 +56,7 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
     if (files.length > 0) {
       handleFile(files[0])
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
