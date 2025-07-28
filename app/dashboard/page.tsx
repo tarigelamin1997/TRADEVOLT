@@ -5,19 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { TradeForm } from '@/components/trade-form'
 
+// Import Clerk hooks at the top level
+import { useUser as clerkUseUser, UserButton as ClerkUserButton } from '@clerk/nextjs'
+
 // Check if we should use Clerk
-const isClerkConfigured = typeof window !== 'undefined' && 
-  !!(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
-
-// Conditionally import Clerk hooks
-let useUser: any = null
-let UserButton: any = null
-
-if (isClerkConfigured) {
-  const clerk = require('@clerk/nextjs')
-  useUser = clerk.useUser
-  UserButton = clerk.UserButton
-}
+const isClerkConfigured = !!(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
 
 // Hardcoded feature rotation - fight me
 const WEEKLY_FEATURES: Record<number, string[]> = {
@@ -40,7 +32,10 @@ interface Trade {
 }
 
 export default function Dashboard() {
-  const user = isClerkConfigured && useUser ? useUser() : { user: { id: 'demo-user' } }
+  // Always call the hook, but use the result conditionally
+  const clerkUser = clerkUseUser()
+  const user = isClerkConfigured && clerkUser ? clerkUser : { id: 'demo-user' }
+  
   const [trades, setTrades] = useState<Trade[]>([])
   const [isPaid, setIsPaid] = useState(false)
   const [aiInsight, setAiInsight] = useState('')
@@ -120,7 +115,7 @@ export default function Dashboard() {
     a.click()
   }
   
-  if (!user || (isClerkConfigured && useUser && !user.user)) {
+  if (isClerkConfigured && !clerkUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>
@@ -138,7 +133,7 @@ export default function Dashboard() {
             {isPaid ? '✨ Ultra Member' : `Free: ${freeFeatures.join(' & ')} this week`}
           </p>
         </div>
-        {isClerkConfigured && UserButton && <UserButton afterSignOutUrl="/" />}
+        {isClerkConfigured && <ClerkUserButton afterSignOutUrl="/" />}
       </div>
       
       {/* Stats */}
