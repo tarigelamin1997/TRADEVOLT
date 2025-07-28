@@ -355,7 +355,7 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
           }
 
           // Build comprehensive notes including all extra data
-          const notesParts = []
+          const notesParts: string[] = []
           
           // Add market type to notes
           if (marketType) {
@@ -478,7 +478,7 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
           if (!trade.createdAt) trade.createdAt = new Date().toISOString()
 
           // Build notes from all extra data
-          const notesParts = []
+          const notesParts: string[] = []
           headers.forEach((header, index) => {
             if (!Object.values(detectedColumns).includes(header) && values[index]?.trim()) {
               const value = values[index].trim()
