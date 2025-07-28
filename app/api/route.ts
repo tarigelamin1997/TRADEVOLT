@@ -96,6 +96,48 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true })
     }
     
+    case 'importTrades': {
+      const trades = body.trades
+      if (!trades || !Array.isArray(trades)) {
+        return new NextResponse('Invalid trades data', { status: 400 })
+      }
+
+      // Get or create user
+      const user = await prisma.user.upsert({
+        where: { clerkId: userId },
+        update: {},
+        create: {
+          clerkId: userId,
+          email: body.email || `${userId}@placeholder.com`
+        }
+      })
+
+      // Import all trades
+      const importedTrades = await prisma.trade.createMany({
+        data: trades.map(trade => ({
+          userId: user.id,
+          symbol: trade.symbol,
+          type: trade.type,
+          entry: trade.entry,
+          exit: trade.exit || null,
+          quantity: trade.quantity,
+          notes: trade.notes || null,
+          createdAt: trade.createdAt || new Date()
+        }))
+      })
+
+      // Fetch and return all trades
+      const allTrades = await prisma.trade.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' }
+      })
+
+      return NextResponse.json({ 
+        trades: allTrades,
+        imported: importedTrades.count 
+      })
+    }
+    
     default:
       return new NextResponse('Unknown action', { status: 400 })
   }

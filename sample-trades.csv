@@ -1,0 +1,11 @@
+Symbol,Type,Entry,Exit,Quantity,Date,Notes
+AAPL,BUY,150.50,155.75,100,2024-01-15,Strong breakout pattern
+MSFT,BUY,380.25,375.50,50,2024-01-18,Stop loss hit
+GOOGL,SELL,140.00,135.50,75,2024-01-20,Short on resistance
+TSLA,BUY,200.00,210.50,30,2024-01-22,Momentum trade
+AMZN,BUY,155.75,,40,2024-01-25,Still holding
+NVDA,SELL,500.00,480.00,20,2024-01-26,Overbought conditions
+META,BUY,350.25,365.00,25,2024-01-28,Earnings play
+NFLX,BUY,450.50,445.00,15,2024-01-30,Failed breakout
+SPY,BUY,470.00,475.50,100,2024-02-01,Index trend following
+QQQ,SELL,400.00,395.00,50,2024-02-03,Tech weakness

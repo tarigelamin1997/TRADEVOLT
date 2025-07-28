@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { TradeForm } from '@/components/trade-form'
+import { CSVImport } from '@/components/csv-import'
 import { useUser, UserButton } from '@clerk/nextjs'
 
 // Check if we should use Clerk
@@ -33,6 +34,7 @@ function DashboardContent({ userId }: { userId: string }) {
   const [trades, setTrades] = useState<Trade[]>([])
   const [isPaid, setIsPaid] = useState(false)
   const [aiInsight, setAiInsight] = useState('')
+  const [showImport, setShowImport] = useState(false)
   
   // Get current week's features
   const weekNumber = Math.floor((Date.now() / 1000 / 60 / 60 / 24 / 7) % 20)
@@ -181,13 +183,21 @@ function DashboardContent({ userId }: { userId: string }) {
       <Card className="p-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Recent Trades</h2>
-          <Button
-            onClick={exportCSV}
-            variant="outline"
-            disabled={!hasFeature('csv-export')}
-          >
-            Export CSV
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setShowImport(true)}
+              variant="outline"
+            >
+              Import CSV
+            </Button>
+            <Button
+              onClick={exportCSV}
+              variant="outline"
+              disabled={!hasFeature('csv-export')}
+            >
+              Export CSV
+            </Button>
+          </div>
         </div>
         
         <div className="space-y-2">
@@ -231,6 +241,25 @@ function DashboardContent({ userId }: { userId: string }) {
             </a>
           </Button>
         </Card>
+      )}
+
+      {/* Import Modal */}
+      {showImport && (
+        <CSVImport
+          onImport={(importedTrades) => {
+            // Reload trades after import
+            fetch('/api', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'getTrades' })
+            })
+              .then(res => res.json())
+              .then(data => {
+                setTrades(data.trades || [])
+              })
+          }}
+          onClose={() => setShowImport(false)}
+        />
       )}
     </div>
   )
