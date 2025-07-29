@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   User,
   ChevronsUpDown,
@@ -32,11 +33,17 @@ import {
   DollarSign,
   PieChart,
   FileText,
-  LineChart,
-  TrendingDown,
-  Activity,
+  Crown,
+  Download,
 } from "lucide-react"
 import { calculateMarketPnL } from '@/lib/market-knowledge'
+import { MetricCard, MetricGrid, InsightCard } from '@/components/MetricCard'
+import { METRIC_DEFINITIONS, METRIC_GROUPS, METRIC_THRESHOLDS } from '@/lib/constants/metrics'
+import { MetricResult, MetricStatus } from '@/lib/types/metrics'
+import * as metrics from '@/lib/tradingMetrics'
+import { useSubscription } from '@/lib/subscription'
+import { generateAnalyticsExport, exportToJSON, exportToCSV } from '@/lib/exportAnalytics'
+import { EquityCurveChart, WinRateChart, ProfitDistributionChart } from '@/components/Charts'
 
 // Menu items (same as history page)
 const mainMenuItems = [
@@ -76,8 +83,10 @@ interface Trade {
 export default function AnalyticsPage() {
   const router = useRouter()
   const [trades, setTrades] = useState<Trade[]>([])
+  const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month' | 'year' | 'all'>('all')
   const [isLoading, setIsLoading] = useState(true)
-  const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month' | 'year' | 'all'>('month')
+  const [activeTab, setActiveTab] = useState('overview')
+  const { subscription } = useSubscription()
 
   useEffect(() => {
     fetchTrades()
@@ -129,83 +138,112 @@ export default function AnalyticsPage() {
 
   const filteredTrades = filterTradesByTimeframe()
 
-  // Calculate analytics
-  const analytics = {
-    totalTrades: filteredTrades.length,
-    closedTrades: filteredTrades.filter(t => t.exit !== null).length,
-    openTrades: filteredTrades.filter(t => t.exit === null).length,
-    
-    totalPnL: filteredTrades.reduce((sum, trade) => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
-      return sum + pnl
-    }, 0),
-    
-    winningTrades: filteredTrades.filter(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
-      return pnl > 0
-    }).length,
-    
-    losingTrades: filteredTrades.filter(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
-      return pnl < 0
-    }).length,
-    
-    largestWin: Math.max(...filteredTrades.map(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
-      return pnl > 0 ? pnl : 0
-    }), 0),
-    
-    largestLoss: Math.min(...filteredTrades.map(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
-      return pnl < 0 ? pnl : 0
-    }), 0),
-    
-    averageWin: 0,
-    averageLoss: 0,
-    profitFactor: 0,
-    expectancy: 0,
-  }
+  // Basic calculations for old stats
+  const closedTrades = filteredTrades.filter(t => t.exit !== null && t.exit !== undefined)
+  const openTrades = filteredTrades.filter(t => t.exit === null || t.exit === undefined)
+  const winningTrades = filteredTrades.filter(trade => {
+    const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
+    return pnl > 0
+  })
+  const losingTrades = filteredTrades.filter(trade => {
+    const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
+    return pnl < 0
+  })
 
-  // Calculate averages and ratios
-  if (analytics.winningTrades > 0) {
-    const wins = filteredTrades.filter(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
-      return pnl > 0
-    })
-    analytics.averageWin = wins.reduce((sum, trade) => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
-      return sum + pnl
-    }, 0) / wins.length
+  // Calculate all metrics
+  const calculateMetric = (metricId: string): MetricResult => {
+    const definition = METRIC_DEFINITIONS[metricId]
+    let value = 0
+    let status: MetricStatus = 'good'
+    
+    switch (metricId) {
+      case 'netPnL':
+        value = metrics.calculateNetPnL(filteredTrades)
+        status = value >= 0 ? 'good' : 'danger'
+        break
+      case 'winRate':
+        value = metrics.calculateWinRate(filteredTrades)
+        if (value < METRIC_THRESHOLDS.winRate.danger) status = 'danger'
+        else if (value < METRIC_THRESHOLDS.winRate.warning) status = 'warning'
+        break
+      case 'profitFactor':
+        value = metrics.calculateProfitFactor(filteredTrades)
+        if (value < METRIC_THRESHOLDS.profitFactor.danger) status = 'danger'
+        else if (value < METRIC_THRESHOLDS.profitFactor.warning) status = 'warning'
+        break
+      case 'expectancy':
+        value = metrics.calculateExpectancy(filteredTrades)
+        status = value >= 0 ? 'good' : 'danger'
+        break
+      case 'averageWin':
+        value = metrics.calculateAverageWin(filteredTrades)
+        status = 'good'
+        break
+      case 'averageLoss':
+        value = metrics.calculateAverageLoss(filteredTrades)
+        status = 'warning'
+        break
+      case 'totalTrades':
+        value = filteredTrades.length
+        status = 'good'
+        break
+      case 'maxDrawdown':
+        value = metrics.calculateMaxDrawdown(filteredTrades).value
+        if (value > METRIC_THRESHOLDS.maxDrawdown.danger) status = 'danger'
+        else if (value > METRIC_THRESHOLDS.maxDrawdown.warning) status = 'warning'
+        break
+      case 'avgDrawdown':
+        value = metrics.calculateAverageDrawdown(filteredTrades)
+        status = value > 20 ? 'danger' : value > 10 ? 'warning' : 'good'
+        break
+      case 'recoveryFactor':
+        value = metrics.calculateRecoveryFactor(filteredTrades)
+        status = value < 1 ? 'danger' : value < 2 ? 'warning' : 'good'
+        break
+      case 'riskOfRuin':
+        value = metrics.calculateRiskOfRuin(filteredTrades).probability
+        if (value > METRIC_THRESHOLDS.riskOfRuin.danger) status = 'danger'
+        else if (value > METRIC_THRESHOLDS.riskOfRuin.warning) status = 'warning'
+        break
+      case 'rMultiple':
+        value = metrics.calculateRMultiple(filteredTrades)
+        status = value < 0 ? 'danger' : value < 1 ? 'warning' : 'good'
+        break
+      case 'sharpeRatio':
+        value = metrics.calculateSharpeRatio(filteredTrades)
+        if (value < METRIC_THRESHOLDS.sharpeRatio.danger) status = 'danger'
+        else if (value < METRIC_THRESHOLDS.sharpeRatio.warning) status = 'warning'
+        break
+      case 'sortinoRatio':
+        value = metrics.calculateSortinoRatio(filteredTrades)
+        if (value < METRIC_THRESHOLDS.sortinoRatio.danger) status = 'danger'
+        else if (value < METRIC_THRESHOLDS.sortinoRatio.warning) status = 'warning'
+        break
+      case 'calmarRatio':
+        value = metrics.calculateCalmarRatio(filteredTrades)
+        status = value < 0.5 ? 'danger' : value < 1 ? 'warning' : 'good'
+        break
+      case 'treynorRatio':
+        value = metrics.calculateTreynorRatio(filteredTrades)
+        status = value < 0 ? 'danger' : value < 0.1 ? 'warning' : 'good'
+        break
+      case 'jensensAlpha':
+        value = metrics.calculateJensensAlpha(filteredTrades)
+        status = value < -5 ? 'danger' : value < 0 ? 'warning' : 'good'
+        break
+    }
+    
+    return {
+      value,
+      status,
+      description: definition.description,
+      format: definition.format,
+      benchmark: definition.benchmark
+    }
   }
-
-  if (analytics.losingTrades > 0) {
-    const losses = filteredTrades.filter(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
-      return pnl < 0
-    })
-    analytics.averageLoss = Math.abs(losses.reduce((sum, trade) => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
-      return sum + pnl
-    }, 0) / losses.length)
-  }
-
-  // Profit Factor = Total Wins / Total Losses
-  if (analytics.averageLoss > 0 && analytics.losingTrades > 0) {
-    const totalWins = analytics.averageWin * analytics.winningTrades
-    const totalLosses = analytics.averageLoss * analytics.losingTrades
-    analytics.profitFactor = totalWins / totalLosses
-  }
-
-  // Expectancy = (Win% × Avg Win) - (Loss% × Avg Loss)
-  if (analytics.closedTrades > 0) {
-    const winRate = analytics.winningTrades / analytics.closedTrades
-    const lossRate = analytics.losingTrades / analytics.closedTrades
-    analytics.expectancy = (winRate * analytics.averageWin) - (lossRate * analytics.averageLoss)
-  }
-
-  const winRate = analytics.closedTrades > 0 
-    ? (analytics.winningTrades / analytics.closedTrades * 100) 
-    : 0
+  
+  // Generate insights
+  const insights = metrics.generateInsights(filteredTrades)
 
   // Get trades by symbol
   const tradesBySymbol = filteredTrades.reduce((acc, trade) => {
@@ -343,101 +381,167 @@ export default function AnalyticsPage() {
             </header>
 
             <main className="flex-1 overflow-y-auto">
-              <div className="p-6 space-y-6">
-                {/* Key Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card className="p-4">
+              <div className="p-6">
+                {/* Subscription Banner for Free Users */}
+                {subscription.plan === 'free' && (
+                  <Card className="p-4 mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm text-gray-600">Total P&L</h3>
-                        <p className={`text-2xl font-bold ${analytics.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${analytics.totalPnL.toFixed(2)}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <Crown className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <h3 className="font-semibold text-blue-900">Unlock Advanced Analytics</h3>
+                          <p className="text-sm text-blue-700">Get risk management metrics and professional trading insights</p>
+                        </div>
                       </div>
-                      {analytics.totalPnL >= 0 ? (
-                        <TrendingUp className="h-8 w-8 text-green-600 opacity-20" />
-                      ) : (
-                        <TrendingDown className="h-8 w-8 text-red-600 opacity-20" />
+                      <Button 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={() => router.push('/subscribe')}
+                      >
+                        Upgrade to Pro - $15/month
+                      </Button>
+                    </div>
+                  </Card>
+                )}
+                
+                {/* Insights Section */}
+                {insights.length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold mb-3">Key Insights</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {insights.slice(0, 4).map((insight, idx) => (
+                        <InsightCard key={idx} {...insight} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Metrics Tabs */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="risk">
+                      Risk Management
+                      {subscription.plan === 'free' && (
+                        <Crown className="h-3 w-3 ml-1" />
                       )}
-                    </div>
-                  </Card>
+                    </TabsTrigger>
+                    <TabsTrigger value="advanced">
+                      Advanced
+                      {subscription.plan === 'free' && (
+                        <Crown className="h-3 w-3 ml-1" />
+                      )}
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="overview" className="space-y-4">
+                    <MetricGrid columns={4}>
+                      {METRIC_GROUPS.overview.metrics.map(metricId => {
+                        const definition = METRIC_DEFINITIONS[metricId]
+                        const result = calculateMetric(metricId)
+                        return (
+                          <MetricCard
+                            key={metricId}
+                            title={definition.name}
+                            metric={result}
+                            tooltip={definition.tooltipContent}
+                            requiresPro={definition.requiresPro}
+                            isPro={subscription.plan === 'pro'}
+                          />
+                        )
+                      })}
+                    </MetricGrid>
+                  </TabsContent>
+                  
+                  <TabsContent value="risk" className="space-y-4">
+                    <MetricGrid columns={3}>
+                      {METRIC_GROUPS.risk.metrics.map(metricId => {
+                        const definition = METRIC_DEFINITIONS[metricId]
+                        const result = calculateMetric(metricId)
+                        return (
+                          <MetricCard
+                            key={metricId}
+                            title={definition.name}
+                            metric={result}
+                            tooltip={definition.tooltipContent}
+                            requiresPro={definition.requiresPro}
+                            isPro={subscription.plan === 'pro'}
+                          />
+                        )
+                      })}
+                    </MetricGrid>
+                  </TabsContent>
+                  
+                  <TabsContent value="advanced" className="space-y-4">
+                    <MetricGrid columns={3}>
+                      {METRIC_GROUPS.advanced.metrics.map(metricId => {
+                        const definition = METRIC_DEFINITIONS[metricId]
+                        const result = calculateMetric(metricId)
+                        return (
+                          <MetricCard
+                            key={metricId}
+                            title={definition.name}
+                            metric={result}
+                            tooltip={definition.tooltipContent}
+                            requiresPro={definition.requiresPro}
+                            isPro={subscription.plan === 'pro'}
+                          />
+                        )
+                      })}
+                    </MetricGrid>
+                  </TabsContent>
+                </Tabs>
 
-                  <Card className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm text-gray-600">Win Rate</h3>
-                        <p className="text-2xl font-bold">{winRate.toFixed(1)}%</p>
-                      </div>
-                      <Activity className="h-8 w-8 text-blue-600 opacity-20" />
-                    </div>
-                  </Card>
-
-                  <Card className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm text-gray-600">Profit Factor</h3>
-                        <p className="text-2xl font-bold">{analytics.profitFactor.toFixed(2)}</p>
-                      </div>
-                      <BarChart3 className="h-8 w-8 text-purple-600 opacity-20" />
-                    </div>
-                  </Card>
-
-                  <Card className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm text-gray-600">Expectancy</h3>
-                        <p className={`text-2xl font-bold ${analytics.expectancy >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          ${analytics.expectancy.toFixed(2)}
-                        </p>
-                      </div>
-                      <LineChart className="h-8 w-8 text-orange-600 opacity-20" />
-                    </div>
-                  </Card>
+                {/* Export Button */}
+                <div className="flex justify-end mt-6 gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="gap-2"
+                    onClick={() => {
+                      const data = generateAnalyticsExport(filteredTrades, timeframe)
+                      exportToCSV(data)
+                    }}
+                  >
+                    <Download className="h-4 w-4" />
+                    Export as CSV
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="gap-2"
+                    onClick={() => {
+                      const data = generateAnalyticsExport(filteredTrades, timeframe)
+                      exportToJSON(data)
+                    }}
+                  >
+                    <Download className="h-4 w-4" />
+                    Export as JSON
+                  </Button>
                 </div>
-
-                {/* Trade Statistics */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                {/* Trade Statistics and Top Symbols */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                   <Card className="p-6">
                     <h2 className="text-lg font-semibold mb-4">Trade Statistics</h2>
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Total Trades</span>
-                        <span className="font-medium">{analytics.totalTrades}</span>
+                        <span className="font-medium">{filteredTrades.length}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Closed Trades</span>
-                        <span className="font-medium">{analytics.closedTrades}</span>
+                        <span className="font-medium">{closedTrades.length}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Open Trades</span>
-                        <span className="font-medium">{analytics.openTrades}</span>
+                        <span className="font-medium">{openTrades.length}</span>
                       </div>
-                      <hr className="my-2" />
+                      <div className="border-t pt-3"></div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Winning Trades</span>
-                        <span className="font-medium text-green-600">{analytics.winningTrades}</span>
+                        <span className="font-medium text-green-600">{winningTrades.length}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Losing Trades</span>
-                        <span className="font-medium text-red-600">{analytics.losingTrades}</span>
-                      </div>
-                      <hr className="my-2" />
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Average Win</span>
-                        <span className="font-medium text-green-600">${analytics.averageWin.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Average Loss</span>
-                        <span className="font-medium text-red-600">${analytics.averageLoss.toFixed(2)}</span>
-                      </div>
-                      <hr className="my-2" />
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Largest Win</span>
-                        <span className="font-medium text-green-600">${analytics.largestWin.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Largest Loss</span>
-                        <span className="font-medium text-red-600">${Math.abs(analytics.largestLoss).toFixed(2)}</span>
+                        <span className="font-medium text-red-600">{losingTrades.length}</span>
                       </div>
                     </div>
                   </Card>
@@ -464,32 +568,15 @@ export default function AnalyticsPage() {
                   </Card>
                 </div>
 
-                {/* Win/Loss Distribution */}
-                <Card className="p-6">
-                  <h2 className="text-lg font-semibold mb-4">Win/Loss Distribution</h2>
-                  <div className="h-64 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="flex gap-8 mb-4">
-                        <div>
-                          <div className="text-3xl font-bold text-green-600">{analytics.winningTrades}</div>
-                          <div className="text-sm text-gray-600">Wins</div>
-                        </div>
-                        <div className="text-3xl font-bold text-gray-400">vs</div>
-                        <div>
-                          <div className="text-3xl font-bold text-red-600">{analytics.losingTrades}</div>
-                          <div className="text-sm text-gray-600">Losses</div>
-                        </div>
-                      </div>
-                      <div className="w-64 h-8 bg-gray-200 rounded-full overflow-hidden mx-auto">
-                        <div 
-                          className="h-full bg-green-600 transition-all duration-500"
-                          style={{ width: `${winRate}%` }}
-                        />
-                      </div>
-                      <p className="text-sm text-gray-600 mt-2">{winRate.toFixed(1)}% Win Rate</p>
-                    </div>
+                {/* Chart Visualizations */}
+                <div className="mt-6 space-y-6">
+                  <h2 className="text-xl font-semibold">Performance Visualizations</h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <EquityCurveChart trades={filteredTrades} />
+                    <WinRateChart trades={filteredTrades} />
                   </div>
-                </Card>
+                  <ProfitDistributionChart trades={filteredTrades} />
+                </div>
               </div>
             </main>
           </div>

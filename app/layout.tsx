@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
+import { SubscriptionProvider } from '@/lib/subscription'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,7 +27,11 @@ export default function RootLayout({
     return (
       <ClerkProvider>
         <html lang="en">
-          <body className={inter.className}>{children}</body>
+          <body className={inter.className}>
+            <SubscriptionProvider>
+              {children}
+            </SubscriptionProvider>
+          </body>
         </html>
       </ClerkProvider>
     )
@@ -35,7 +40,11 @@ export default function RootLayout({
   // Otherwise, render without authentication
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <SubscriptionProvider>
+          {children}
+        </SubscriptionProvider>
+      </body>
     </html>
   )
 }

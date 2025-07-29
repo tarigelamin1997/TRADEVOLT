@@ -139,6 +139,19 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    case 'getSubscription': {
+      // For now, return free plan. In production, check with Stripe
+      const subscription = {
+        plan: 'free' as const,
+        // Uncomment when implementing Stripe:
+        // plan: user.subscriptionStatus || 'free',
+        // expiresAt: user.subscriptionExpiresAt,
+        // daysRemaining: calculateDaysRemaining(user.subscriptionExpiresAt)
+      }
+      
+      return NextResponse.json({ subscription })
+    }
+    
     default:
       return new NextResponse('Unknown action', { status: 400 })
   }
