@@ -13,32 +13,20 @@ interface SubscriptionContextType {
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined)
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
-  const [subscription, setSubscription] = useState<SubscriptionStatus>({ plan: 'free' })
-  const [isLoading, setIsLoading] = useState(true)
+  // During beta, everyone has pro access
+  const [subscription, setSubscription] = useState<SubscriptionStatus>({ plan: 'pro' })
+  const [isLoading, setIsLoading] = useState(false)
   
-  const upgradeToProUrl = '/subscribe' // This will be the Stripe checkout URL
+  const upgradeToProUrl = '/subscribe' // Beta information page
   
   const checkSubscription = async () => {
-    try {
-      const res = await fetch('/api', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getSubscription' })
-      })
-      
-      if (res.ok) {
-        const data = await res.json()
-        setSubscription(data.subscription || { plan: 'free' })
-      }
-    } catch (error) {
-      console.error('Failed to check subscription:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    // During beta, everyone is pro
+    setSubscription({ plan: 'pro' })
+    setIsLoading(false)
   }
   
   useEffect(() => {
-    checkSubscription()
+    // No need to check during beta
   }, [])
   
   return (

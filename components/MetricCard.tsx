@@ -5,7 +5,7 @@ import {
   TrendingDown, 
   Minus, 
   Info,
-  Lock 
+ 
 } from 'lucide-react'
 import { MetricResult, MetricStatus, TrendDirection } from '@/lib/types/metrics'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -98,18 +98,8 @@ export function MetricCard({
   }
 
   const sizeClasses = getSizeClasses()
-  const needsProAccess = requiresPro && !isPro
-
   return (
-    <Card className={`relative ${sizeClasses.card} ${needsProAccess ? 'opacity-75' : ''}`}>
-      {needsProAccess && (
-        <div className="absolute inset-0 bg-gray-50 bg-opacity-90 flex items-center justify-center z-10 rounded-lg">
-          <div className="text-center">
-            <Lock className="h-6 w-6 text-gray-500 mx-auto mb-1" />
-            <p className="text-xs text-gray-600">Pro Feature</p>
-          </div>
-        </div>
-      )}
+    <Card className={`relative ${sizeClasses.card}`}>
       
       <div className="flex justify-between items-start">
         <div className="flex-1">

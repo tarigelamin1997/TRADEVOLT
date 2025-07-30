@@ -1,169 +1,160 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Check, X, Crown } from "lucide-react"
-
-const plans = [
-  {
-    name: 'Free',
-    price: '$0',
-    period: 'forever',
-    features: [
-      'Essential trading metrics',
-      'Trade history tracking',
-      'Basic P&L reports',
-      'CSV import/export',
-      'Trade journal',
-      'Up to 100 trades/month'
-    ],
-    limitations: [
-      'No risk management metrics',
-      'No advanced analytics',
-      'No priority support'
-    ],
-    cta: 'Current Plan',
-    disabled: true
-  },
-  {
-    name: 'Pro',
-    price: '$15',
-    period: '/month',
-    popular: true,
-    features: [
-      'Everything in Free',
-      'Risk management metrics',
-      'Advanced analytics (Sharpe, Sortino, etc.)',
-      'Unlimited trades',
-      'Detailed performance insights',
-      'Priority email support',
-      'Export to multiple formats',
-      'Custom market analysis'
-    ],
-    limitations: [],
-    cta: 'Upgrade to Pro',
-    disabled: false
-  }
-]
+import { Check, Star, Zap, TrendingUp, BarChart3, Shield, Users } from "lucide-react"
 
 export default function SubscribePage() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  
-  const handleSubscribe = async (plan: string) => {
-    if (plan === 'Free') return
-    
-    setLoading(true)
-    // In production, this would create a Stripe checkout session
-    // For now, just simulate
-    setTimeout(() => {
-      alert('Stripe checkout would open here. Integration coming soon!')
-      setLoading(false)
-    }, 1000)
-  }
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Trading Journey
+          <span className="inline-block px-4 py-2 bg-purple-600 text-white rounded-full text-sm font-semibold mb-4">
+            🎉 BETA ACCESS
+          </span>
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+            Welcome to TradeVolt Beta!
           </h1>
-          <p className="text-xl text-gray-600">
-            Unlock professional trading analytics and take your performance to the next level
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            You&apos;re among the first traders to experience our professional-grade analytics platform. 
+            Enjoy <span className="font-semibold text-purple-600">unlimited access to all features</span> during our beta period!
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {plans.map((plan) => (
-            <Card 
-              key={plan.name}
-              className={`relative p-8 ${
-                plan.popular 
-                  ? 'border-blue-500 border-2 shadow-xl' 
-                  : 'border-gray-200'
-              }`}
+        <Card className="max-w-4xl mx-auto p-8 shadow-xl border-purple-200">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">Everything Unlocked for Beta Users 🚀</h2>
+            <p className="text-gray-600">No credit card required • No time limits • Full feature access</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div>
+              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-purple-600" />
+                Essential Analytics
+              </h3>
+              <ul className="space-y-2">
+                {[
+                  'Net P&L tracking',
+                  'Win rate analysis',
+                  'Profit factor calculations',
+                  'Trade expectancy',
+                  'Average win/loss metrics',
+                  'Comprehensive trade history'
+                ].map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <Shield className="h-5 w-5 text-purple-600" />
+                Professional Features
+              </h3>
+              <ul className="space-y-2">
+                {[
+                  'Risk management metrics',
+                  'Maximum drawdown analysis',
+                  'Risk of ruin calculations',
+                  'Sharpe & Sortino ratios',
+                  'Advanced performance metrics',
+                  'AI-powered insights'
+                ].map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+          <div className="bg-purple-50 rounded-lg p-6 mb-8">
+            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500" />
+              Beta User Benefits
+            </h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <Zap className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <h4 className="font-medium">Early Access</h4>
+                <p className="text-sm text-gray-600">Be first to try new features</p>
+              </div>
+              <div className="text-center">
+                <Users className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <h4 className="font-medium">Shape the Product</h4>
+                <p className="text-sm text-gray-600">Your feedback drives development</p>
+              </div>
+              <div className="text-center">
+                <BarChart3 className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <h4 className="font-medium">Exclusive Insights</h4>
+                <p className="text-sm text-gray-600">Advanced analytics at no cost</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 text-lg"
+              onClick={() => router.push('/dashboard')}
             >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
-                    <Crown className="h-4 w-4" />
-                    MOST POPULAR
-                  </div>
-                </div>
-              )}
-              
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold mb-2">{plan.name}</h2>
-                <div className="flex items-baseline justify-center">
-                  <span className="text-5xl font-bold">{plan.price}</span>
-                  <span className="text-gray-600 ml-1">{plan.period}</span>
-                </div>
-              </div>
-              
-              <div className="space-y-4 mb-8">
-                <h3 className="font-semibold text-gray-900">Features:</h3>
-                <ul className="space-y-3">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                {plan.limitations.length > 0 && (
-                  <>
-                    <h3 className="font-semibold text-gray-900 pt-4">Limitations:</h3>
-                    <ul className="space-y-3">
-                      {plan.limitations.map((limitation, idx) => (
-                        <li key={idx} className="flex items-start gap-3">
-                          <X className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-gray-700">{limitation}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-              </div>
-              
-              <Button
-                className={`w-full ${
-                  plan.popular 
-                    ? 'bg-blue-600 hover:bg-blue-700' 
-                    : ''
-                }`}
-                variant={plan.popular ? 'default' : 'outline'}
-                disabled={plan.disabled || loading}
-                onClick={() => handleSubscribe(plan.name)}
-              >
-                {loading ? 'Processing...' : plan.cta}
-              </Button>
-            </Card>
-          ))}
-        </div>
+              Start Using TradeVolt Beta →
+            </Button>
+            <p className="text-sm text-gray-600 mt-4">
+              No signup required if you&apos;re already logged in
+            </p>
+          </div>
+        </Card>
         
         <div className="mt-16 text-center">
-          <h3 className="text-lg font-semibold mb-4">Frequently Asked Questions</h3>
-          <div className="max-w-3xl mx-auto space-y-4 text-left">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h4 className="font-semibold mb-2">Can I cancel anytime?</h4>
-              <p className="text-gray-600">Yes! You can cancel your Pro subscription anytime. You&apos;ll continue to have access until the end of your billing period.</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h4 className="font-semibold mb-2">What payment methods do you accept?</h4>
-              <p className="text-gray-600">We accept all major credit cards, debit cards, and support international payments through Stripe.</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h4 className="font-semibold mb-2">Do I need a credit card for the free plan?</h4>
-              <p className="text-gray-600">No! The free plan is completely free forever with no credit card required.</p>
-            </div>
+          <h3 className="text-2xl font-bold mb-8">What Beta Users Are Saying</h3>
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <Card className="p-6">
+              <div className="flex gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-3">&quot;The risk metrics alone have transformed how I manage my positions. Can&apos;t imagine trading without this now.&quot;</p>
+              <p className="text-sm font-medium">- Active Day Trader</p>
+            </Card>
+            
+            <Card className="p-6">
+              <div className="flex gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-3">&quot;Finally, professional-grade analytics that don&apos;t cost a fortune. The insights have helped me identify weak spots in my strategy.&quot;</p>
+              <p className="text-sm font-medium">- Swing Trader</p>
+            </Card>
+            
+            <Card className="p-6">
+              <div className="flex gap-1 mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-3">&quot;The Sharpe ratio tracking alone is worth it. This platform gives me institutional-level metrics for my personal trading.&quot;</p>
+              <p className="text-sm font-medium">- Options Trader</p>
+            </Card>
           </div>
         </div>
         
-        <div className="mt-8 text-center">
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 mb-4">
+            Questions about the beta? Reach out to us at{' '}
+            <a href="mailto:beta@tradevolt.com" className="text-purple-600 hover:underline">
+              beta@tradevolt.com
+            </a>
+          </p>
           <Button 
             variant="ghost" 
             onClick={() => router.back()}

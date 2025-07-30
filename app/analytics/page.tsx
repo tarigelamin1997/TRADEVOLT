@@ -33,7 +33,6 @@ import {
   DollarSign,
   PieChart,
   FileText,
-  Crown,
   Download,
 } from "lucide-react"
 import { calculateMarketPnL } from '@/lib/market-knowledge'
@@ -382,26 +381,16 @@ export default function AnalyticsPage() {
 
             <main className="flex-1 overflow-y-auto">
               <div className="p-6">
-                {/* Subscription Banner for Free Users */}
-                {subscription.plan === 'free' && (
-                  <Card className="p-4 mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Crown className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <h3 className="font-semibold text-blue-900">Unlock Advanced Analytics</h3>
-                          <p className="text-sm text-blue-700">Get risk management metrics and professional trading insights</p>
-                        </div>
-                      </div>
-                      <Button 
-                        className="bg-blue-600 hover:bg-blue-700"
-                        onClick={() => router.push('/subscribe')}
-                      >
-                        Upgrade to Pro - $15/month
-                      </Button>
+                {/* Beta Banner */}
+                <Card className="p-4 mb-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-purple-900">🎉 Beta Access - All Features Unlocked!</h3>
+                      <p className="text-sm text-purple-700">Enjoy full access to all 16 professional metrics during our beta period</p>
                     </div>
-                  </Card>
-                )}
+                    <span className="px-3 py-1 bg-purple-600 text-white text-sm rounded-full font-medium">BETA</span>
+                  </div>
+                </Card>
                 
                 {/* Insights Section */}
                 {insights.length > 0 && (
@@ -419,18 +408,8 @@ export default function AnalyticsPage() {
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="risk">
-                      Risk Management
-                      {subscription.plan === 'free' && (
-                        <Crown className="h-3 w-3 ml-1" />
-                      )}
-                    </TabsTrigger>
-                    <TabsTrigger value="advanced">
-                      Advanced
-                      {subscription.plan === 'free' && (
-                        <Crown className="h-3 w-3 ml-1" />
-                      )}
-                    </TabsTrigger>
+                    <TabsTrigger value="risk">Risk Management</TabsTrigger>
+                    <TabsTrigger value="advanced">Advanced</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="overview" className="space-y-4">
@@ -444,8 +423,8 @@ export default function AnalyticsPage() {
                             title={definition.name}
                             metric={result}
                             tooltip={definition.tooltipContent}
-                            requiresPro={definition.requiresPro}
-                            isPro={subscription.plan === 'pro'}
+                            requiresPro={false}
+                            isPro={true}
                           />
                         )
                       })}
@@ -463,8 +442,8 @@ export default function AnalyticsPage() {
                             title={definition.name}
                             metric={result}
                             tooltip={definition.tooltipContent}
-                            requiresPro={definition.requiresPro}
-                            isPro={subscription.plan === 'pro'}
+                            requiresPro={false}
+                            isPro={true}
                           />
                         )
                       })}
@@ -482,8 +461,8 @@ export default function AnalyticsPage() {
                             title={definition.name}
                             metric={result}
                             tooltip={definition.tooltipContent}
-                            requiresPro={definition.requiresPro}
-                            isPro={subscription.plan === 'pro'}
+                            requiresPro={false}
+                            isPro={true}
                           />
                         )
                       })}

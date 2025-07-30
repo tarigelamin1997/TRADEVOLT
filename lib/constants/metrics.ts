@@ -74,7 +74,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     name: 'Maximum Drawdown',
     description: 'Largest peak-to-trough decline',
     category: 'risk',
-    requiresPro: true,
+    requiresPro: false,
     benchmark: 20,
     format: 'percentage',
     tooltipContent: 'The largest percentage drop from a peak to a trough in your account'
@@ -84,7 +84,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     name: 'Average Drawdown',
     description: 'Mean of all drawdown periods',
     category: 'risk',
-    requiresPro: true,
+    requiresPro: false,
     benchmark: 10,
     format: 'percentage',
     tooltipContent: 'The average of all drawdown periods in your trading'
@@ -94,7 +94,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     name: 'Recovery Factor',
     description: 'Net profit divided by max drawdown',
     category: 'risk',
-    requiresPro: true,
+    requiresPro: false,
     benchmark: 3,
     format: 'decimal',
     tooltipContent: 'How well you recover from drawdowns. Higher is better'
@@ -104,7 +104,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     name: 'Risk of Ruin',
     description: 'Probability of account blow-up',
     category: 'risk',
-    requiresPro: true,
+    requiresPro: false,
     benchmark: 5,
     format: 'percentage',
     tooltipContent: 'The probability of losing your entire trading capital'
@@ -114,7 +114,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     name: 'R-Multiple',
     description: 'Average profit/loss in risk units',
     category: 'risk',
-    requiresPro: true,
+    requiresPro: false,
     benchmark: 2,
     format: 'decimal',
     tooltipContent: 'Your average profit/loss expressed as a multiple of your risk'
@@ -126,7 +126,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     name: 'Sharpe Ratio',
     description: 'Risk-adjusted returns',
     category: 'advanced',
-    requiresPro: true,
+    requiresPro: false,
     benchmark: 1.0,
     format: 'decimal',
     tooltipContent: 'Return per unit of risk. Above 1.0 is good, above 2.0 is excellent'
@@ -136,7 +136,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     name: 'Sortino Ratio',
     description: 'Downside risk-adjusted returns',
     category: 'advanced',
-    requiresPro: true,
+    requiresPro: false,
     benchmark: 1.5,
     format: 'decimal',
     tooltipContent: 'Like Sharpe but only penalizes downside volatility'
@@ -146,7 +146,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     name: 'Calmar Ratio',
     description: 'Annual return over max drawdown',
     category: 'advanced',
-    requiresPro: true,
+    requiresPro: false,
     benchmark: 1.0,
     format: 'decimal',
     tooltipContent: 'Annual return divided by maximum drawdown'
@@ -156,7 +156,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     name: 'Treynor Ratio',
     description: 'Excess return per unit of systematic risk',
     category: 'advanced',
-    requiresPro: true,
+    requiresPro: false,
     benchmark: 0.1,
     format: 'decimal',
     tooltipContent: 'Measures returns earned in excess of risk-free rate per unit of market risk'
@@ -166,7 +166,7 @@ export const METRIC_DEFINITIONS: Record<string, MetricDefinition> = {
     name: "Jensen's Alpha",
     description: 'Excess returns vs market',
     category: 'advanced',
-    requiresPro: true,
+    requiresPro: false,
     benchmark: 0,
     format: 'percentage',
     tooltipContent: 'Your excess returns compared to expected market returns'
