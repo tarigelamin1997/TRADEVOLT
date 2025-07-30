@@ -17,16 +17,18 @@ model User {
 }
 
 model Trade {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   userId     String
   symbol     String
-  type       String   // "BUY" or "SELL"
+  type       String    // "BUY" or "SELL"
   entry      Float
   exit       Float?
   quantity   Float
   notes      String?
-  marketType String?  // "FUTURES", "OPTIONS", "FOREX", "CRYPTO", "STOCKS"
-  createdAt  DateTime @default(now())
+  marketType String?   // "FUTURES", "OPTIONS", "FOREX", "CRYPTO", "STOCKS"
+  entryTime  DateTime?
+  exitTime   DateTime?
+  createdAt  DateTime  @default(now())
   
-  user       User     @relation(fields: [userId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
 }
