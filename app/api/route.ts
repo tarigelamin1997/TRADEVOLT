@@ -15,6 +15,15 @@ if (isClerkConfigured) {
 
 // ONE endpoint for EVERYTHING
 export async function POST(request: NextRequest) {
+  // Check database URL
+  if (!process.env.DATABASE_URL) {
+    console.error('DATABASE_URL is not set')
+    return new NextResponse(
+      JSON.stringify({ error: 'Database configuration error' }), 
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
   let clerkId = 'demo-user' // Default for when auth is not configured
   
   // If Clerk is configured, use real authentication
@@ -194,6 +203,26 @@ export async function POST(request: NextRequest) {
         }
         
         return NextResponse.json({ subscription })
+      }
+      
+      case 'testConnection': {
+        // Test database connection
+        try {
+          const userCount = await prisma.user.count()
+          const tradeCount = await prisma.trade.count()
+          return NextResponse.json({ 
+            status: 'connected',
+            database_url_set: !!process.env.DATABASE_URL,
+            userCount,
+            tradeCount
+          })
+        } catch (error) {
+          return NextResponse.json({ 
+            status: 'error',
+            database_url_set: !!process.env.DATABASE_URL,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          })
+        }
       }
       
       default:
