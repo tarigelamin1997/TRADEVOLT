@@ -48,27 +48,53 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // Check database URL
-  if (!process.env.DATABASE_URL) {
-    console.error('DATABASE_URL is not set')
-    return new NextResponse(
-      JSON.stringify({ error: 'Database configuration error' }), 
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    )
-  }
-
-  let clerkId = 'demo-user' // Default for when auth is not configured
-  
-  // If Clerk is configured, use real authentication
-  if (isClerkConfigured && auth) {
-    const authResult = auth()
-    clerkId = authResult.userId
-    if (!clerkId) return new NextResponse('Unauthorized', { status: 401 })
-  }
-  
-  const body = await request.json()
-  
   try {
+    // Check database URL
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL is not set')
+      return new NextResponse(
+        JSON.stringify({ error: 'Database configuration error' }), 
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    let clerkId = 'demo-user' // Default for when auth is not configured
+    
+    // If Clerk is configured, use real authentication
+    if (isClerkConfigured && auth) {
+      try {
+        const authResult = auth()
+        clerkId = authResult.userId
+        if (!clerkId) {
+          console.log('No clerk user ID found, using demo-user')
+          clerkId = 'demo-user'
+        }
+      } catch (authError) {
+        console.error('Auth error:', authError)
+        clerkId = 'demo-user'
+      }
+    }
+    
+    console.log('Processing request for clerkId:', clerkId)
+    
+    let body
+    try {
+      body = await request.json()
+      console.log('Request body:', JSON.stringify(body, null, 2))
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError)
+      return new NextResponse(
+        JSON.stringify({ error: 'Invalid JSON in request body' }), 
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    if (!body.action) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Missing action in request body' }), 
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
     // Giant switch statement - fight me
     switch (body.action) {
       case 'getTrades': {
@@ -294,42 +320,52 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('API Error:', error)
     
+    // Build error response
+    const errorResponse: any = {
+      error: 'Internal server error',
+      timestamp: new Date().toISOString()
+    }
+    
     // Check if it's a Prisma error
     if (error instanceof Error) {
       console.error('Error name:', error.name)
       console.error('Error message:', error.message)
       console.error('Error stack:', error.stack)
       
+      errorResponse.error = error.message
+      errorResponse.type = error.name
+      
       // Check for common Prisma errors
       if (error.message.includes('P2002')) {
+        errorResponse.error = 'Duplicate entry'
         return new NextResponse(
-          JSON.stringify({ error: 'Duplicate entry' }), 
+          JSON.stringify(errorResponse), 
           { status: 400, headers: { 'Content-Type': 'application/json' } }
         )
       }
       
       if (error.message.includes('P2025')) {
+        errorResponse.error = 'Record not found'
         return new NextResponse(
-          JSON.stringify({ error: 'Record not found' }), 
+          JSON.stringify(errorResponse), 
           { status: 404, headers: { 'Content-Type': 'application/json' } }
         )
       }
       
       // Database connection errors
       if (error.message.includes('P1001') || error.message.includes('ECONNREFUSED')) {
-        return new NextResponse(
-          JSON.stringify({ error: 'Database connection failed' }), 
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
-        )
+        errorResponse.error = 'Database connection failed'
       }
+      
+      // Include stack trace in production for now to debug
+      errorResponse.stack = error.stack?.split('\n').slice(0, 5).join('\n')
+    } else {
+      errorResponse.rawError = String(error)
     }
     
+    // Always return JSON response
     return new NextResponse(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Internal server error',
-        type: error instanceof Error ? error.name : 'Unknown',
-        details: process.env.NODE_ENV === 'development' ? String(error) : undefined
-      }), 
+      JSON.stringify(errorResponse), 
       { 
         status: 500, 
         headers: { 'Content-Type': 'application/json' } 
