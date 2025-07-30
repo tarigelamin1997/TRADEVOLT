@@ -59,12 +59,16 @@ export async function POST(request: NextRequest) {
       }
       
       case 'addTrade': {
+        console.log('Adding trade for clerkId:', clerkId)
+        console.log('Trade data:', body.trade)
+        
         // Get or create user
         let user = await prisma.user.findUnique({
           where: { clerkId }
         })
         
         if (!user) {
+          console.log('Creating new user')
           user = await prisma.user.create({
             data: {
               clerkId,
@@ -73,6 +77,8 @@ export async function POST(request: NextRequest) {
             }
           })
         }
+        
+        console.log('User found/created:', user.id)
         
         const trade = await prisma.trade.create({
           data: {
@@ -88,6 +94,8 @@ export async function POST(request: NextRequest) {
             exitTime: body.trade.exitTime ? new Date(body.trade.exitTime) : null
           }
         })
+        
+        console.log('Trade created:', trade.id)
         
         return NextResponse.json({ trade })
       }

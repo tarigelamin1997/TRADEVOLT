@@ -82,7 +82,6 @@ export function TradeForm({ onAdd }: TradeFormProps) {
             entry: parseFloat(trade.entry),
             exit: trade.exit ? parseFloat(trade.exit) : null,
             quantity: parseFloat(trade.quantity),
-            createdAt: entryDateTime.toISOString(),
             entryTime: entryDateTime.toISOString(),
             exitTime: exitDateTime ? exitDateTime.toISOString() : null,
             marketType: trade.marketType,
@@ -93,7 +92,9 @@ export function TradeForm({ onAdd }: TradeFormProps) {
       })
       
       if (!res.ok) {
-        throw new Error('Failed to add trade')
+        const errorData = await res.text()
+        console.error('API Error Response:', errorData)
+        throw new Error(`Failed to add trade: ${errorData}`)
       }
       
       const data = await res.json()
