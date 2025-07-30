@@ -14,6 +14,39 @@ if (isClerkConfigured) {
 }
 
 // ONE endpoint for EVERYTHING
+// GET endpoint for testing
+export async function GET(request: NextRequest) {
+  try {
+    const dbUrlSet = !!process.env.DATABASE_URL
+    const dbUrlStart = process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'not set'
+    
+    // Try to connect to database
+    let dbStatus = 'unknown'
+    try {
+      await prisma.$connect()
+      dbStatus = 'connected'
+    } catch (e) {
+      dbStatus = 'failed'
+    }
+    
+    return NextResponse.json({
+      status: 'API is running',
+      database: {
+        url_set: dbUrlSet,
+        url_preview: dbUrlStart,
+        connection: dbStatus
+      },
+      environment: process.env.NODE_ENV,
+      timestamp: new Date().toISOString()
+    })
+  } catch (error) {
+    return NextResponse.json({
+      error: 'Failed to check status',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
+  }
+}
+
 export async function POST(request: NextRequest) {
   // Check database URL
   if (!process.env.DATABASE_URL) {
@@ -230,10 +263,42 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('API Error:', error)
+    
+    // Check if it's a Prisma error
+    if (error instanceof Error) {
+      console.error('Error name:', error.name)
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+      
+      // Check for common Prisma errors
+      if (error.message.includes('P2002')) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Duplicate entry' }), 
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      
+      if (error.message.includes('P2025')) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Record not found' }), 
+          { status: 404, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      
+      // Database connection errors
+      if (error.message.includes('P1001') || error.message.includes('ECONNREFUSED')) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Database connection failed' }), 
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+    
     return new NextResponse(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : 'Internal server error',
-        details: process.env.NODE_ENV === 'development' ? error : undefined
+        type: error instanceof Error ? error.name : 'Unknown',
+        details: process.env.NODE_ENV === 'development' ? String(error) : undefined
       }), 
       { 
         status: 500, 
