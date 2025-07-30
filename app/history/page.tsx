@@ -30,6 +30,7 @@ import {
   PieChart,
   FileText,
   LogOut,
+  Plus,
 } from "lucide-react"
 
 import { useRouter } from 'next/navigation'
@@ -37,6 +38,7 @@ import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CSVImport } from '@/components/csv-import'
+import { TradeForm } from '@/components/trade-form'
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { useUser, UserButton } from '@clerk/nextjs'
 
@@ -127,6 +129,7 @@ function TradeHistoryContent({ user }: { user: any }) {
   const [trades, setTrades] = useState<Trade[]>([])
   const [filteredTrades, setFilteredTrades] = useState<Trade[]>([])
   const [showImport, setShowImport] = useState(false)
+  const [showAddTrade, setShowAddTrade] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterMarket, setFilterMarket] = useState('ALL')
   const [sortBy, setSortBy] = useState('date')
@@ -415,8 +418,37 @@ function TradeHistoryContent({ user }: { user: any }) {
                     <Button onClick={exportToCSV} variant="outline">
                       Export CSV
                     </Button>
+                    <Button 
+                      onClick={() => setShowAddTrade(true)} 
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Trade
+                    </Button>
                   </div>
                 </Card>
+
+                {/* Add Trade Form */}
+                {showAddTrade && (
+                  <Card className="p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-semibold">Add New Trade</h3>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setShowAddTrade(false)}
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                    <TradeForm 
+                      onTradeAdded={() => {
+                        fetchTrades()
+                        setShowAddTrade(false)
+                      }} 
+                    />
+                  </Card>
+                )}
 
                 {/* Trade Table */}
                 <Card className="overflow-hidden">
