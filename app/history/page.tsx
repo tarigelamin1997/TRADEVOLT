@@ -442,7 +442,7 @@ function TradeHistoryContent({ user }: { user: any }) {
                       </Button>
                     </div>
                     <TradeForm 
-                      onTradeAdded={() => {
+                      onAdd={() => {
                         fetchTrades()
                         setShowAddTrade(false)
                       }} 
