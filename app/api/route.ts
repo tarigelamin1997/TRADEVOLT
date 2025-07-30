@@ -241,19 +241,49 @@ export async function POST(request: NextRequest) {
       case 'testConnection': {
         // Test database connection
         try {
-          const userCount = await prisma.user.count()
-          const tradeCount = await prisma.trade.count()
+          console.log('Testing database connection...')
+          
+          // First check if we can connect
+          await prisma.$connect()
+          console.log('Database connected successfully')
+          
+          // Check if tables exist by trying to count
+          let userCount = 0
+          let tradeCount = 0
+          let tablesExist = false
+          
+          try {
+            userCount = await prisma.user.count()
+            tradeCount = await prisma.trade.count()
+            tablesExist = true
+            console.log(`Found ${userCount} users and ${tradeCount} trades`)
+          } catch (tableError) {
+            console.error('Table error:', tableError)
+            if (tableError instanceof Error && tableError.message.includes('does not exist')) {
+              return NextResponse.json({ 
+                status: 'error',
+                database_url_set: !!process.env.DATABASE_URL,
+                connected: true,
+                error: 'Database tables do not exist. Run "prisma db push" to create them.',
+                details: tableError.message
+              })
+            }
+          }
+          
           return NextResponse.json({ 
             status: 'connected',
             database_url_set: !!process.env.DATABASE_URL,
+            tablesExist,
             userCount,
             tradeCount
           })
         } catch (error) {
+          console.error('Connection test error:', error)
           return NextResponse.json({ 
             status: 'error',
             database_url_set: !!process.env.DATABASE_URL,
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
           })
         }
       }
