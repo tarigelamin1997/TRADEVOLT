@@ -13,6 +13,7 @@ declare module 'react-sparklines' {
     style?: React.CSSProperties
     max?: number
     min?: number
+    children?: ReactNode
   }
 
   export interface SparklinesLineProps {
