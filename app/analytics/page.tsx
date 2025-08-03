@@ -45,6 +45,11 @@ import { generateAnalyticsExport, exportToJSON, exportToCSV } from '@/lib/export
 import { EquityCurveChart, WinRateChart, ProfitDistributionChart } from '@/components/Charts'
 import { ExcursionStats } from '@/components/features/excursion-stats'
 import { useAuthUser } from '@/lib/auth-wrapper'
+import { VisualMetricCard } from '@/components/visual-metric-card'
+import { RadialGauge } from '@/components/charts/radial-gauge'
+import { MAEMFEScatter } from '@/components/charts/mae-mfe-scatter'
+import { motion } from 'framer-motion'
+import { TrendingUp, TrendingDown, Shield, Zap, Target, Activity } from 'lucide-react'
 
 // Menu items (same as history page)
 const mainMenuItems = [
@@ -396,6 +401,54 @@ export default function AnalyticsPage() {
                 )}
                 
                 {/* Metrics Tabs */}
+                {/* Key Performance Indicators */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm flex flex-col items-center"
+                  >
+                    <RadialGauge
+                      value={metrics.calculateWinRate(filteredTrades)}
+                      label="Win Rate"
+                      threshold={{ good: 50, warning: 40 }}
+                      size={160}
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm flex flex-col items-center"
+                  >
+                    <RadialGauge
+                      value={Math.min(metrics.calculateProfitFactor(filteredTrades), 5)}
+                      max={5}
+                      label="Profit Factor"
+                      unit="x"
+                      threshold={{ good: 1.5, warning: 1 }}
+                      size={160}
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm flex flex-col items-center"
+                  >
+                    <RadialGauge
+                      value={Math.min(Math.abs(metrics.calculateMaxDrawdown(filteredTrades).value), 100)}
+                      label="Max Drawdown"
+                      color="#ef4444"
+                      threshold={{ good: 20, warning: 40 }}
+                      size={160}
+                    />
+                  </motion.div>
+                </div>
+
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
                   <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -405,22 +458,46 @@ export default function AnalyticsPage() {
                   </TabsList>
                   
                   <TabsContent value="overview" className="space-y-4">
-                    <MetricGrid columns={4}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {METRIC_GROUPS.overview.metrics.map(metricId => {
                         const definition = METRIC_DEFINITIONS[metricId]
                         const result = calculateMetric(metricId)
+                        
+                        // Generate trend data for last 30 days
+                        const trendData = []
+                        for (let i = 29; i >= 0; i--) {
+                          const date = new Date()
+                          date.setDate(date.getDate() - i)
+                          const dayTrades = filteredTrades.filter(t => 
+                            new Date(t.createdAt).toDateString() === date.toDateString()
+                          )
+                          if (dayTrades.length > 0) {
+                            trendData.push(calculateMetric(metricId).value)
+                          }
+                        }
+                        
                         return (
-                          <MetricCard
+                          <VisualMetricCard
                             key={metricId}
                             title={definition.name}
-                            metric={result}
-                            tooltip={definition.tooltipContent}
-                            requiresPro={false}
-                            isPro={true}
+                            value={result.value}
+                            format={result.format}
+                            status={result.status}
+                            description={definition.tooltipContent}
+                            benchmark={definition.benchmark ? {
+                              value: definition.benchmark,
+                              label: 'Target'
+                            } : undefined}
+                            trend={trendData.length > 1 ? {
+                              data: trendData,
+                              current: trendData[trendData.length - 1],
+                              previous: trendData[trendData.length - 2]
+                            } : undefined}
+                            icon={<Activity className="h-4 w-4" />}
                           />
                         )
                       })}
-                    </MetricGrid>
+                    </div>
                   </TabsContent>
                   
                   <TabsContent value="risk" className="space-y-4">
@@ -463,6 +540,9 @@ export default function AnalyticsPage() {
                   
                   <TabsContent value="excursion" className="space-y-4">
                     <ExcursionStats userId={user.id} />
+                    {filteredTrades.some(t => t.mae !== null && t.mfe !== null) && (
+                      <MAEMFEScatter trades={filteredTrades} />
+                    )}
                   </TabsContent>
                 </Tabs>
 
