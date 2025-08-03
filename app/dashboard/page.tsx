@@ -8,7 +8,7 @@ import { RadialGauge } from '@/components/charts/radial-gauge'
 import { EquityCurveChart } from '@/components/charts/equity-curve'
 import { DailyPnLChart } from '@/components/charts/daily-pnl-chart'
 import { SymbolDistribution } from '@/components/charts/symbol-distribution'
-import { TradingCalendarHeatmap } from '@/components/charts/calendar-heatmap'
+import { EnhancedCalendar } from '@/components/charts/enhanced-calendar'
 import { VisualMetricCard } from '@/components/visual-metric-card'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -327,8 +327,8 @@ export default function VisualDashboardPage() {
           <SymbolDistribution trades={trades} metric="count" />
         </div>
 
-        {/* Calendar Heatmap */}
-        <TradingCalendarHeatmap trades={trades} />
+        {/* Enhanced Calendar */}
+        <EnhancedCalendar trades={trades} />
 
         {/* Trade Form Modal */}
         <AnimatePresence>
