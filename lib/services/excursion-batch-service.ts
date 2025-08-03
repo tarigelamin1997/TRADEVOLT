@@ -144,7 +144,7 @@ export class ExcursionBatchService {
       mae: trade.mae!,
       mfe: trade.mfe!,
       edgeRatio: trade.edgeRatio || 0,
-      updrawPercent: trade.updrawPercent,
+      updrawPercent: trade.updrawPercent ?? null,
       priceData,
       runningPnL
     }
