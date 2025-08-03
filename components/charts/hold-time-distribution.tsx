@@ -58,7 +58,7 @@ export function HoldTimeDistribution({ trades }: HoldTimeDistributionProps) {
   , holdTimeStats.distribution[0] || { range: '', count: 0 })
   
   // Prepare chart data
-  const chartData: ChartData<'bar'> = {
+  const chartData: ChartData<'bar' | 'line'> = {
     labels: holdTimeStats.distribution.map(d => d.range),
     datasets: [
       {
@@ -67,7 +67,8 @@ export function HoldTimeDistribution({ trades }: HoldTimeDistributionProps) {
         backgroundColor: 'rgba(59, 130, 246, 0.5)',
         borderColor: 'rgb(59, 130, 246)',
         borderWidth: 2,
-        yAxisID: 'y'
+        yAxisID: 'y',
+        type: 'bar' as const
       },
       {
         label: 'Win Rate %',
@@ -86,7 +87,7 @@ export function HoldTimeDistribution({ trades }: HoldTimeDistributionProps) {
     ]
   }
   
-  const options: ChartOptions<'bar'> = {
+  const options: ChartOptions<'bar' | 'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
