@@ -216,7 +216,7 @@ export function StreakTracker({ streaks }: StreakTrackerProps) {
                 <div className="flex gap-2">
                   <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                   <p>
-                    <strong className="text-red-600">Active Loss Streak:</strong> You're in a {streaks.current.count}-trade losing streak. Consider taking a break to reset mentally.
+                    <strong className="text-red-600">Active Loss Streak:</strong> You&apos;re in a {streaks.current.count}-trade losing streak. Consider taking a break to reset mentally.
                   </p>
                 </div>
               )}
