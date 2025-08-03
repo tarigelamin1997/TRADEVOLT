@@ -1,5 +1,6 @@
 import { UserSettings } from './settings'
 import { calculateMarketPnL } from './market-knowledge'
+import { safeToFixed } from './utils/safe-format'
 
 interface Trade {
   id: string
@@ -38,7 +39,7 @@ export function calculatePnLWithCommission(
 // Format currency based on user settings
 export function formatCurrency(amount: number, settings: UserSettings): string {
   const symbol = getCurrencySymbol(settings.trading.accountCurrency)
-  const formatted = amount.toFixed(settings.display.numberFormat.decimalPlaces)
+  const formatted = safeToFixed(amount, settings.display.numberFormat.decimalPlaces)
   
   if (settings.display.numberFormat.thousandSeparator) {
     const parts = formatted.split('.')

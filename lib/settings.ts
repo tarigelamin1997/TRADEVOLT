@@ -142,6 +142,7 @@ export function saveSettings(settings: Partial<UserSettings>) {
 
 // Hook for using settings in components
 import { useState, useEffect } from 'react'
+import { safeToFixed } from './utils/safe-format'
 
 export function useSettings() {
   const [settings, setSettings] = useState<UserSettings>(loadSettings())
@@ -166,7 +167,7 @@ export function useSettings() {
 // Format helpers based on settings
 export function formatCurrency(amount: number, settings: UserSettings): string {
   const symbol = getCurrencySymbol(settings.trading.accountCurrency)
-  const formatted = amount.toFixed(settings.display.numberFormat.decimalPlaces)
+  const formatted = safeToFixed(amount, settings.display.numberFormat.decimalPlaces)
   
   if (settings.display.numberFormat.thousandSeparator) {
     const parts = formatted.split('.')

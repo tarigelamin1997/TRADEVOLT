@@ -16,6 +16,7 @@ import { Line } from 'react-chartjs-2'
 import { motion } from 'framer-motion'
 import type { Trade } from '@/lib/db-memory'
 import { calculateMarketPnL } from '@/lib/market-knowledge'
+import { safeToFixed } from '@/lib/utils/safe-format'
 
 ChartJS.register(
   CategoryScale,
@@ -96,7 +97,7 @@ export function EquityCurveChart({ trades, startingBalance = 10000, height = 300
             const pnl = dataPoints[context.dataIndex].pnl
             return [
               `Balance: $${value.toLocaleString()}`,
-              `Trade P&L: ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`
+              `Trade P&L: ${pnl >= 0 ? '+' : ''}$${safeToFixed(pnl, 2)}`
             ]
           }
         }
@@ -146,7 +147,7 @@ export function EquityCurveChart({ trades, startingBalance = 10000, height = 300
             ${balance.toLocaleString()}
           </div>
           <div className={`text-sm ${totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {totalPnL >= 0 ? '+' : ''}{totalReturn.toFixed(2)}% All Time
+            {totalPnL >= 0 ? '+' : ''}{safeToFixed(totalReturn, 2)}% All Time
           </div>
         </div>
       </div>

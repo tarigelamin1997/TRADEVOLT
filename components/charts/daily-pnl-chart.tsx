@@ -14,6 +14,7 @@ import { Bar } from 'react-chartjs-2'
 import { motion } from 'framer-motion'
 import type { Trade } from '@/lib/db-memory'
 import { calculateMarketPnL } from '@/lib/market-knowledge'
+import { safeToFixed } from '@/lib/utils/safe-format'
 
 ChartJS.register(
   CategoryScale,
@@ -96,7 +97,7 @@ export function DailyPnLChart({ trades, days = 30, height = 300 }: DailyPnLChart
         callbacks: {
           label: (context) => {
             const value = context.parsed.y
-            return `P&L: ${value >= 0 ? '+' : ''}$${value.toFixed(2)}`
+            return `P&L: ${value >= 0 ? '+' : ''}$${safeToFixed(value, 2)}`
           }
         }
       }
@@ -142,7 +143,7 @@ export function DailyPnLChart({ trades, days = 30, height = 300 }: DailyPnLChart
         </div>
         <div className="text-right">
           <div className={`text-2xl font-bold ${totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}
+            {totalPnL >= 0 ? '+' : ''}${safeToFixed(totalPnL, 2)}
           </div>
           <div className="text-sm text-muted-foreground">
             <span className="text-green-600">{profitDays}</span> / <span className="text-red-600">{lossDays}</span> days
