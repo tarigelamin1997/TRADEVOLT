@@ -699,7 +699,7 @@ export function CSVImport({ onImport, onClose }: CSVImportProps) {
                 </thead>
                 <tbody>
                   {preview.map((trade, i) => {
-                    const calculatedPnL = calculateMarketPnL(trade, trade.marketType)
+                    const calculatedPnL = calculateMarketPnL(trade, trade.marketType || null)
                     return (
                       <tr key={i} className="border-t">
                         <td className="px-3 py-2">{trade.symbol}</td>

@@ -137,7 +137,7 @@ export class BehavioralAnalysisService {
     consistency: DailyConsistency,
     revenge: RevengeAnalysis
   ): ZellaScoreComponents {
-    const pnlData = trades.map(t => calculateMarketPnL(t, t.marketType) || 0)
+    const pnlData = trades.map(t => calculateMarketPnL(t, t.marketType || null) || 0)
     const wins = pnlData.filter(pnl => pnl > 0)
     const losses = pnlData.filter(pnl => pnl < 0)
 
@@ -195,7 +195,7 @@ export class BehavioralAnalysisService {
     
     dailyGroups.forEach((dayTrades, date) => {
       const dayPnL = dayTrades.reduce((sum, trade) => {
-        return sum + (calculateMarketPnL(trade, trade.marketType) || 0)
+        return sum + (calculateMarketPnL(trade, trade.marketType || null) || 0)
       }, 0)
       dailyPnL.push({ date, pnl: dayPnL })
     })
@@ -237,7 +237,7 @@ export class BehavioralAnalysisService {
   private static analyzeOutliers(trades: Trade[]): OutlierAnalysis {
     const tradePnLs = trades.map(trade => ({
       trade,
-      pnl: calculateMarketPnL(trade, trade.marketType) || 0
+      pnl: calculateMarketPnL(trade, trade.marketType || null) || 0
     })).filter(t => t.pnl !== 0)
 
     if (tradePnLs.length === 0) {
@@ -287,7 +287,7 @@ export class BehavioralAnalysisService {
     let currentStreak: { type: 'win' | 'loss'; count: number; trades: Trade[] } | null = null
 
     trades.forEach(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType) || 0
+      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
       const isWin = pnl > 0
 
       if (!currentStreak) {
@@ -333,21 +333,24 @@ export class BehavioralAnalysisService {
       ? lossStreaks.reduce((sum, s) => sum + s.count, 0) / lossStreaks.length
       : 0
 
+    // Keep reference to the actual current streak
+    const lastStreak = streaks[streaks.length - 1]
+    
     // Current streak P&L
-    const currentStreakPnL = currentStreak
-      ? currentStreak.trades.reduce((sum, trade) => 
-          sum + (calculateMarketPnL(trade, trade.marketType) || 0), 0)
+    const currentStreakPnL = lastStreak
+      ? lastStreak.trades.reduce((sum, trade) => 
+          sum + (calculateMarketPnL(trade, trade.marketType || null) || 0), 0)
       : 0
 
     // Determine current streak info
     const lastTrade = trades[trades.length - 1]
-    const lastPnL = lastTrade ? calculateMarketPnL(lastTrade, lastTrade.marketType) || 0 : 0
+    const lastPnL = lastTrade ? calculateMarketPnL(lastTrade, lastTrade.marketType || null) || 0 : 0
 
     return {
-      current: currentStreak ? {
-        type: currentStreak.type,
-        count: currentStreak.count,
-        startDate: new Date(currentStreak.trades[0].entryTime || currentStreak.trades[0].createdAt)
+      current: lastStreak ? {
+        type: lastStreak.type,
+        count: lastStreak.count,
+        startDate: new Date(lastStreak.trades[0].entryTime || lastStreak.trades[0].createdAt)
       } : {
         type: 'none',
         count: 0,
@@ -367,7 +370,7 @@ export class BehavioralAnalysisService {
     
     for (let i = 1; i < trades.length; i++) {
       const prevTrade = trades[i - 1]
-      const prevPnL = calculateMarketPnL(prevTrade, prevTrade.marketType) || 0
+      const prevPnL = calculateMarketPnL(prevTrade, prevTrade.marketType || null) || 0
 
       // Only check if previous trade was a loss
       if (prevPnL >= 0) continue
@@ -399,7 +402,7 @@ export class BehavioralAnalysisService {
         }
 
         // Check if trying to recover the loss
-        const currPnL = calculateMarketPnL(currTrade, currTrade.marketType) || 0
+        const currPnL = calculateMarketPnL(currTrade, currTrade.marketType || null) || 0
         if (currTrade.quantity > prevTrade.quantity || timeDiff < 10 * 60 * 1000) {
           revengeTrades.push(currTrade)
           
@@ -452,7 +455,7 @@ export class BehavioralAnalysisService {
     let runningPnL = 0
 
     trades.forEach(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType) || 0
+      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
       runningPnL += pnl
       
       if (runningPnL > peak) {

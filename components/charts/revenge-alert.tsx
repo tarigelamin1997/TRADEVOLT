@@ -161,7 +161,7 @@ export function RevengeAlert({ revenge }: RevengeAlertProps) {
                           </p>
                           <p className="text-xs text-muted-foreground">
                             Trigger: {incident.triggerTrade.symbol} (Loss: {formatCurrency(
-                              calculateMarketPnL(incident.triggerTrade, incident.triggerTrade.marketType) || 0,
+                              calculateMarketPnL(incident.triggerTrade, incident.triggerTrade.marketType || null) || 0,
                               settings
                             )})
                           </p>

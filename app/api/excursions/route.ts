@@ -2,26 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ExcursionBatchService } from '@/lib/services/excursion-batch-service'
 import * as dbMemory from '@/lib/db-memory'
 
-// Check if Clerk is configured
-const isClerkConfigured = !!(
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
-  process.env.CLERK_SECRET_KEY
-)
-
-// Conditionally import auth
-let auth: any = null
-if (isClerkConfigured) {
-  auth = require('@clerk/nextjs/server').auth
-}
+// For now, we'll use demo mode since Clerk is not configured
+const isClerkConfigured = false
 
 export async function POST(request: NextRequest) {
   try {
     // Get user ID
     let userId = 'demo-user'
-    if (isClerkConfigured && auth) {
-      const authResult = auth()
-      userId = authResult?.userId || 'demo-user'
-    }
 
     const body = await request.json()
     const { action, tradeId } = body
