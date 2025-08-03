@@ -69,7 +69,7 @@ export default function VisualDashboardPage() {
 
   useEffect(() => {
     fetchTrades()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchTrades = async () => {
     try {
@@ -266,7 +266,7 @@ export default function VisualDashboardPage() {
               <div>
                 <h3 className="text-lg font-semibold">Net P&L</h3>
                 <div className={`text-3xl font-bold ${stats.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {stats.totalPnL >= 0 ? '+' : ''}{formatCurrency(stats.totalPnL, settings.baseCurrency)}
+                  {stats.totalPnL >= 0 ? '+' : ''}{formatCurrency(stats.totalPnL, settings)}
                 </div>
               </div>
               <div className={`p-2 rounded-lg ${stats.totalPnL >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
@@ -277,7 +277,7 @@ export default function VisualDashboardPage() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Today&apos;s P&L</span>
                 <span className={`font-medium ${stats.todayPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {stats.todayPnL >= 0 ? '+' : ''}{formatCurrency(stats.todayPnL, settings.baseCurrency)}
+                  {stats.todayPnL >= 0 ? '+' : ''}{formatCurrency(stats.todayPnL, settings)}
                 </span>
               </div>
             </div>
