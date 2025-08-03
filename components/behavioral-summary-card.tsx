@@ -47,23 +47,26 @@ export function BehavioralSummaryCard({ trades }: BehavioralSummaryCardProps) {
       transition={{ delay: 0.7 }}
     >
       <Card className="relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full pointer-events-none" />
         
-        <CardHeader>
+        <CardHeader className="relative z-10">
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-purple-600" />
               Behavioral Analysis
             </div>
-            <Link href="/behavioral">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs hover:bg-gray-100 dark:hover:bg-gray-800"
-              >
-                View Details
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
+            <Link 
+              href="/behavioral"
+              className="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 h-8 px-3 py-2"
+              onClick={(e) => {
+                // Ensure navigation works
+                if (e.ctrlKey || e.metaKey || e.shiftKey) return; // Allow normal link behavior for new tab
+                e.preventDefault();
+                window.location.href = '/behavioral';
+              }}
+            >
+              View Details
+              <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
           </CardTitle>
         </CardHeader>
