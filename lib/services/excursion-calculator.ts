@@ -176,7 +176,7 @@ export class ExcursionCalculator {
     const edgeRatio = this.calculateEdgeRatio(mae, mfe)
     const updrawPercent = this.calculateUpdraw(
       mfe,
-      trade.takeProfitPrice,
+      trade.takeProfitPrice ?? null,
       trade.entry,
       trade.type as 'BUY' | 'SELL'
     )
