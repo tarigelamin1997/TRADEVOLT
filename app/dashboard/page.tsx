@@ -13,6 +13,7 @@ import { VisualMetricCard } from '@/components/visual-metric-card'
 import { TimeMetricsSummary } from '@/components/time-metrics-summary'
 import { BehavioralSummaryCard } from '@/components/behavioral-summary-card'
 import { ExecutionSummaryCard } from '@/components/execution-summary-card'
+import { MarketInsightsWidget } from '@/components/market-insights-widget'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   TrendingUp, 
@@ -331,6 +332,7 @@ export default function VisualDashboardPage() {
           <TimeMetricsSummary trades={trades} />
           <BehavioralSummaryCard trades={trades} />
           <ExecutionSummaryCard trades={trades} />
+          <MarketInsightsWidget trades={trades} />
           <SymbolDistribution trades={trades} metric="pnl" />
         </div>
 

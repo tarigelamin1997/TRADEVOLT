@@ -38,6 +38,10 @@ export interface Trade {
   wasTakeProfitHit?: boolean | null
   exitReason?: 'STOP_LOSS' | 'TAKE_PROFIT' | 'MANUAL' | 'OTHER' | null
   partialExits?: PartialExit[] | null
+  // Setup/Strategy fields
+  setup?: string | null
+  setupTags?: string[] | null
+  confidence?: number | null
 }
 
 export interface PartialExit {

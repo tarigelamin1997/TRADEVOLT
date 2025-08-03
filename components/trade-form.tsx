@@ -17,6 +17,9 @@ interface Trade {
   exitTime: string
   marketType: string
   notes: string
+  setup: string
+  setupTags: string
+  confidence: string
 }
 
 interface TradeFormProps {
@@ -45,7 +48,10 @@ export function TradeForm({ onAdd }: TradeFormProps) {
     exitDate: '',
     exitTime: '',
     marketType: getLastMarketType(),
-    notes: ''
+    notes: '',
+    setup: '',
+    setupTags: '',
+    confidence: '3'
   })
 
   // Save market type to localStorage when it changes
@@ -88,7 +94,10 @@ export function TradeForm({ onAdd }: TradeFormProps) {
             entryTime: entryDateTime.toISOString(),
             exitTime: exitDateTime ? exitDateTime.toISOString() : null,
             marketType: trade.marketType,
-            notes: trade.notes || null
+            notes: trade.notes || null,
+            setup: trade.setup || null,
+            setupTags: trade.setupTags ? trade.setupTags.split(',').map(tag => tag.trim()).filter(tag => tag) : null,
+            confidence: trade.confidence ? parseInt(trade.confidence) : null
           },
           email: 'user@example.com' // This will be replaced by actual user email from dashboard
         })
@@ -115,7 +124,10 @@ export function TradeForm({ onAdd }: TradeFormProps) {
         exitDate: '',
         exitTime: '',
         marketType: trade.marketType, // Keep the same market type
-        notes: ''
+        notes: '',
+        setup: '',
+        setupTags: '',
+        confidence: '3'
       })
     } catch (error) {
       console.error('Error adding trade:', error)
@@ -279,6 +291,53 @@ export function TradeForm({ onAdd }: TradeFormProps) {
             required
           />
         </div>
+      </div>
+
+      {/* Setup and Confidence Row */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Setup/Strategy (Optional)
+          </label>
+          <input
+            placeholder="e.g., Breakout, Mean Reversion, Trend Following"
+            value={trade.setup}
+            onChange={(e) => setTrade({ ...trade, setup: e.target.value })}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Confidence Level
+          </label>
+          <select
+            value={trade.confidence}
+            onChange={(e) => setTrade({ ...trade, confidence: e.target.value })}
+            className="w-full p-2 border rounded"
+          >
+            <option value="1">1 - Very Low</option>
+            <option value="2">2 - Low</option>
+            <option value="3">3 - Medium</option>
+            <option value="4">4 - High</option>
+            <option value="5">5 - Very High</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Setup Tags */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Setup Tags (Optional)
+        </label>
+        <input
+          placeholder="e.g., momentum, reversal, news-driven (comma separated)"
+          value={trade.setupTags}
+          onChange={(e) => setTrade({ ...trade, setupTags: e.target.value })}
+          className="w-full p-2 border rounded"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Add tags to categorize your trades (separate with commas)
+        </p>
       </div>
 
       {/* Notes */}
