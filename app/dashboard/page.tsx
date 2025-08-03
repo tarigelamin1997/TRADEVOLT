@@ -1,23 +1,32 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { SidebarLayout } from '@/components/sidebar-layout'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TradeForm } from '@/components/trade-form'
-import { CSVImport } from '@/components/csv-import'
-import { useUser, UserButton } from '@clerk/nextjs'
-
-// Check if we should use Clerk
-const isClerkConfigured = !!(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
-
-// Hardcoded feature rotation - fight me
-const WEEKLY_FEATURES: Record<number, string[]> = {
-  0: ['add-trades', 'basic-pnl'],
-  1: ['ai-insights', 'csv-export'],
-  2: ['advanced-charts', 'risk-analysis'],
-  3: ['trade-replay', 'position-sizing'],
-  // ... add all 20 weeks
-}
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  DollarSign, 
+  Activity,
+  Plus,
+  Upload,
+  BarChart3,
+  Calendar,
+  Target,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Clock,
+  ArrowUpRight,
+  ArrowDownRight,
+  X
+} from 'lucide-react'
+import { calculateMarketPnL } from '@/lib/market-knowledge'
+import { useSettings } from '@/lib/settings'
+import { formatCurrency } from '@/lib/calculations'
+import { useRouter } from 'next/navigation'
 
 interface Trade {
   id: string
@@ -27,279 +36,416 @@ interface Trade {
   exit?: number | null
   quantity: number
   notes?: string | null
+  marketType?: string | null
   createdAt: string
+  entryTime?: string | null
+  exitTime?: string | null
 }
 
-function DashboardContent({ userId }: { userId: string }) {
+interface DashboardStats {
+  totalTrades: number
+  openTrades: number
+  closedTrades: number
+  totalPnL: number
+  todayPnL: number
+  winRate: number
+  avgWin: number
+  avgLoss: number
+  profitFactor: number
+  currentStreak: { type: 'win' | 'loss' | 'none'; count: number }
+}
+
+export default function DashboardPage() {
+  const router = useRouter()
+  const { settings } = useSettings()
   const [trades, setTrades] = useState<Trade[]>([])
-  const [isPaid, setIsPaid] = useState(false)
-  const [aiInsight, setAiInsight] = useState('')
-  const [showImport, setShowImport] = useState(false)
-  
-  // Get current week's features
-  const weekNumber = Math.floor((Date.now() / 1000 / 60 / 60 / 24 / 7) % 20)
-  const freeFeatures = WEEKLY_FEATURES[weekNumber] || ['add-trades', 'basic-pnl']
-  
-  const hasFeature = (feature: string) => isPaid || freeFeatures.includes(feature)
-  
+  const [stats, setStats] = useState<DashboardStats>({
+    totalTrades: 0,
+    openTrades: 0,
+    closedTrades: 0,
+    totalPnL: 0,
+    todayPnL: 0,
+    winRate: 0,
+    avgWin: 0,
+    avgLoss: 0,
+    profitFactor: 0,
+    currentStreak: { type: 'none', count: 0 }
+  })
+  const [isLoading, setIsLoading] = useState(true)
+  const [showTradeForm, setShowTradeForm] = useState(false)
+
   useEffect(() => {
-    // Load trades
-    fetch('/api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'getTrades' })
-    })
-      .then(res => res.json())
-      .then(data => {
-        setTrades(data.trades || [])
-        setIsPaid(data.isPaid || false)
-      })
-      .catch(err => console.error('Failed to load trades:', err))
+    fetchTrades()
   }, [])
-  
-  const stats = {
-    totalTrades: trades.length,
-    totalPnL: trades.reduce((sum, t) => {
-      if (!t.exit) return sum
-      const pnl = (t.exit - t.entry) * t.quantity * (t.type === 'BUY' ? 1 : -1)
-      return sum + pnl
-    }, 0),
-    winRate: trades.length ? 
-      (trades.filter(t => {
-        if (!t.exit) return false
-        const pnl = (t.exit - t.entry) * (t.type === 'BUY' ? 1 : -1)
-        return pnl > 0
-      }).length / trades.length * 100) : 0
-  }
-  
-  const getAI = async () => {
-    if (!hasFeature('ai-insights')) return
-    
-    const res = await fetch('/api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        action: 'getAI',
-        trades: trades 
+
+  const fetchTrades = async () => {
+    try {
+      const res = await fetch('/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getTrades' })
       })
-    })
-    
-    const data = await res.json()
-    setAiInsight(data.insight)
-  }
-  
-  const exportCSV = () => {
-    if (!hasFeature('csv-export')) return
-    
-    const csv = [
-      ['Date', 'Symbol', 'Type', 'Entry', 'Exit', 'Quantity', 'P&L'],
-      ...trades.map(t => [
-        new Date(t.createdAt).toLocaleDateString(),
-        t.symbol,
-        t.type,
-        t.entry,
-        t.exit || '',
-        t.quantity,
-        t.exit ? (t.exit - t.entry) * t.quantity * (t.type === 'BUY' ? 1 : -1) : ''
-      ])
-    ].map(row => row.join(',')).join('\n')
-    
-    const blob = new Blob([csv], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'trades.csv'
-    a.click()
+      const data = await res.json()
+      const trades = data.trades || []
+      setTrades(trades)
+      calculateStats(trades)
+    } catch (error) {
+      console.error('Failed to fetch trades:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
+  const calculateStats = (trades: Trade[]) => {
+    const today = new Date().toDateString()
+    const todayTrades = trades.filter(t => new Date(t.createdAt).toDateString() === today)
+    
+    const closedTrades = trades.filter(t => t.exit !== null)
+    const openTrades = trades.filter(t => t.exit === null)
+    
+    let totalPnL = 0
+    let todayPnL = 0
+    let wins = 0
+    let losses = 0
+    let totalWin = 0
+    let totalLoss = 0
+    
+    // Calculate P&L and win/loss stats
+    closedTrades.forEach(trade => {
+      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
+      totalPnL += pnl
+      
+      if (new Date(trade.createdAt).toDateString() === today) {
+        todayPnL += pnl
+      }
+      
+      if (pnl > 0) {
+        wins++
+        totalWin += pnl
+      } else if (pnl < 0) {
+        losses++
+        totalLoss += Math.abs(pnl)
+      }
+    })
+    
+    // Calculate streak
+    const sortedClosed = [...closedTrades].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+    
+    let currentStreak = { type: 'none' as 'win' | 'loss' | 'none', count: 0 }
+    if (sortedClosed.length > 0) {
+      const firstPnL = calculateMarketPnL(sortedClosed[0], sortedClosed[0].marketType || null) || 0
+      currentStreak.type = firstPnL >= 0 ? 'win' : 'loss'
+      currentStreak.count = 1
+      
+      for (let i = 1; i < sortedClosed.length; i++) {
+        const pnl = calculateMarketPnL(sortedClosed[i], sortedClosed[i].marketType || null) || 0
+        const isWin = pnl >= 0
+        if ((currentStreak.type === 'win' && isWin) || (currentStreak.type === 'loss' && !isWin)) {
+          currentStreak.count++
+        } else {
+          break
+        }
+      }
+    }
+    
+    setStats({
+      totalTrades: trades.length,
+      openTrades: openTrades.length,
+      closedTrades: closedTrades.length,
+      totalPnL,
+      todayPnL,
+      winRate: closedTrades.length > 0 ? (wins / closedTrades.length) * 100 : 0,
+      avgWin: wins > 0 ? totalWin / wins : 0,
+      avgLoss: losses > 0 ? totalLoss / losses : 0,
+      profitFactor: totalLoss > 0 ? totalWin / totalLoss : totalWin > 0 ? Infinity : 0,
+      currentStreak
+    })
+  }
+
+  const recentTrades = trades.slice(0, 5)
+
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      {/* Header */}
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Your Trading Journal</h1>
-          <p className="text-gray-600">
-            {isPaid ? '✨ Ultra Member' : `Free: ${freeFeatures.join(' & ')} this week`}
-          </p>
-        </div>
-        {isClerkConfigured && <UserButton afterSignOutUrl="/" />}
-      </div>
-      
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card className="p-4">
-          <h3 className="text-sm text-gray-600">Total P&L</h3>
-          <p className={`text-2xl font-bold ${stats.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            ${stats.totalPnL.toFixed(2)}
-          </p>
-        </Card>
-        <Card className="p-4">
-          <h3 className="text-sm text-gray-600">Win Rate</h3>
-          <p className="text-2xl font-bold">{stats.winRate.toFixed(1)}%</p>
-        </Card>
-        <Card className="p-4">
-          <h3 className="text-sm text-gray-600">Total Trades</h3>
-          <p className="text-2xl font-bold">{stats.totalTrades}</p>
-        </Card>
-      </div>
-      
-      {/* Trade Entry */}
-      {hasFeature('add-trades') ? (
-        <Card className="p-4 mb-8">
-          <h2 className="text-xl font-bold mb-4">Add Trade</h2>
-          <TradeForm onAdd={(trade) => setTrades([...trades, trade])} />
-        </Card>
-      ) : (
-        <Card className="p-4 mb-8 text-center text-gray-500">
-          <p>Trade entry not in this week&apos;s features</p>
-        </Card>
-      )}
-      
-      {/* AI Insights */}
-      <Card className="p-4 mb-8">
-        <h2 className="text-xl font-bold mb-4">AI Insights</h2>
-        {hasFeature('ai-insights') ? (
-          <>
-            <Button onClick={getAI} className="mb-4">Get AI Analysis</Button>
-            {aiInsight && (
-              <p className="p-4 bg-gray-100 rounded">{aiInsight}</p>
-            )}
-          </>
-        ) : (
-          <div className="text-center">
-            <p className="text-gray-500 mb-4">
-              AI Insights not available this week
-            </p>
-            <Button asChild>
-              <a href="https://buy.stripe.com/your-link">
-                Upgrade for All Features - $25/mo
-              </a>
-            </Button>
-          </div>
-        )}
-      </Card>
-      
-      {/* Trade List */}
-      <Card className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Recent Trades</h2>
-          <div className="flex gap-2">
+    <SidebarLayout currentPath="/dashboard">
+      <>
+        <header className="flex h-16 items-center gap-4 border-b px-6">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <div className="ml-auto flex items-center gap-2">
             <Button
-              onClick={() => setShowImport(true)}
-              variant="outline"
+              onClick={() => setShowTradeForm(true)}
+              size="sm"
             >
+              <Plus className="h-4 w-4 mr-2" />
+              New Trade
+            </Button>
+            <Button
+              onClick={() => router.push('/history')}
+              variant="outline"
+              size="sm"
+            >
+              <Upload className="h-4 w-4 mr-2" />
               Import CSV
             </Button>
-            <Button
-              onClick={exportCSV}
-              variant="outline"
-              disabled={!hasFeature('csv-export')}
-            >
-              Export CSV
-            </Button>
           </div>
-        </div>
-        
-        <div className="space-y-2">
-          {trades.slice(-10).reverse().map((trade, i) => {
-            const pnl = trade.exit ?
-              (trade.exit - trade.entry) * trade.quantity * (trade.type === 'BUY' ? 1 : -1) :
-              null
-              
-            return (
-              <div key={i} className="flex justify-between p-2 border rounded">
-                <div>
-                  <span className="font-semibold">{trade.symbol}</span>
-                  <span className="ml-2 text-sm text-gray-600">{trade.type}</span>
-                  <span className="ml-2 text-xs text-gray-500">
-                    {new Date(trade.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div>
-                  {pnl !== null && (
-                    <span className={pnl >= 0 ? 'text-green-600' : 'text-red-600'}>
-                      ${pnl.toFixed(2)}
-                    </span>
+        </header>
+
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-6">
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total P&L</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${stats.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(stats.totalPnL, settings)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    From {stats.closedTrades} closed trades
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Today's P&L</CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${stats.todayPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(stats.todayPnL, settings)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.todayPnL >= 0 ? (
+                      <span className="flex items-center text-green-600">
+                        <TrendingUp className="h-3 w-3 mr-1" />
+                        Profitable day
+                      </span>
+                    ) : stats.todayPnL < 0 ? (
+                      <span className="flex items-center text-red-600">
+                        <TrendingDown className="h-3 w-3 mr-1" />
+                        Loss day
+                      </span>
+                    ) : (
+                      'No trades today'
+                    )}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Win Rate</CardTitle>
+                  <Target className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.winRate.toFixed(1)}%</div>
+                  <p className="text-xs text-muted-foreground">
+                    Profit Factor: {stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
+                  {stats.currentStreak.type === 'win' ? (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  ) : stats.currentStreak.type === 'loss' ? (
+                    <XCircle className="h-4 w-4 text-red-600" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-muted-foreground" />
                   )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </Card>
-      
-      {/* Upgrade CTA */}
-      {!isPaid && (
-        <Card className="p-8 mt-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Unlock Everything</h2>
-          <p className="mb-6 text-gray-600">
-            Get all 20 features instantly. Stop waiting for weekly rotations.
-          </p>
-          <Button asChild size="lg">
-            <a href="https://buy.stripe.com/your-link">
-              Upgrade Now - $25/mo
-            </a>
-          </Button>
-        </Card>
-      )}
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {stats.currentStreak.count > 0 ? (
+                      <span className={stats.currentStreak.type === 'win' ? 'text-green-600' : 'text-red-600'}>
+                        {stats.currentStreak.count} {stats.currentStreak.type}s
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.openTrades} open positions
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
 
-      {/* Import Modal */}
-      {showImport && (
-        <CSVImport
-          onImport={(importedTrades) => {
-            // Reload trades after import
-            fetch('/api', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'getTrades' })
-            })
-              .then(res => res.json())
-              .then(data => {
-                setTrades(data.trades || [])
-              })
-          }}
-          onClose={() => setShowImport(false)}
-        />
-      )}
-    </div>
-  )
-}
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Recent Trades */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Recent Trades</CardTitle>
+                  <CardDescription>Your last 5 trades</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {recentTrades.length > 0 ? (
+                      recentTrades.map(trade => {
+                        const pnl = calculateMarketPnL(trade, trade.marketType || null)
+                        return (
+                          <div key={trade.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-full ${trade.type === 'BUY' ? 'bg-green-100' : 'bg-red-100'}`}>
+                                {trade.type === 'BUY' ? (
+                                  <ArrowUpRight className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <ArrowDownRight className="h-4 w-4 text-red-600" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-medium">{trade.symbol}</p>
+                                <p className="text-sm text-gray-500">
+                                  {new Date(trade.createdAt).toLocaleDateString()} • 
+                                  {trade.exit ? ' Closed' : ' Open'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              {pnl !== null ? (
+                                <p className={`font-medium ${pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {formatCurrency(pnl, settings)}
+                                </p>
+                              ) : (
+                                <p className="text-gray-500">Open</p>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })
+                    ) : (
+                      <p className="text-center text-gray-500 py-4">No trades yet</p>
+                    )}
+                  </div>
+                  <Button
+                    onClick={() => router.push('/history')}
+                    variant="outline"
+                    className="w-full mt-4"
+                  >
+                    View All Trades
+                  </Button>
+                </CardContent>
+              </Card>
 
-function DemoMode() {
-  return <DashboardContent userId="demo-user" />
-}
+              {/* Quick Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performance Summary</CardTitle>
+                  <CardDescription>Key metrics at a glance</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">Average Win</span>
+                    <span className="font-medium text-green-600">
+                      {formatCurrency(stats.avgWin, settings)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">Average Loss</span>
+                    <span className="font-medium text-red-600">
+                      {formatCurrency(stats.avgLoss, settings)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">Total Trades</span>
+                    <span className="font-medium">{stats.totalTrades}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">Open Positions</span>
+                    <span className="font-medium">{stats.openTrades}</span>
+                  </div>
+                  
+                  <div className="pt-4 border-t space-y-2">
+                    <Button
+                      onClick={() => router.push('/analytics')}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      View Analytics
+                    </Button>
+                    <Button
+                      onClick={() => router.push('/journal')}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Trade Journal
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-function AuthenticatedDashboard() {
-  const { user, isLoaded } = useUser()
-  
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    )
-  }
-  
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Please sign in to continue</p>
-      </div>
-    )
-  }
-  
-  return <DashboardContent userId={user.id} />
-}
+            {/* Trading Goals Progress */}
+            {settings.goals.monthlyProfitTarget > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Monthly Goal Progress</CardTitle>
+                  <CardDescription>
+                    Target: {formatCurrency(settings.goals.monthlyProfitTarget, settings)}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Current Progress</span>
+                      <span className="font-medium">
+                        {formatCurrency(stats.totalPnL, settings)} / {formatCurrency(settings.goals.monthlyProfitTarget, settings)}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full"
+                        style={{
+                          width: `${Math.min(100, (stats.totalPnL / settings.goals.monthlyProfitTarget) * 100)}%`
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {((stats.totalPnL / settings.goals.monthlyProfitTarget) * 100).toFixed(1)}% of monthly target
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </main>
 
-export default function Dashboard() {
-  // Redirect to history page which has the full interface
-  if (typeof window !== 'undefined') {
-    window.location.href = '/history'
-  }
-  
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p>Redirecting to Trade History...</p>
-    </div>
+        {/* Trade Form Modal */}
+        {showTradeForm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-2xl mx-4">
+              <CardHeader>
+                <CardTitle>Add New Trade</CardTitle>
+                <Button
+                  onClick={() => setShowTradeForm(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-4 right-4"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <TradeForm
+                  onTradeAdded={() => {
+                    setShowTradeForm(false)
+                    fetchTrades()
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </>
+    </SidebarLayout>
   )
 }
