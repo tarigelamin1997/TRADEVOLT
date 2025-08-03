@@ -10,7 +10,7 @@ interface User {
   createdAt: string
 }
 
-interface Trade {
+export interface Trade {
   id: string
   userId: string
   symbol: string
@@ -164,8 +164,21 @@ memoryDB.trades.set(demoUserId, demoTrades)
 // Find all trades across all users
 export async function findAllTrades(): Promise<Trade[]> {
   const allTrades: Trade[] = []
-  for (const trades of memoryDB.trades.values()) {
+  const tradeArrays = Array.from(memoryDB.trades.values())
+  for (const trades of tradeArrays) {
     allTrades.push(...trades)
   }
   return allTrades
+}
+
+// Update a trade
+export async function updateTrade(tradeId: string, updates: Partial<Trade>): Promise<Trade | null> {
+  for (const [userId, trades] of Array.from(memoryDB.trades.entries())) {
+    const tradeIndex = trades.findIndex(t => t.id === tradeId)
+    if (tradeIndex !== -1) {
+      trades[tradeIndex] = { ...trades[tradeIndex], ...updates }
+      return trades[tradeIndex]
+    }
+  }
+  return null
 }
