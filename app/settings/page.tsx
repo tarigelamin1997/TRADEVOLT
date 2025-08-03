@@ -2,17 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { SidebarLayout } from '@/components/sidebar-layout'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -20,44 +10,19 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { 
-  User,
-  ChevronsUpDown,
-  Home,
-  History,
-  Plus,
-  BarChart3,
-  Settings,
-  Calendar,
-  TrendingUp,
-  DollarSign,
-  PieChart,
-  FileText,
   Palette,
-  Globe,
   Database,
   Bell,
   Target,
   Save,
   RotateCcw,
   CreditCard,
-  Check
+  Check,
+  DollarSign
 } from "lucide-react"
 import { useSettings, DEFAULT_SETTINGS, type UserSettings } from '@/lib/settings'
 import { MARKET_TYPES } from '@/lib/market-knowledge'
 import { useTheme } from '@/lib/theme-provider'
-
-// Menu items (same as other pages)
-const mainMenuItems = [
-  { icon: Home, label: 'Dashboard', href: '/dashboard' },
-  { icon: History, label: 'Trade History', href: '/history' },
-  { icon: BarChart3, label: 'Analytics', href: '/analytics' },
-  { icon: TrendingUp, label: 'Performance Metrics', href: '/metrics' },
-  { icon: Calendar, label: 'Calendar', href: '/calendar' },
-  { icon: PieChart, label: 'Market Analysis', href: '/analysis' },
-  { icon: DollarSign, label: 'P&L Report', href: '/pnl' },
-  { icon: FileText, label: 'Trade Journal', href: '/journal' },
-  { icon: Settings, label: 'Settings', href: '/settings' }
-]
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -116,56 +81,11 @@ export default function SettingsPage() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full">
-        <Sidebar>
-          <SidebarHeader>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton size="lg">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-                    <BarChart3 className="size-4" />
-                  </div>
-                  <span className="font-semibold">Trading Journal</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarMenu>
-              {mainMenuItems.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton 
-                    onClick={() => router.push(item.href)}
-                    className={item.href === '/settings' ? 'bg-gray-100' : ''}
-                  >
-                    <item.icon className="mr-2 h-4 w-4" />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <User />
-                  <span>user@example.com</span>
-                  <ChevronsUpDown className="ml-auto" />
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
-        </Sidebar>
-
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="flex items-center justify-between border-b px-6 py-4">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <h1 className="text-xl font-semibold">Settings</h1>
-            </div>
-            <div className="flex items-center gap-2">
+    <SidebarLayout currentPath="/settings">
+      <>
+        <header className="flex items-center justify-between border-b px-6 py-4">
+          <h1 className="text-xl font-semibold">Settings</h1>
+          <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -788,8 +708,7 @@ export default function SettingsPage() {
               </Button>
             )}
           </div>
-        </div>
-      </div>
-    </SidebarProvider>
+      </>
+    </SidebarLayout>
   )
 }
