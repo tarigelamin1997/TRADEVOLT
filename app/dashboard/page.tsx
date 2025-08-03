@@ -436,7 +436,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <TradeForm
-                  onTradeAdded={() => {
+                  onAdd={() => {
                     setShowTradeForm(false)
                     fetchTrades()
                   }}
