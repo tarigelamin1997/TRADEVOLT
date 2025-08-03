@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Bar } from 'react-chartjs-2'
+import { Chart } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
   Legend,
@@ -26,6 +28,8 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
   Legend
@@ -233,7 +237,7 @@ export function HoldTimeDistribution({ trades }: HoldTimeDistributionProps) {
             transition={{ delay: 0.5 }}
             className="h-[300px]"
           >
-            <Bar data={chartData} options={options} />
+            <Chart type='bar' data={chartData} options={options} />
           </motion.div>
           
           {/* Distribution Details */}
