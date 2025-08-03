@@ -27,6 +27,13 @@ interface Trade {
   createdAt: string
   entryTime?: string | null
   exitTime?: string | null
+  // Excursion metrics
+  mae?: number | null
+  mfe?: number | null
+  edgeRatio?: number | null
+  updrawPercent?: number | null
+  takeProfitPrice?: number | null
+  stopLossPrice?: number | null
 }
 
 interface Database {

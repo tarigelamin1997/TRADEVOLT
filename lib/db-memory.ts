@@ -23,6 +23,13 @@ interface Trade {
   createdAt: string
   entryTime?: string | null
   exitTime?: string | null
+  // Excursion metrics
+  mae?: number | null
+  mfe?: number | null
+  edgeRatio?: number | null
+  updrawPercent?: number | null
+  takeProfitPrice?: number | null
+  stopLossPrice?: number | null
 }
 
 // In-memory storage
@@ -153,3 +160,12 @@ const demoTrades: Trade[] = [
   }
 ]
 memoryDB.trades.set(demoUserId, demoTrades)
+
+// Find all trades across all users
+export async function findAllTrades(): Promise<Trade[]> {
+  const allTrades: Trade[] = []
+  for (const trades of memoryDB.trades.values()) {
+    allTrades.push(...trades)
+  }
+  return allTrades
+}

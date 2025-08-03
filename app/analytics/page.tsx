@@ -43,6 +43,8 @@ import * as metrics from '@/lib/tradingMetrics'
 import { useSubscription } from '@/lib/subscription'
 import { generateAnalyticsExport, exportToJSON, exportToCSV } from '@/lib/exportAnalytics'
 import { EquityCurveChart, WinRateChart, ProfitDistributionChart } from '@/components/Charts'
+import { ExcursionStats } from '@/components/features/excursion-stats'
+import { useAuthUser } from '@/lib/auth-wrapper'
 
 // Menu items (same as history page)
 const mainMenuItems = [
@@ -81,6 +83,7 @@ interface Trade {
 
 export default function AnalyticsPage() {
   const router = useRouter()
+  const { user } = useAuthUser()
   const [trades, setTrades] = useState<Trade[]>([])
   const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month' | 'year' | 'all'>('all')
   const [isLoading, setIsLoading] = useState(true)
@@ -406,10 +409,11 @@ export default function AnalyticsPage() {
                 
                 {/* Metrics Tabs */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="risk">Risk Management</TabsTrigger>
                     <TabsTrigger value="advanced">Advanced</TabsTrigger>
+                    <TabsTrigger value="excursion">Excursion</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="overview" className="space-y-4">
@@ -467,6 +471,10 @@ export default function AnalyticsPage() {
                         )
                       })}
                     </MetricGrid>
+                  </TabsContent>
+                  
+                  <TabsContent value="excursion" className="space-y-4">
+                    <ExcursionStats userId={user.id} />
                   </TabsContent>
                 </Tabs>
 

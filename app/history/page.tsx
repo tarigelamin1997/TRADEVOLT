@@ -26,6 +26,11 @@ interface Trade {
   createdAt: string
   entryTime?: string | null
   exitTime?: string | null
+  // Excursion metrics
+  mae?: number | null
+  mfe?: number | null
+  edgeRatio?: number | null
+  updrawPercent?: number | null
 }
 
 // Check if Clerk is configured
@@ -137,7 +142,7 @@ function TradeHistoryContent({ user }: { user: any }) {
   }
 
   const exportToCSV = () => {
-    const headers = ['Entry Time', 'Exit Time', 'Symbol', 'Type', 'Entry Price', 'Exit Price', 'Quantity', 'Market', 'Result', 'P&L', 'Notes']
+    const headers = ['Entry Time', 'Exit Time', 'Symbol', 'Type', 'Entry Price', 'Exit Price', 'Quantity', 'Market', 'Result', 'P&L', 'MAE %', 'MFE %', 'Edge Ratio', 'Notes']
     const rows = filteredTrades.map(trade => {
       const pnl = calculateMarketPnL(trade, trade.marketType || null)
       const result = pnl !== null ? (pnl >= 0 ? 'WIN' : 'LOSS') : ''
@@ -152,6 +157,9 @@ function TradeHistoryContent({ user }: { user: any }) {
         trade.marketType || '',
         result,
         pnl ? pnl.toFixed(2) : '',
+        trade.mae !== null && trade.mae !== undefined ? trade.mae.toFixed(2) : '',
+        trade.mfe !== null && trade.mfe !== undefined ? trade.mfe.toFixed(2) : '',
+        trade.edgeRatio !== null && trade.edgeRatio !== undefined ? trade.edgeRatio.toFixed(2) : '',
         trade.notes || ''
       ]
     })
@@ -347,6 +355,15 @@ function TradeHistoryContent({ user }: { user: any }) {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             P&L
                           </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            MAE
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            MFE
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Edge
+                          </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Notes
                           </th>
@@ -411,6 +428,33 @@ function TradeHistoryContent({ user }: { user: any }) {
                                   </span>
                                 ) : (
                                   '-'
+                                )}
+                              </td>
+                              <td className={`text-center ${cellClass}`}>
+                                {trade.mae !== null && trade.mae !== undefined ? (
+                                  <span className="text-red-600 font-medium">
+                                    -{trade.mae.toFixed(1)}%
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </td>
+                              <td className={`text-center ${cellClass}`}>
+                                {trade.mfe !== null && trade.mfe !== undefined ? (
+                                  <span className="text-green-600 font-medium">
+                                    +{trade.mfe.toFixed(1)}%
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </td>
+                              <td className={`text-center ${cellClass}`}>
+                                {trade.edgeRatio !== null && trade.edgeRatio !== undefined ? (
+                                  <span className={trade.edgeRatio >= 2 ? 'text-green-600 font-medium' : 'text-amber-600'}>
+                                    {trade.edgeRatio.toFixed(1)}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
                                 )}
                               </td>
                               <td className={`text-gray-500 max-w-xs truncate ${cellClass}`}>

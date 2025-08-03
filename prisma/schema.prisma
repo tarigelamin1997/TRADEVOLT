@@ -17,18 +17,60 @@ model User {
 }
 
 model Trade {
-  id         String    @id @default(cuid())
-  userId     String
-  symbol     String
-  type       String    // "BUY" or "SELL"
-  entry      Float
-  exit       Float?
-  quantity   Float
-  notes      String?
-  marketType String?   // "FUTURES", "OPTIONS", "FOREX", "CRYPTO", "STOCKS"
-  entryTime  DateTime?
-  exitTime   DateTime?
-  createdAt  DateTime  @default(now())
+  id              String    @id @default(cuid())
+  userId          String
+  symbol          String
+  type            String    // "BUY" or "SELL"
+  entry           Float
+  exit            Float?
+  quantity        Float
+  notes           String?
+  marketType      String?   // "FUTURES", "OPTIONS", "FOREX", "CRYPTO", "STOCKS"
+  entryTime       DateTime?
+  exitTime        DateTime?
   
-  user       User      @relation(fields: [userId], references: [id])
+  // Excursion Metrics
+  mae             Float?    // Maximum Adverse Excursion (%)
+  mfe             Float?    // Maximum Favorable Excursion (%)
+  edgeRatio       Float?    // MFE/MAE ratio
+  updrawPercent   Float?    // How close to take profit (%)
+  takeProfitPrice Float?    // Target price for take profit
+  stopLossPrice   Float?    // Stop loss price
+  
+  createdAt       DateTime  @default(now())
+  
+  user            User              @relation(fields: [userId], references: [id])
+  priceData       TradePriceData[]
+  excursions      TradeExcursion[]
+  
+  @@index([userId, createdAt])
+  @@index([userId, symbol])
+}
+
+model TradePriceData {
+  id        String   @id @default(cuid())
+  tradeId   String
+  timestamp DateTime
+  price     Float
+  volume    Float?
+  createdAt DateTime @default(now())
+  
+  trade     Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  
+  @@index([tradeId, timestamp])
+}
+
+model TradeExcursion {
+  id                 String   @id @default(cuid())
+  tradeId            String
+  timestamp          DateTime
+  price              Float
+  runningPnl         Float
+  runningPnlPercent  Float
+  maeAtTime          Float
+  mfeAtTime          Float
+  
+  trade              Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  
+  @@index([tradeId, timestamp])
 }
