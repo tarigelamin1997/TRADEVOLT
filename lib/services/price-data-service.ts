@@ -1,4 +1,4 @@
-import type { Trade } from '@prisma/client'
+import type { Trade } from '@/lib/db-memory'
 import type { PriceData, PriceDataProvider } from '@/lib/types/excursion'
 import { ExcursionCalculator } from './excursion-calculator'
 
@@ -89,12 +89,13 @@ export class PriceDataService {
     }
     
     const interval = ExcursionCalculator.determineInterval(trade)
-    const endTime = trade.exitTime || new Date()
+    const entryTime = new Date(trade.entryTime)
+    const endTime = trade.exitTime ? new Date(trade.exitTime) : new Date()
     
     try {
       const priceData = await provider.fetchHistoricalData(
         trade.symbol,
-        trade.entryTime,
+        entryTime,
         endTime,
         interval
       )

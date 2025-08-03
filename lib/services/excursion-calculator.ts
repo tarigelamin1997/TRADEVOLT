@@ -1,4 +1,4 @@
-import { Trade } from '@prisma/client'
+import type { Trade } from '@/lib/db-memory'
 import type { PriceData, RunningPnL, ExcursionMetrics } from '@/lib/types/excursion'
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 
@@ -194,8 +194,9 @@ export class ExcursionCalculator {
    */
   static getTradeDuration(trade: Trade): number {
     if (!trade.entryTime) return 0
-    const exitTime = trade.exitTime || new Date()
-    return Math.floor((exitTime.getTime() - trade.entryTime.getTime()) / (1000 * 60))
+    const entryTime = new Date(trade.entryTime)
+    const exitTime = trade.exitTime ? new Date(trade.exitTime) : new Date()
+    return Math.floor((exitTime.getTime() - entryTime.getTime()) / (1000 * 60))
   }
   
   /**
