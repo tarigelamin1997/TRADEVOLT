@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BehavioralAnalysisService, type BehavioralMetrics } from '@/lib/services/behavioral-analysis-service'
 import { Brain, TrendingUp, AlertTriangle, ChevronRight } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import type { Trade } from '@/lib/db-memory'
 
@@ -15,7 +15,6 @@ interface BehavioralSummaryCardProps {
 }
 
 export function BehavioralSummaryCard({ trades }: BehavioralSummaryCardProps) {
-  const router = useRouter()
   const [metrics, setMetrics] = useState<BehavioralMetrics | null>(null)
 
   useEffect(() => {
@@ -56,15 +55,16 @@ export function BehavioralSummaryCard({ trades }: BehavioralSummaryCardProps) {
               <Brain className="h-5 w-5 text-purple-600" />
               Behavioral Analysis
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/behavioral')}
-              className="text-xs"
-            >
-              View Details
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
+            <Link href="/behavioral">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                View Details
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </Link>
           </CardTitle>
         </CardHeader>
         
