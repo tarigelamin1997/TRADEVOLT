@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 import { AlertCircle, TrendingUp, Zap, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

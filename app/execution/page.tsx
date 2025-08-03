@@ -45,6 +45,7 @@ export default function ExecutionAnalysisPage() {
 
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timePeriod, selectedMarket])
 
   const fetchData = async () => {
