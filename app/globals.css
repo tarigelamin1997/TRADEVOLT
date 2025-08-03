@@ -66,3 +66,77 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Additional dark mode specific styles */
+.dark {
+  color-scheme: dark;
+}
+
+/* Fix for inputs and selects in dark mode */
+.dark input,
+.dark select,
+.dark textarea {
+  @apply bg-gray-800 border-gray-600 text-gray-100;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  @apply border-blue-500 ring-blue-500;
+}
+
+/* Card styles for dark mode */
+.dark .bg-gray-50 {
+  @apply bg-gray-800;
+}
+
+.dark .bg-gray-100 {
+  @apply bg-gray-700;
+}
+
+.dark .text-gray-600 {
+  @apply text-gray-400;
+}
+
+.dark .text-gray-500 {
+  @apply text-gray-400;
+}
+
+.dark .border-gray-200 {
+  @apply border-gray-700;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  @apply hover:bg-gray-800;
+}
+
+/* Table styles for dark mode */
+.dark table {
+  @apply bg-gray-900;
+}
+
+.dark thead {
+  @apply bg-gray-800;
+}
+
+.dark tbody tr:hover {
+  @apply bg-gray-800;
+}
+
+/* Button styles for dark mode */
+.dark .bg-blue-600 {
+  @apply bg-blue-500;
+}
+
+.dark .hover\:bg-blue-700:hover {
+  @apply hover:bg-blue-600;
+}

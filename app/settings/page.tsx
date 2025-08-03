@@ -38,10 +38,13 @@ import {
   Bell,
   Target,
   Save,
-  RotateCcw
+  RotateCcw,
+  CreditCard,
+  Check
 } from "lucide-react"
 import { useSettings, DEFAULT_SETTINGS, type UserSettings } from '@/lib/settings'
 import { MARKET_TYPES } from '@/lib/market-knowledge'
+import { useTheme } from '@/lib/theme-provider'
 
 // Menu items (same as other pages)
 const mainMenuItems = [
@@ -59,6 +62,7 @@ const mainMenuItems = [
 export default function SettingsPage() {
   const router = useRouter()
   const { settings, updateSettings } = useSettings()
+  const { setTheme } = useTheme()
   const [localSettings, setLocalSettings] = useState<UserSettings>(settings)
   const [hasChanges, setHasChanges] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
@@ -97,6 +101,8 @@ export default function SettingsPage() {
   const handleSave = () => {
     setSaveStatus('saving')
     updateSettings(localSettings)
+    // Apply theme change immediately
+    setTheme(localSettings.display.theme)
     setTimeout(() => {
       setSaveStatus('saved')
       setHasChanges(false)
@@ -184,7 +190,7 @@ export default function SettingsPage() {
           <main className="flex-1 overflow-y-auto">
             <div className="p-6 max-w-4xl mx-auto">
               <Tabs defaultValue="trading" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-5">
+                <TabsList className="grid w-full grid-cols-6">
                   <TabsTrigger value="trading">
                     <DollarSign className="h-4 w-4 mr-2" />
                     Trading
@@ -204,6 +210,10 @@ export default function SettingsPage() {
                   <TabsTrigger value="goals">
                     <Target className="h-4 w-4 mr-2" />
                     Goals
+                  </TabsTrigger>
+                  <TabsTrigger value="subscription">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Subscription
                   </TabsTrigger>
                 </TabsList>
 
@@ -331,19 +341,54 @@ export default function SettingsPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
+                      <div className="space-y-4">
+                        <div>
                           <Label>Theme</Label>
-                          <select
-                            value={localSettings.display.theme}
-                            onChange={(e) => handleChange('display', 'theme', e.target.value)}
-                            className="w-full p-2 border rounded"
-                          >
-                            <option value="light">Light</option>
-                            <option value="dark">Dark</option>
-                            <option value="system">System</option>
-                          </select>
+                          <div className="grid grid-cols-3 gap-3 mt-2">
+                            <button
+                              onClick={() => handleChange('display', 'theme', 'light')}
+                              className={`p-4 border-2 rounded-lg transition-all ${
+                                localSettings.display.theme === 'light' 
+                                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                                  : 'border-gray-200 dark:border-gray-700'
+                              }`}
+                            >
+                              <div className="space-y-2">
+                                <div className="w-full h-8 bg-white rounded border border-gray-200"></div>
+                                <div className="text-sm font-medium">Light</div>
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => handleChange('display', 'theme', 'dark')}
+                              className={`p-4 border-2 rounded-lg transition-all ${
+                                localSettings.display.theme === 'dark' 
+                                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                                  : 'border-gray-200 dark:border-gray-700'
+                              }`}
+                            >
+                              <div className="space-y-2">
+                                <div className="w-full h-8 bg-gray-900 rounded border border-gray-700"></div>
+                                <div className="text-sm font-medium">Dark</div>
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => handleChange('display', 'theme', 'system')}
+                              className={`p-4 border-2 rounded-lg transition-all ${
+                                localSettings.display.theme === 'system' 
+                                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                                  : 'border-gray-200 dark:border-gray-700'
+                              }`}
+                            >
+                              <div className="space-y-2">
+                                <div className="w-full h-8 bg-gradient-to-r from-white to-gray-900 rounded border border-gray-400"></div>
+                                <div className="text-sm font-medium">System</div>
+                              </div>
+                            </button>
+                          </div>
                         </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Timezone</Label>
                           <select
@@ -632,9 +677,117 @@ export default function SettingsPage() {
                     </CardContent>
                   </Card>
                 </TabsContent>
+
+                <TabsContent value="subscription" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Manage Your Subscription</CardTitle>
+                      <CardDescription>
+                        View and manage your Trading Journal Pro subscription
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="border rounded-lg p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-lg font-semibold">Current Plan</h3>
+                            <p className="text-gray-600">Free Plan</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold">$0</p>
+                            <p className="text-sm text-gray-500">per month</p>
+                          </div>
+                        </div>
+                        
+                        <div className="border-t pt-4">
+                          <h4 className="font-medium mb-2">Free Plan Features:</h4>
+                          <ul className="space-y-2 text-sm">
+                            <li className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                              <span>Track unlimited trades</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                              <span>Basic P&L tracking</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                              <span>Essential metrics (7 metrics)</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                              <span>CSV import/export</span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="border rounded-lg p-6 space-y-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-lg font-semibold">Pro Plan</h3>
+                            <p className="text-gray-600">Everything in Free, plus:</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold">$15</p>
+                            <p className="text-sm text-gray-500">per month</p>
+                          </div>
+                        </div>
+                        
+                        <div className="border-t border-blue-200 dark:border-blue-800 pt-4">
+                          <ul className="space-y-2 text-sm">
+                            <li className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-blue-600 mt-0.5" />
+                              <span>All 16 professional metrics</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-blue-600 mt-0.5" />
+                              <span>Risk management metrics</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-blue-600 mt-0.5" />
+                              <span>Advanced risk-adjusted metrics</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-blue-600 mt-0.5" />
+                              <span>Priority support</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-blue-600 mt-0.5" />
+                              <span>Advanced charts & visualizations</span>
+                            </li>
+                          </ul>
+                        </div>
+                        
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => router.push('/subscribe')}>
+                          Upgrade to Pro
+                        </Button>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <h4 className="font-medium mb-2">Billing Information</h4>
+                        <p className="text-sm text-gray-600">No payment method on file</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
               </Tabs>
             </div>
           </main>
+          
+          {/* Apply Changes Button */}
+          <div className="fixed bottom-6 right-6 z-50">
+            {hasChanges && (
+              <Button
+                size="lg"
+                onClick={handleSave}
+                className="shadow-lg"
+              >
+                <Check className="h-5 w-5 mr-2" />
+                Apply Changes
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </SidebarProvider>
