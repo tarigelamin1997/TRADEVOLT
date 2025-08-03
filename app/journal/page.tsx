@@ -11,6 +11,7 @@ import {
   X,
   Plus,
   Star,
+  RotateCcw,
 } from "lucide-react"
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 
@@ -32,10 +33,7 @@ interface Trade {
 interface JournalEntry {
   tradeId: string
   trade: Trade
-  reflection: string
-  lessons: string
-  emotions: string
-  improvements: string
+  notes: string
   rating: number
 }
 
@@ -79,10 +77,7 @@ export default function TradeJournalPage() {
     const newEntry: JournalEntry = {
       tradeId,
       trade,
-      reflection: entry.reflection || journalEntries[tradeId]?.reflection || '',
-      lessons: entry.lessons || journalEntries[tradeId]?.lessons || '',
-      emotions: entry.emotions || journalEntries[tradeId]?.emotions || '',
-      improvements: entry.improvements || journalEntries[tradeId]?.improvements || '',
+      notes: entry.notes || journalEntries[tradeId]?.notes || '',
       rating: entry.rating || journalEntries[tradeId]?.rating || 3,
     }
 
@@ -105,56 +100,53 @@ export default function TradeJournalPage() {
 
   const JournalForm = ({ trade }: { trade: Trade }) => {
     const existing = journalEntries[trade.id]
+    
+    // Create a template for new entries
+    const getInitialContent = () => {
+      if (existing?.notes) return existing.notes
+      
+      return `<h2>Trade Reflection</h2>
+<p>What was your reasoning for this trade? What happened?</p>
+<p><br></p>
+
+<h2>Lessons Learned</h2>
+<p>What did you learn from this trade? What patterns did you notice?</p>
+<p><br></p>
+
+<h2>Emotional State</h2>
+<p>How were you feeling? (confident, anxious, greedy, fearful, etc.)</p>
+<p><br></p>
+
+<h2>Areas for Improvement</h2>
+<p>What could you have done better? What would you do differently?</p>
+<p><br></p>`
+    }
+    
     const [form, setForm] = useState({
-      reflection: existing?.reflection || '',
-      lessons: existing?.lessons || '',
-      emotions: existing?.emotions || '',
-      improvements: existing?.improvements || '',
+      notes: getInitialContent(),
       rating: existing?.rating || 3,
     })
 
     return (
       <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
         <div>
-          <label className="block text-sm font-medium mb-2">Trade Reflection</label>
+          <div className="flex items-center justify-between mb-4">
+            <label className="block text-lg font-medium">Trade Journal Entry</label>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setForm({ ...form, notes: getInitialContent() })}
+              className="text-xs"
+            >
+              <RotateCcw className="h-3 w-3 mr-1" />
+              Reset Template
+            </Button>
+          </div>
           <RichTextEditor
-            content={form.reflection}
-            onChange={(content) => setForm({ ...form, reflection: content })}
-            placeholder="What was your reasoning for this trade? What happened? Add images, charts, or any relevant content..."
-            minHeight="250px"
-            className="bg-white dark:bg-gray-900"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Lessons Learned</label>
-          <RichTextEditor
-            content={form.lessons}
-            onChange={(content) => setForm({ ...form, lessons: content })}
-            placeholder="What did you learn from this trade? What patterns did you notice?"
-            minHeight="200px"
-            className="bg-white dark:bg-gray-900"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Emotional State</label>
-          <RichTextEditor
-            content={form.emotions}
-            onChange={(content) => setForm({ ...form, emotions: content })}
-            placeholder="How were you feeling? (confident, anxious, greedy, fearful, etc.) What influenced your emotions?"
-            minHeight="150px"
-            className="bg-white dark:bg-gray-900"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Areas for Improvement</label>
-          <RichTextEditor
-            content={form.improvements}
-            onChange={(content) => setForm({ ...form, improvements: content })}
-            placeholder="What could you have done better? What would you do differently next time?"
-            minHeight="150px"
+            content={form.notes}
+            onChange={(content) => setForm({ ...form, notes: content })}
+            placeholder="Document your trade journey, thoughts, emotions, and lessons learned..."
+            minHeight="500px"
             className="bg-white dark:bg-gray-900"
           />
         </div>
@@ -335,60 +327,25 @@ export default function TradeJournalPage() {
                           {hasJournal && !isEditing && (
                             <div className="space-y-3 pt-4 border-t">
                               <div>
-                                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reflection</h4>
+                                <div className="flex items-center justify-between mb-3">
+                                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Journal Entry</h4>
+                                  <div className="flex gap-1">
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                      <Star
+                                        key={star}
+                                        className={`h-4 w-4 ${
+                                          star <= journalEntries[trade.id].rating
+                                            ? 'text-yellow-500 fill-current'
+                                            : 'text-gray-300'
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
                                 <div 
                                   className="prose prose-sm max-w-none dark:prose-invert"
-                                  dangerouslySetInnerHTML={{ __html: journalEntries[trade.id].reflection }}
+                                  dangerouslySetInnerHTML={{ __html: journalEntries[trade.id].notes }}
                                 />
-                              </div>
-                              {journalEntries[trade.id].lessons && (
-                                <div>
-                                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Lessons Learned</h4>
-                                  <div 
-                                    className="prose prose-sm max-w-none dark:prose-invert"
-                                    dangerouslySetInnerHTML={{ __html: journalEntries[trade.id].lessons }}
-                                  />
-                                </div>
-                              )}
-                              {journalEntries[trade.id].emotions && (
-                                <div>
-                                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Emotional State</h4>
-                                  <div 
-                                    className="prose prose-sm max-w-none dark:prose-invert"
-                                    dangerouslySetInnerHTML={{ __html: journalEntries[trade.id].emotions }}
-                                  />
-                                </div>
-                              )}
-                              {journalEntries[trade.id].improvements && (
-                                <div>
-                                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Areas for Improvement</h4>
-                                  <div 
-                                    className="prose prose-sm max-w-none dark:prose-invert"
-                                    dangerouslySetInnerHTML={{ __html: journalEntries[trade.id].improvements }}
-                                  />
-                                </div>
-                              )}
-                              <div>
-                                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Trade Rating</h4>
-                                <div className="flex gap-1">
-                                  {[1, 2, 3, 4, 5].map(star => (
-                                    <Star
-                                      key={star}
-                                      className={`h-5 w-5 ${
-                                        star <= journalEntries[trade.id].rating
-                                          ? 'text-yellow-500 fill-current'
-                                          : 'text-gray-300'
-                                      }`}
-                                    />
-                                  ))}
-                                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {journalEntries[trade.id].rating === 1 && 'Poor Trade'}
-                                    {journalEntries[trade.id].rating === 2 && 'Below Average'}
-                                    {journalEntries[trade.id].rating === 3 && 'Average Trade'}
-                                    {journalEntries[trade.id].rating === 4 && 'Good Trade'}
-                                    {journalEntries[trade.id].rating === 5 && 'Excellent Trade'}
-                                  </span>
-                                </div>
                               </div>
                             </div>
                           )}
