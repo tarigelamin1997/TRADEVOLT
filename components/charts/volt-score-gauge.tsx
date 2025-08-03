@@ -54,7 +54,7 @@ export function VoltScoreGauge({ score, components }: VoltScoreGaugeProps) {
                 <Info className="h-4 w-4 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p>The Volt Score™ measures your trading "voltage" (0-100) by combining win rate, profit factor, risk/reward, consistency, recovery, and discipline metrics. Higher voltage = better performance!</p>
+                <p>The Volt Score™ measures your trading &quot;voltage&quot; (0-100) by combining win rate, profit factor, risk/reward, consistency, recovery, and discipline metrics. Higher voltage = better performance!</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
