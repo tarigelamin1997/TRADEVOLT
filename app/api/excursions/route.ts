@@ -1,22 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs'
 import { ExcursionBatchService } from '@/lib/services/excursion-batch-service'
-import { prisma } from '@/lib/db'
+import * as dbMemory from '@/lib/db-memory'
+
+// Check if Clerk is configured
+const isClerkConfigured = !!(
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
+  process.env.CLERK_SECRET_KEY
+)
+
+// Conditionally import auth
+let auth: any = null
+if (isClerkConfigured) {
+  auth = require('@clerk/nextjs/server').auth
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Get user ID
+    let userId = 'demo-user'
+    if (isClerkConfigured && auth) {
+      const authResult = auth()
+      userId = authResult?.userId || 'demo-user'
     }
 
     const body = await request.json()
     const { action, tradeId } = body
 
     // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId }
-    })
+    const user = await dbMemory.findUserByClerkId(userId)
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -32,9 +43,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Verify trade belongs to user
-        const trade = await prisma.trade.findFirst({
-          where: { id: tradeId, userId: user.id }
-        })
+        const trades = await dbMemory.findTradesByUserId(user.id)
+        const trade = trades.find(t => t.id === tradeId)
 
         if (!trade) {
           return NextResponse.json(
@@ -75,25 +85,21 @@ export async function POST(request: NextRequest) {
         const stats = await ExcursionBatchService.getUserExcursionStats(user.id)
         
         // Get distribution data
-        const trades = await prisma.trade.findMany({
-          where: {
-            userId: user.id,
-            mae: { not: null },
-            mfe: { not: null }
-          },
-          select: {
-            id: true,
-            symbol: true,
-            mae: true,
-            mfe: true,
-            edgeRatio: true,
-            exit: true,
-            entry: true,
-            type: true,
-            quantity: true,
-            marketType: true
-          }
-        })
+        const allTrades = await dbMemory.findTradesByUserId(user.id)
+        const trades = allTrades
+          .filter(t => t.mae !== null && t.mae !== undefined && t.mfe !== null && t.mfe !== undefined)
+          .map(t => ({
+            id: t.id,
+            symbol: t.symbol,
+            mae: t.mae || 0,
+            mfe: t.mfe || 0,
+            edgeRatio: t.edgeRatio || 0,
+            exit: t.exit,
+            entry: t.entry,
+            type: t.type,
+            quantity: t.quantity,
+            marketType: t.marketType
+          }))
 
         // Calculate distributions
         const maeRanges = [
@@ -180,9 +186,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Verify trade belongs to user
-        const trade = await prisma.trade.findFirst({
-          where: { id: tradeId, userId: user.id }
-        })
+        const trades = await dbMemory.findTradesByUserId(user.id)
+        const trade = trades.find(t => t.id === tradeId)
 
         if (!trade) {
           return NextResponse.json(
