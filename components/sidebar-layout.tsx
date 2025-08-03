@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useAuthUser } from '@/lib/auth-wrapper'
 import {
   Sidebar,
@@ -139,11 +140,15 @@ export function SidebarLayout({ children, currentPath }: SidebarLayoutProps) {
                           isCollapsed && "h-6 w-6"
                         )}>
                           {user.imageUrl ? (
-                            <img 
-                              src={user.imageUrl} 
-                              alt={displayName}
-                              className="h-full w-full rounded-full object-cover"
-                            />
+                            <div className="relative h-full w-full">
+                              <Image 
+                                src={user.imageUrl} 
+                                alt={displayName}
+                                className="rounded-full object-cover"
+                                fill
+                                sizes="32px"
+                              />
+                            </div>
                           ) : (
                             initials
                           )}

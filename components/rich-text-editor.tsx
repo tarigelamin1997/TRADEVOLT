@@ -8,7 +8,7 @@ import Highlight from '@tiptap/extension-highlight'
 import Typography from '@tiptap/extension-typography'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Color } from '@tiptap/extension-color'
-import TextStyle from '@tiptap/extension-text-style'
+import { TextStyle } from '@tiptap/extension-text-style'
 import {
   Bold,
   Italic,
