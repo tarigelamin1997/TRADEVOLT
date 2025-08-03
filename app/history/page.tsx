@@ -13,26 +13,7 @@ import { useUser } from '@clerk/nextjs'
 import { useSettings } from '@/lib/settings'
 import { calculatePnLWithCommission, formatCurrency, formatDateTime, checkDailyLossLimit, checkStreaks, getTableDensityClass } from '@/lib/calculations'
 import { TimeAnalysisService } from '@/lib/services/time-analysis-service'
-
-
-interface Trade {
-  id: string
-  symbol: string
-  type: 'BUY' | 'SELL'
-  entry: number
-  exit?: number | null
-  quantity: number
-  notes?: string | null
-  marketType?: string | null
-  createdAt: string
-  entryTime?: string | null
-  exitTime?: string | null
-  // Excursion metrics
-  mae?: number | null
-  mfe?: number | null
-  edgeRatio?: number | null
-  updrawPercent?: number | null
-}
+import type { Trade } from '@/lib/db-memory'
 
 // Check if Clerk is configured
 const isClerkConfigured = !!(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
