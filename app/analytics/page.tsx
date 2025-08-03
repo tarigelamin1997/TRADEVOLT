@@ -49,7 +49,7 @@ import { VisualMetricCard } from '@/components/visual-metric-card'
 import { RadialGauge } from '@/components/charts/radial-gauge'
 import { MAEMFEScatter } from '@/components/charts/mae-mfe-scatter'
 import { motion } from 'framer-motion'
-import { TrendingUp, TrendingDown, Shield, Zap, Target, Activity } from 'lucide-react'
+import { TrendingDown, Shield, Zap, Target, Activity } from 'lucide-react'
 
 // Menu items (same as history page)
 const mainMenuItems = [
