@@ -2,63 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { 
-  Sidebar,
-  SidebarProvider,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-  SidebarTrigger,
-  SidebarInset,
-} from "@/components/ui/sidebar"
+import { SidebarLayout } from '@/components/sidebar-layout'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { RichTextEditor } from '@/components/rich-text-editor'
 import { 
-  User,
-  ChevronsUpDown,
-  Calendar,
-  Home,
-  TrendingUp,
-  Search,
-  Settings,
-  Import,
-  BarChart3,
-  History,
-  DollarSign,
-  PieChart,
-  FileText,
   Edit,
   Save,
   X,
   Plus,
+  Star,
 } from "lucide-react"
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 
-// Menu items (same as other pages)
-const mainMenuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Trade History", url: "/history", icon: History },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "P&L Report", url: "/pnl", icon: DollarSign },
-  { title: "Import Trades", url: "#import", icon: Import },
-]
-
-const toolsMenuItems = [
-  { title: "Market Analysis", url: "/analysis", icon: TrendingUp },
-  { title: "Performance Metrics", url: "/metrics", icon: PieChart },
-  { title: "Trade Journal", url: "/journal", icon: FileText },
-  { title: "Calendar", url: "/calendar", icon: Calendar },
-]
-
-const settingsMenuItems = [
-  { title: "Search", url: "/search", icon: Search },
-  { title: "Settings", url: "/settings", icon: Settings },
-]
 
 interface Trade {
   id: string
@@ -163,71 +119,76 @@ export default function TradeJournalPage() {
     })
 
     return (
-      <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+      <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
         <div>
-          <label className="block text-sm font-medium mb-1">Trade Reflection</label>
-          <textarea
-            className="w-full p-2 border rounded-md"
-            rows={3}
-            placeholder="What was your reasoning for this trade? What happened?"
-            value={form.reflection}
-            onChange={(e) => setForm({ ...form, reflection: e.target.value })}
+          <label className="block text-sm font-medium mb-2">Trade Reflection</label>
+          <RichTextEditor
+            content={form.reflection}
+            onChange={(content) => setForm({ ...form, reflection: content })}
+            placeholder="What was your reasoning for this trade? What happened? Add images, charts, or any relevant content..."
+            minHeight="250px"
+            className="bg-white dark:bg-gray-900"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Lessons Learned</label>
-          <textarea
-            className="w-full p-2 border rounded-md"
-            rows={2}
-            placeholder="What did you learn from this trade?"
-            value={form.lessons}
-            onChange={(e) => setForm({ ...form, lessons: e.target.value })}
+          <label className="block text-sm font-medium mb-2">Lessons Learned</label>
+          <RichTextEditor
+            content={form.lessons}
+            onChange={(content) => setForm({ ...form, lessons: content })}
+            placeholder="What did you learn from this trade? What patterns did you notice?"
+            minHeight="200px"
+            className="bg-white dark:bg-gray-900"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Emotional State</label>
-          <input
-            type="text"
-            className="w-full p-2 border rounded-md"
-            placeholder="How were you feeling? (confident, anxious, greedy, fearful, etc.)"
-            value={form.emotions}
-            onChange={(e) => setForm({ ...form, emotions: e.target.value })}
+          <label className="block text-sm font-medium mb-2">Emotional State</label>
+          <RichTextEditor
+            content={form.emotions}
+            onChange={(content) => setForm({ ...form, emotions: content })}
+            placeholder="How were you feeling? (confident, anxious, greedy, fearful, etc.) What influenced your emotions?"
+            minHeight="150px"
+            className="bg-white dark:bg-gray-900"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Areas for Improvement</label>
-          <textarea
-            className="w-full p-2 border rounded-md"
-            rows={2}
-            placeholder="What could you have done better?"
-            value={form.improvements}
-            onChange={(e) => setForm({ ...form, improvements: e.target.value })}
+          <label className="block text-sm font-medium mb-2">Areas for Improvement</label>
+          <RichTextEditor
+            content={form.improvements}
+            onChange={(content) => setForm({ ...form, improvements: content })}
+            placeholder="What could you have done better? What would you do differently next time?"
+            minHeight="150px"
+            className="bg-white dark:bg-gray-900"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Trade Rating</label>
-          <div className="flex gap-2">
-            {[1, 2, 3, 4, 5].map(rating => (
+          <label className="block text-sm font-medium mb-2">Trade Rating</label>
+          <div className="flex items-center gap-2">
+            {[1, 2, 3, 4, 5].map((rating) => (
               <button
                 key={rating}
                 onClick={() => setForm({ ...form, rating })}
-                className={`px-3 py-1 rounded ${
-                  form.rating === rating 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-200 hover:bg-gray-300'
+                className={`p-2 rounded-lg transition-colors ${
+                  form.rating >= rating 
+                    ? 'text-yellow-500 hover:text-yellow-600' 
+                    : 'text-gray-300 hover:text-gray-400'
                 }`}
+                title={`${rating} star${rating > 1 ? 's' : ''}`}
               >
-                {rating}
+                <Star className="h-6 w-6 fill-current" />
               </button>
             ))}
+            <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+              {form.rating === 1 && 'Poor Trade'}
+              {form.rating === 2 && 'Below Average'}
+              {form.rating === 3 && 'Average Trade'}
+              {form.rating === 4 && 'Good Trade'}
+              {form.rating === 5 && 'Excellent Trade'}
+            </span>
           </div>
-          <p className="text-xs text-gray-500 mt-1">
-            1 = Poor execution, 5 = Perfect execution
-          </p>
         </div>
 
         <div className="flex gap-2">
@@ -252,45 +213,8 @@ export default function TradeJournalPage() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <Sidebar>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {mainMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        onClick={() => handleMenuClick(item.url)}
-                        isActive={item.url === '/journal'}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Tools</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {toolsMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        onClick={() => handleMenuClick(item.url)}
-                        isActive={item.url === '/journal'}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
+    <SidebarLayout currentPath="/journal">
+      <>
               </SidebarGroupContent>
             </SidebarGroup>
 
@@ -323,17 +247,11 @@ export default function TradeJournalPage() {
                 </div>
                 <ChevronsUpDown className="h-5 w-5" />
               </SidebarMenuButton>
-            </SidebarGroup>
-          </SidebarFooter>
-        </Sidebar>
-
-        <SidebarInset>
-          <div className="flex h-full flex-col">
-            <header className="flex h-16 items-center gap-4 border-b px-6">
-              <SidebarTrigger className="h-7 w-7" />
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold">Trade Journal</h1>
-              </div>
+        {/* Header */}
+        <header className="flex h-16 items-center gap-4 border-b px-6">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">Trade Journal</h1>
+          </div>
               <div className="flex gap-2">
                 <Button
                   variant={filterType === 'all' ? 'default' : 'outline'}
@@ -454,42 +372,59 @@ export default function TradeJournalPage() {
                           {hasJournal && !isEditing && (
                             <div className="space-y-3 pt-4 border-t">
                               <div>
-                                <h4 className="text-sm font-medium text-gray-700">Reflection</h4>
-                                <p className="text-sm mt-1">{journalEntries[trade.id].reflection}</p>
+                                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reflection</h4>
+                                <div 
+                                  className="prose prose-sm max-w-none dark:prose-invert"
+                                  dangerouslySetInnerHTML={{ __html: journalEntries[trade.id].reflection }}
+                                />
                               </div>
                               {journalEntries[trade.id].lessons && (
                                 <div>
-                                  <h4 className="text-sm font-medium text-gray-700">Lessons Learned</h4>
-                                  <p className="text-sm mt-1">{journalEntries[trade.id].lessons}</p>
+                                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Lessons Learned</h4>
+                                  <div 
+                                    className="prose prose-sm max-w-none dark:prose-invert"
+                                    dangerouslySetInnerHTML={{ __html: journalEntries[trade.id].lessons }}
+                                  />
                                 </div>
                               )}
                               {journalEntries[trade.id].emotions && (
                                 <div>
-                                  <h4 className="text-sm font-medium text-gray-700">Emotional State</h4>
-                                  <p className="text-sm mt-1">{journalEntries[trade.id].emotions}</p>
+                                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Emotional State</h4>
+                                  <div 
+                                    className="prose prose-sm max-w-none dark:prose-invert"
+                                    dangerouslySetInnerHTML={{ __html: journalEntries[trade.id].emotions }}
+                                  />
                                 </div>
                               )}
                               {journalEntries[trade.id].improvements && (
                                 <div>
-                                  <h4 className="text-sm font-medium text-gray-700">Areas for Improvement</h4>
-                                  <p className="text-sm mt-1">{journalEntries[trade.id].improvements}</p>
+                                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Areas for Improvement</h4>
+                                  <div 
+                                    className="prose prose-sm max-w-none dark:prose-invert"
+                                    dangerouslySetInnerHTML={{ __html: journalEntries[trade.id].improvements }}
+                                  />
                                 </div>
                               )}
                               <div>
-                                <h4 className="text-sm font-medium text-gray-700">Trade Rating</h4>
-                                <div className="flex gap-1 mt-1">
+                                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Trade Rating</h4>
+                                <div className="flex gap-1">
                                   {[1, 2, 3, 4, 5].map(star => (
-                                    <span
+                                    <Star
                                       key={star}
-                                      className={`text-xl ${
+                                      className={`h-5 w-5 ${
                                         star <= journalEntries[trade.id].rating
-                                          ? 'text-yellow-500'
+                                          ? 'text-yellow-500 fill-current'
                                           : 'text-gray-300'
                                       }`}
-                                    >
-                                      ★
-                                    </span>
+                                    />
                                   ))}
+                                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                    {journalEntries[trade.id].rating === 1 && 'Poor Trade'}
+                                    {journalEntries[trade.id].rating === 2 && 'Below Average'}
+                                    {journalEntries[trade.id].rating === 3 && 'Average Trade'}
+                                    {journalEntries[trade.id].rating === 4 && 'Good Trade'}
+                                    {journalEntries[trade.id].rating === 5 && 'Excellent Trade'}
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -510,9 +445,7 @@ export default function TradeJournalPage() {
                 )}
               </div>
             </main>
-          </div>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+      </>
+    </SidebarLayout>
   )
 }
