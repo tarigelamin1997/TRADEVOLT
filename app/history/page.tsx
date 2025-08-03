@@ -12,6 +12,7 @@ import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { useUser } from '@clerk/nextjs'
 import { useSettings } from '@/lib/settings'
 import { calculatePnLWithCommission, formatCurrency, formatDateTime, checkDailyLossLimit, checkStreaks, getTableDensityClass } from '@/lib/calculations'
+import { TimeAnalysisService } from '@/lib/services/time-analysis-service'
 
 
 interface Trade {
@@ -142,13 +143,15 @@ function TradeHistoryContent({ user }: { user: any }) {
   }
 
   const exportToCSV = () => {
-    const headers = ['Entry Time', 'Exit Time', 'Symbol', 'Type', 'Entry Price', 'Exit Price', 'Quantity', 'Market', 'Result', 'P&L', 'MAE %', 'MFE %', 'Edge Ratio', 'Notes']
+    const headers = ['Entry Time', 'Exit Time', 'Hold Time', 'Symbol', 'Type', 'Entry Price', 'Exit Price', 'Quantity', 'Market', 'Result', 'P&L', 'MAE %', 'MFE %', 'Edge Ratio', 'Notes']
     const rows = filteredTrades.map(trade => {
       const pnl = calculateMarketPnL(trade, trade.marketType || null)
       const result = pnl !== null ? (pnl >= 0 ? 'WIN' : 'LOSS') : ''
+      const holdTime = TimeAnalysisService.calculateHoldTime(trade)
       return [
         new Date(trade.createdAt).toLocaleString(),
         trade.exit ? new Date(trade.createdAt).toLocaleString() : '',
+        holdTime !== null ? TimeAnalysisService.formatHoldTime(holdTime) : '',
         trade.symbol,
         trade.type,
         trade.entry,
@@ -332,6 +335,9 @@ function TradeHistoryContent({ user }: { user: any }) {
                             Exit Time
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Hold Time
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Symbol
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -381,6 +387,19 @@ function TradeHistoryContent({ user }: { user: any }) {
                               </td>
                               <td className={`whitespace-nowrap text-gray-900 ${cellClass}`}>
                                 {trade.exitTime ? formatDateTime(trade.exitTime, settings) : '-'}
+                              </td>
+                              <td className={`whitespace-nowrap text-gray-900 ${cellClass}`}>
+                                {(() => {
+                                  const holdTime = TimeAnalysisService.calculateHoldTime(trade)
+                                  if (holdTime !== null) {
+                                    return (
+                                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                                        {TimeAnalysisService.formatHoldTime(holdTime)}
+                                      </span>
+                                    )
+                                  }
+                                  return '-'
+                                })()}
                               </td>
                               <td className={`whitespace-nowrap font-medium text-gray-900 ${cellClass}`}>
                                 {trade.symbol}

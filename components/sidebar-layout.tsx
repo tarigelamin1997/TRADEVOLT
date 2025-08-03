@@ -39,7 +39,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  Clock
 } from "lucide-react"
 import { cn } from '@/lib/utils'
 
@@ -50,6 +51,7 @@ const mainMenuItems = [
   { icon: BarChart3, label: 'Analytics', href: '/analytics' },
   { icon: TrendingUp, label: 'Performance Metrics', href: '/metrics' },
   { icon: Calendar, label: 'Calendar', href: '/calendar' },
+  { icon: Clock, label: 'Time Analysis', href: '/time-analysis' },
   { icon: PieChart, label: 'Market Analysis', href: '/analysis' },
   { icon: DollarSign, label: 'P&L Report', href: '/pnl' },
   { icon: FileText, label: 'Trade Journal', href: '/journal' },

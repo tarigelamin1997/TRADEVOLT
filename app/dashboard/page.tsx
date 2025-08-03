@@ -10,6 +10,7 @@ import { DailyPnLChart } from '@/components/charts/daily-pnl-chart'
 import { SymbolDistribution } from '@/components/charts/symbol-distribution'
 import { EnhancedCalendar } from '@/components/charts/enhanced-calendar'
 import { VisualMetricCard } from '@/components/visual-metric-card'
+import { TimeMetricsSummary } from '@/components/time-metrics-summary'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   TrendingUp, 
@@ -321,8 +322,10 @@ export default function VisualDashboardPage() {
           <EquityCurveChart trades={trades} />
           <DailyPnLChart trades={trades} days={30} />
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Time Metrics and Symbol Distribution */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <TimeMetricsSummary trades={trades} />
           <SymbolDistribution trades={trades} metric="pnl" />
           <SymbolDistribution trades={trades} metric="count" />
         </div>
