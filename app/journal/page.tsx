@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { SidebarLayout } from '@/components/sidebar-layout'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -41,7 +40,6 @@ interface JournalEntry {
 }
 
 export default function TradeJournalPage() {
-  const router = useRouter()
   const [trades, setTrades] = useState<Trade[]>([])
   const [journalEntries, setJournalEntries] = useState<Record<string, JournalEntry>>({})
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -73,9 +71,6 @@ export default function TradeJournalPage() {
     }
   }
 
-  const handleMenuClick = (url: string) => {
-    router.push(url)
-  }
 
   const saveJournalEntry = (tradeId: string, entry: Partial<JournalEntry>) => {
     const trade = trades.find(t => t.id === tradeId)
@@ -215,38 +210,6 @@ export default function TradeJournalPage() {
   return (
     <SidebarLayout currentPath="/journal">
       <>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Settings</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {settingsMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton onClick={() => handleMenuClick(item.url)}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-
-          <SidebarFooter>
-            <SidebarGroup>
-              <SidebarMenuButton className="w-full justify-between gap-3 h-12">
-                <div className="flex items-center gap-2">
-                  <User className="h-5 w-5 rounded-md" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-sm font-medium">Demo User</span>
-                    <span className="text-xs text-muted-foreground">demo@tradevolt.com</span>
-                  </div>
-                </div>
-                <ChevronsUpDown className="h-5 w-5" />
-              </SidebarMenuButton>
         {/* Header */}
         <header className="flex h-16 items-center gap-4 border-b px-6">
           <div className="flex-1">
