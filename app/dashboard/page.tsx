@@ -197,7 +197,8 @@ export default function VisualDashboardPage() {
 
   return (
     <SidebarLayout>
-      <div className="space-y-6 p-6">
+      <div className="min-h-screen overflow-y-auto">
+        <div className="space-y-6 p-6">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -359,6 +360,7 @@ export default function VisualDashboardPage() {
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
       </div>
     </SidebarLayout>
   )
