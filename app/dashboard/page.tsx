@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { SidebarLayout } from '@/components/sidebar-layout'
 import { Button } from '@/components/ui/button'
-import { TradeForm } from '@/components/trade-form'
+import { TradeFormEnhanced } from '@/components/trade-form-enhanced'
 import { RadialGauge } from '@/components/charts/radial-gauge'
 import { EquityCurveChart } from '@/components/charts/equity-curve'
 import { DailyPnLChart } from '@/components/charts/daily-pnl-chart'
@@ -14,6 +14,7 @@ import { TimeMetricsSummary } from '@/components/time-metrics-summary'
 import { BehavioralSummaryCard } from '@/components/behavioral-summary-card'
 import { ExecutionSummaryCard } from '@/components/execution-summary-card'
 import { MarketInsightsWidget } from '@/components/market-insights-widget'
+import { ActiveSetupWidget } from '@/components/active-setup-widget'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   TrendingUp, 
@@ -329,6 +330,7 @@ export default function VisualDashboardPage() {
         
         {/* Analysis Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ActiveSetupWidget />
           <TimeMetricsSummary trades={trades} />
           <BehavioralSummaryCard trades={trades} />
           <ExecutionSummaryCard trades={trades} />
@@ -364,7 +366,7 @@ export default function VisualDashboardPage() {
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                <TradeForm onAdd={handleTradeAdded} />
+                <TradeFormEnhanced onAdd={handleTradeAdded} />
               </motion.div>
             </motion.div>
           )}

@@ -25,7 +25,8 @@ import { findUserByClerkId, findTradesByUserId } from '@/lib/db-memory'
 import { SetupCard } from '@/components/playbooks/setup-card'
 import { SetupWizard } from '@/components/playbooks/setup-wizard'
 import { SetupAnalytics } from '@/components/playbooks/setup-analytics'
-import { DisciplineScore } from '@/components/playbooks/discipline-score'
+import { DisciplineTracker } from '@/components/playbooks/discipline-tracker'
+import { SetupEvolution } from '@/components/playbooks/setup-evolution'
 import { cn } from '@/lib/utils'
 
 export default function PlaybooksPage() {
@@ -205,10 +206,11 @@ export default function PlaybooksPage() {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid grid-cols-4 w-full lg:w-auto">
+        <TabsList className="grid grid-cols-5 w-full lg:w-auto">
           <TabsTrigger value="my-setups">My Setups</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="discipline">Discipline</TabsTrigger>
+          <TabsTrigger value="evolution">Evolution</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
         </TabsList>
 
@@ -308,7 +310,11 @@ export default function PlaybooksPage() {
         </TabsContent>
 
         <TabsContent value="discipline" className="space-y-6">
-          <DisciplineScore trades={trades} />
+          <DisciplineTracker />
+        </TabsContent>
+
+        <TabsContent value="evolution" className="space-y-6">
+          <SetupEvolution />
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-6">

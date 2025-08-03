@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CSVImport } from '@/components/csv-import'
-import { TradeForm } from '@/components/trade-form'
+import { TradeFormEnhanced } from '@/components/trade-form-enhanced'
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { useUser } from '@clerk/nextjs'
 import { useSettings } from '@/lib/settings'
@@ -295,7 +295,7 @@ function TradeHistoryContent({ user }: { user: any }) {
                         ✕
                       </Button>
                     </div>
-                    <TradeForm 
+                    <TradeFormEnhanced 
                       onAdd={() => {
                         fetchTrades()
                         setShowAddTrade(false)
