@@ -30,6 +30,7 @@ export interface ExcursionStats {
   avgMFE: number
   avgEdgeRatio: number
   avgEfficiency: number
+  totalTrades: number
   maeDistribution: { range: string; count: number }[]
   mfeDistribution: { range: string; count: number }[]
   trades: Array<{
