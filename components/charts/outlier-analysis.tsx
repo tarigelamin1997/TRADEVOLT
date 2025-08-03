@@ -245,7 +245,7 @@ export function OutlierAnalysisChart({ outliers }: OutlierAnalysisProps) {
                     : outlierImpact < -20
                     ? "Implement strict risk management rules to prevent large losses."
                     : outlierImpact > 50
-                    ? "Don't rely on home runs. Build a sustainable edge in your regular trading."
+                    ? "Don&apos;t rely on home runs. Build a sustainable edge in your regular trading."
                     : "Your performance shows good consistency. Continue managing risk effectively."
                 }
               </p>

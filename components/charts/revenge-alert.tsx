@@ -244,7 +244,7 @@ export function RevengeAlert({ revenge }: RevengeAlertProps) {
                     💡 <strong>Prevention Tips:</strong>
                   </p>
                   <ul className="ml-6 space-y-1">
-                    <li>• Implement a "cooling-off" period after any loss</li>
+                    <li>• Implement a &quot;cooling-off&quot; period after any loss</li>
                     <li>• Reduce position size by 50% after consecutive losses</li>
                     <li>• Set daily loss limits and stick to them</li>
                     <li>• Keep a trading journal to track emotional state</li>

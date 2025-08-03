@@ -33,7 +33,7 @@ export default function BehavioralPage() {
     if (trades.length > 0) {
       analyzeMetrics()
     }
-  }, [trades, timeRange])
+  }, [trades, timeRange]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchTrades = async () => {
     try {
