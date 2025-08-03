@@ -14,6 +14,7 @@ import {
   RotateCcw,
 } from "lucide-react"
 import { calculateMarketPnL } from '@/lib/market-knowledge'
+import { safeToFixed } from '@/lib/utils/safe-format'
 
 
 interface Trade {
@@ -250,8 +251,8 @@ export default function TradeJournalPage() {
                     <h3 className="text-sm text-gray-600">Average Rating</h3>
                     <p className="text-2xl font-bold">
                       {Object.values(journalEntries).length > 0
-                        ? (Object.values(journalEntries).reduce((sum, e) => sum + e.rating, 0) / 
-                           Object.values(journalEntries).length).toFixed(1)
+                        ? safeToFixed((Object.values(journalEntries).reduce((sum, e) => sum + e.rating, 0) / 
+                           Object.values(journalEntries).length), 1)
                         : '-'}
                     </p>
                   </Card>
@@ -295,7 +296,7 @@ export default function TradeJournalPage() {
                             <div className="text-right">
                               {pnl !== null && (
                                 <p className={`text-lg font-bold ${pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  ${pnl.toFixed(2)}
+                                  ${safeToFixed(pnl, 2)}
                                 </p>
                               )}
                               {!hasJournal && !isEditing && (

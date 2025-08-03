@@ -64,11 +64,11 @@ export default function TimeAnalysisPage() {
         , dayStats[0]) : { dayName: 'Monday', totalPnL: 0 }
         
         setQuickStats({
-          avgHoldTime: holdTimeStats.avgHoldTime,
-          bestHour: bestHour.hour,
-          bestDay: bestDay.dayName,
-          totalTradingDays: frequencyStats.tradingDays,
-          avgTradesPerDay: frequencyStats.avgTradesPerDay
+          avgHoldTime: holdTimeStats?.avgHoldTime || 0,
+          bestHour: bestHour?.hour || 0,
+          bestDay: bestDay?.dayName || 'Monday',
+          totalTradingDays: frequencyStats?.tradingDays || 0,
+          avgTradesPerDay: frequencyStats?.avgTradesPerDay || 0
         })
       }
     } catch (error) {

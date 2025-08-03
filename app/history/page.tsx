@@ -13,6 +13,7 @@ import { useUser } from '@clerk/nextjs'
 import { useSettings } from '@/lib/settings'
 import { calculatePnLWithCommission, formatCurrency, formatDateTime, checkDailyLossLimit, checkStreaks, getTableDensityClass } from '@/lib/calculations'
 import { TimeAnalysisService } from '@/lib/services/time-analysis-service'
+import { safeToFixed } from '@/lib/utils/safe-format'
 import type { Trade } from '@/lib/db-memory'
 
 // Check if Clerk is configured
@@ -140,10 +141,10 @@ function TradeHistoryContent({ user }: { user: any }) {
         trade.quantity,
         trade.marketType || '',
         result,
-        pnl ? pnl.toFixed(2) : '',
-        trade.mae !== null && trade.mae !== undefined ? trade.mae.toFixed(2) : '',
-        trade.mfe !== null && trade.mfe !== undefined ? trade.mfe.toFixed(2) : '',
-        trade.edgeRatio !== null && trade.edgeRatio !== undefined ? trade.edgeRatio.toFixed(2) : '',
+        pnl ? safeToFixed(pnl, 2) : '',
+        safeToFixed(trade.mae, 2),
+        safeToFixed(trade.mfe, 2),
+        safeToFixed(trade.edgeRatio, 2),
         trade.notes || ''
       ]
     })
@@ -222,7 +223,7 @@ function TradeHistoryContent({ user }: { user: any }) {
                   </Card>
                   <Card className="p-4">
                     <h3 className="text-sm text-gray-600">Win Rate</h3>
-                    <p className="text-2xl font-bold">{winRate.toFixed(1)}%</p>
+                    <p className="text-2xl font-bold">{safeToFixed(winRate, 1)}%</p>
                   </Card>
                   <Card className="p-4">
                     <h3 className="text-sm text-gray-600">Win/Loss</h3>
@@ -433,7 +434,7 @@ function TradeHistoryContent({ user }: { user: any }) {
                               <td className={`text-center ${cellClass}`}>
                                 {trade.mae !== null && trade.mae !== undefined ? (
                                   <span className="text-red-600 font-medium">
-                                    -{trade.mae.toFixed(1)}%
+                                    -{safeToFixed(trade.mae, 1)}%
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -442,7 +443,7 @@ function TradeHistoryContent({ user }: { user: any }) {
                               <td className={`text-center ${cellClass}`}>
                                 {trade.mfe !== null && trade.mfe !== undefined ? (
                                   <span className="text-green-600 font-medium">
-                                    +{trade.mfe.toFixed(1)}%
+                                    +{safeToFixed(trade.mfe, 1)}%
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -451,7 +452,7 @@ function TradeHistoryContent({ user }: { user: any }) {
                               <td className={`text-center ${cellClass}`}>
                                 {trade.edgeRatio !== null && trade.edgeRatio !== undefined ? (
                                   <span className={trade.edgeRatio >= 2 ? 'text-green-600 font-medium' : 'text-amber-600'}>
-                                    {trade.edgeRatio.toFixed(1)}
+                                    {safeToFixed(trade.edgeRatio, 1)}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
