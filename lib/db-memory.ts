@@ -30,6 +30,23 @@ export interface Trade {
   updrawPercent?: number | null
   takeProfitPrice?: number | null
   stopLossPrice?: number | null
+  // Execution quality fields
+  intendedEntry?: number | null
+  intendedExit?: number | null
+  commission?: number | null
+  wasStopLossHit?: boolean | null
+  wasTakeProfitHit?: boolean | null
+  exitReason?: 'STOP_LOSS' | 'TAKE_PROFIT' | 'MANUAL' | 'OTHER' | null
+  partialExits?: PartialExit[] | null
+}
+
+export interface PartialExit {
+  id: string
+  price: number
+  quantity: number
+  timestamp: string
+  commission?: number
+  reason?: 'SCALE_OUT' | 'TAKE_PROFIT' | 'STOP_LOSS' | 'MANUAL'
 }
 
 // In-memory storage

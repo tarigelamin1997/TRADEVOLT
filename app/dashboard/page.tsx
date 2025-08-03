@@ -12,6 +12,7 @@ import { EnhancedCalendar } from '@/components/charts/enhanced-calendar'
 import { VisualMetricCard } from '@/components/visual-metric-card'
 import { TimeMetricsSummary } from '@/components/time-metrics-summary'
 import { BehavioralSummaryCard } from '@/components/behavioral-summary-card'
+import { ExecutionSummaryCard } from '@/components/execution-summary-card'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   TrendingUp, 
@@ -325,10 +326,11 @@ export default function VisualDashboardPage() {
           <DailyPnLChart trades={trades} days={30} />
         </div>
         
-        {/* Time Metrics, Behavioral, and Symbol Distribution */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Analysis Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TimeMetricsSummary trades={trades} />
           <BehavioralSummaryCard trades={trades} />
+          <ExecutionSummaryCard trades={trades} />
           <SymbolDistribution trades={trades} metric="pnl" />
         </div>
 

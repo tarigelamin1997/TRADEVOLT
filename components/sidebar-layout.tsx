@@ -41,7 +41,8 @@ import {
   ChevronRight,
   Menu,
   Clock,
-  Brain
+  Brain,
+  Zap
 } from "lucide-react"
 import { cn } from '@/lib/utils'
 
@@ -54,6 +55,7 @@ const mainMenuItems = [
   { icon: Calendar, label: 'Calendar', href: '/calendar' },
   { icon: Clock, label: 'Time Analysis', href: '/time-analysis' },
   { icon: Brain, label: 'Behavioral Analysis', href: '/behavioral' },
+  { icon: Zap, label: 'Execution Quality', href: '/execution' },
   { icon: PieChart, label: 'Market Analysis', href: '/analysis' },
   { icon: DollarSign, label: 'P&L Report', href: '/pnl' },
   { icon: FileText, label: 'Trade Journal', href: '/journal' },

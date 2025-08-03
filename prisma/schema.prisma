@@ -37,11 +37,20 @@ model Trade {
   takeProfitPrice Float?    // Target price for take profit
   stopLossPrice   Float?    // Stop loss price
   
+  // Execution Quality Fields
+  intendedEntry   Float?    // Planned entry price
+  intendedExit    Float?    // Planned exit price
+  commission      Float?    // Trading fees/commission
+  wasStopLossHit  Boolean?  // Whether SL was triggered
+  wasTakeProfitHit Boolean? // Whether TP was triggered
+  exitReason      String?   // STOP_LOSS, TAKE_PROFIT, MANUAL, OTHER
+  
   createdAt       DateTime  @default(now())
   
   user            User              @relation(fields: [userId], references: [id])
   priceData       TradePriceData[]
   excursions      TradeExcursion[]
+  partialExits    PartialExit[]
   
   @@index([userId, createdAt])
   @@index([userId, symbol])
@@ -71,6 +80,21 @@ model TradeExcursion {
   mfeAtTime          Float
   
   trade              Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  
+  @@index([tradeId, timestamp])
+}
+
+model PartialExit {
+  id         String   @id @default(cuid())
+  tradeId    String
+  price      Float
+  quantity   Float
+  timestamp  DateTime
+  commission Float?
+  reason     String?  // SCALE_OUT, TAKE_PROFIT, STOP_LOSS, MANUAL
+  createdAt  DateTime @default(now())
+  
+  trade      Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
   
   @@index([tradeId, timestamp])
 }
