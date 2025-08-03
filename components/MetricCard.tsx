@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { MetricResult, MetricStatus, TrendDirection } from '@/lib/types/metrics'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { safeToFixed } from '@/lib/utils/safe-format'
 
 interface MetricCardProps {
   title: string
@@ -35,9 +36,9 @@ export function MetricCard({
           maximumFractionDigits: 2
         })}`
       case 'percentage':
-        return `${value.toFixed(1)}%`
+        return `${safeToFixed(value, 1)}%`
       case 'decimal':
-        return value.toFixed(2)
+        return safeToFixed(value, 2)
       case 'number':
         return Math.round(value).toLocaleString()
       default:

@@ -3,6 +3,7 @@
 import { Card } from '@/components/ui/card'
 import { Trade } from '@/lib/types/metrics'
 import { calculateMarketPnL } from '@/lib/market-knowledge'
+import { safeToFixed } from '@/lib/utils/safe-format'
 
 interface ChartProps {
   trades: Trade[]
@@ -70,10 +71,10 @@ export function EquityCurveChart({ trades }: ChartProps) {
             {dataPoints[dataPoints.length - 1].date}
           </text>
           <text x={10} y={padding} fontSize="12" fill="#6b7280">
-            ${maxBalance.toFixed(0)}
+            ${safeToFixed(maxBalance, 0)}
           </text>
           <text x={10} y={height - padding} fontSize="12" fill="#6b7280">
-            ${minBalance.toFixed(0)}
+            ${safeToFixed(minBalance, 0)}
           </text>
           
           {/* The curve */}
@@ -102,9 +103,9 @@ export function EquityCurveChart({ trades }: ChartProps) {
       </div>
       <div className="mt-4 flex justify-between text-sm text-gray-600">
         <span>Starting: $10,000</span>
-        <span>Current: ${balance.toFixed(2)}</span>
+        <span>Current: ${safeToFixed(balance, 2)}</span>
         <span className={balance >= 10000 ? "text-green-600" : "text-red-600"}>
-          {balance >= 10000 ? '+' : ''}{((balance - 10000) / 10000 * 100).toFixed(1)}%
+          {balance >= 10000 ? '+' : ''}{safeToFixed(((balance - 10000) / 10000 * 100), 1)}%
         </span>
       </div>
     </Card>
@@ -154,7 +155,7 @@ export function WinRateChart({ trades }: ChartProps) {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-bold">{winRate.toFixed(1)}%</span>
+            <span className="text-3xl font-bold">{safeToFixed(winRate, 1)}%</span>
             <span className="text-sm text-gray-600">Win Rate</span>
           </div>
         </div>
@@ -222,7 +223,7 @@ export function ProfitDistributionChart({ trades }: ChartProps) {
           return (
             <div key={i} className="flex items-center gap-3">
               <span className="text-xs text-gray-600 w-24 text-right">
-                ${rangeStart.toFixed(0)} - ${rangeEnd.toFixed(0)}
+                ${safeToFixed(rangeStart, 0)} - ${safeToFixed(rangeEnd, 0)}
               </span>
               <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
                 <div
@@ -259,7 +260,7 @@ export function ProfitDistributionChart({ trades }: ChartProps) {
           <p className={`font-semibold ${
             tradesPnL.reduce((a, b) => a + b, 0) >= 0 ? 'text-green-600' : 'text-red-600'
           }`}>
-            ${tradesPnL.reduce((a, b) => a + b, 0).toFixed(2)}
+            ${safeToFixed(tradesPnL.reduce((a, b) => a + b, 0), 2)}
           </p>
         </div>
       </div>

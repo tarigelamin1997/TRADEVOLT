@@ -36,6 +36,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { calculateMarketPnL } from '@/lib/market-knowledge'
+import { safeToFixed } from '@/lib/utils/safe-format'
 
 const mainMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
@@ -309,7 +310,7 @@ export default function CalendarPage() {
                                     <div className={`text-xs font-medium ${
                                       datePnL >= 0 ? 'text-green-600' : 'text-red-600'
                                     }`}>
-                                      ${Math.abs(datePnL).toFixed(0)}
+                                      ${safeToFixed(Math.abs(datePnL), 0)}
                                     </div>
                                     <div className="flex gap-1 justify-center">
                                       {hasWins && (
@@ -360,7 +361,7 @@ export default function CalendarPage() {
                               <span className={`font-medium ${
                                 getPnLForDate(selectedDate) >= 0 ? 'text-green-600' : 'text-red-600'
                               }`}>
-                                ${getPnLForDate(selectedDate).toFixed(2)}
+                                ${safeToFixed(getPnLForDate(selectedDate), 2)}
                               </span>
                             </div>
                           </div>
@@ -382,7 +383,7 @@ export default function CalendarPage() {
                                       <span className={`text-sm font-medium ${
                                         pnl >= 0 ? 'text-green-600' : 'text-red-600'
                                       }`}>
-                                        ${pnl.toFixed(2)}
+                                        ${safeToFixed(pnl, 2)}
                                       </span>
                                     </div>
                                   </div>
@@ -426,7 +427,7 @@ export default function CalendarPage() {
                                 <span className={`font-medium ${
                                   monthPnL >= 0 ? 'text-green-600' : 'text-red-600'
                                 }`}>
-                                  ${monthPnL.toFixed(2)}
+                                  ${safeToFixed(monthPnL, 2)}
                                 </span>
                               </div>
                             </>

@@ -28,6 +28,7 @@ import {
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { useSettings } from '@/lib/settings'
 import { formatCurrency } from '@/lib/calculations'
+import { safeToFixed } from '@/lib/utils/safe-format'
 import { useRouter } from 'next/navigation'
 import type { Trade } from '@/lib/db-memory'
 
@@ -253,7 +254,7 @@ export default function VisualDashboardPage() {
             />
             <div className="mt-4 text-center">
               <p className="text-sm text-muted-foreground">
-                ${stats.avgWin.toFixed(2)} avg win / ${stats.avgLoss.toFixed(2)} avg loss
+                ${safeToFixed(stats.avgWin, 2)} avg win / ${safeToFixed(stats.avgLoss, 2)} avg loss
               </p>
             </div>
           </motion.div>

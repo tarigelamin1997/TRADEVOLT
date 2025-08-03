@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { safeToFixed } from '@/lib/utils/safe-format'
 
 interface VisualMetricCardProps {
   title: string
@@ -48,9 +49,9 @@ export function VisualMetricCard({
       case 'currency':
         return `$${val.toLocaleString()}`
       case 'percentage':
-        return `${val.toFixed(1)}%`
+        return `${safeToFixed(val, 1)}%`
       case 'decimal':
-        return val.toFixed(2)
+        return safeToFixed(val, 2)
       default:
         return val.toLocaleString()
     }
