@@ -14,7 +14,7 @@ export interface Trade {
   id: string
   userId: string
   symbol: string
-  type: string
+  type: 'BUY' | 'SELL'
   entry: number
   exit?: number | null
   quantity: number
