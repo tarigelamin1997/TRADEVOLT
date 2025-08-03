@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from './ui/button'
 import { MARKET_TYPES } from '@/lib/market-knowledge'
+import { useSettings } from '@/lib/settings'
 
 interface Trade {
   symbol: string
@@ -23,12 +24,14 @@ interface TradeFormProps {
 }
 
 export function TradeForm({ onAdd }: TradeFormProps) {
-  // Get last used market type from localStorage
+  const { settings } = useSettings()
+  
+  // Get last used market type from localStorage or use settings default
   const getLastMarketType = () => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('lastMarketType') || 'STOCKS'
+      return localStorage.getItem('lastMarketType') || settings.trading.defaultMarketType
     }
-    return 'STOCKS'
+    return settings.trading.defaultMarketType
   }
 
   const [trade, setTrade] = useState<Trade>({
@@ -36,7 +39,7 @@ export function TradeForm({ onAdd }: TradeFormProps) {
     type: 'BUY',
     entry: '',
     exit: '',
-    quantity: '',
+    quantity: settings.trading.riskManagement.defaultPositionSize.toString(),
     entryDate: new Date().toISOString().split('T')[0], // Default to today
     entryTime: new Date().toTimeString().split(' ')[0].substring(0, 5), // HH:MM format
     exitDate: '',

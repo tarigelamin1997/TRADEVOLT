@@ -41,6 +41,8 @@ import { CSVImport } from '@/components/csv-import'
 import { TradeForm } from '@/components/trade-form'
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { useUser, UserButton } from '@clerk/nextjs'
+import { useSettings } from '@/lib/settings'
+import { calculatePnLWithCommission, formatCurrency, formatDateTime, checkDailyLossLimit, checkStreaks, getTableDensityClass } from '@/lib/calculations'
 
 // Menu items
 const mainMenuItems = [
@@ -126,6 +128,7 @@ const isClerkConfigured = !!(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY)
 
 function TradeHistoryContent({ user }: { user: any }) {
   const router = useRouter()
+  const { settings } = useSettings()
   const [trades, setTrades] = useState<Trade[]>([])
   const [filteredTrades, setFilteredTrades] = useState<Trade[]>([])
   const [showImport, setShowImport] = useState(false)
@@ -134,6 +137,7 @@ function TradeHistoryContent({ user }: { user: any }) {
   const [filterMarket, setFilterMarket] = useState('ALL')
   const [sortBy, setSortBy] = useState('date')
   const [isLoading, setIsLoading] = useState(true)
+  const [alert, setAlert] = useState<string | null>(null)
 
   useEffect(() => {
     fetchTrades()
@@ -142,6 +146,31 @@ function TradeHistoryContent({ user }: { user: any }) {
   useEffect(() => {
     filterAndSortTrades()
   }, [trades, searchTerm, filterMarket, sortBy]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    // Check for alerts when trades change
+    if (trades.length > 0 && settings.alerts.enableNotifications) {
+      // Check daily loss limit
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const todaysTrades = trades.filter(t => {
+        const tradeDate = new Date(t.createdAt)
+        tradeDate.setHours(0, 0, 0, 0)
+        return tradeDate.getTime() === today.getTime()
+      })
+      
+      const lossCheck = checkDailyLossLimit(todaysTrades, settings)
+      if (lossCheck.exceeded) {
+        setAlert(`⚠️ Daily loss limit exceeded: ${formatCurrency(lossCheck.totalLoss, settings)}`)
+      }
+      
+      // Check for streaks
+      const streakCheck = checkStreaks(trades, settings)
+      if (streakCheck.alert) {
+        setAlert(streakCheck.alert)
+      }
+    }
+  }, [trades, settings]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchTrades = async () => {
     try {
@@ -235,19 +264,19 @@ function TradeHistoryContent({ user }: { user: any }) {
     a.click()
   }
 
-  // Calculate stats
+  // Calculate stats with commission
   const stats = {
     totalTrades: filteredTrades.length,
     totalPnL: filteredTrades.reduce((sum, trade) => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
+      const pnl = calculatePnLWithCommission(trade, settings) || 0
       return sum + pnl
     }, 0),
     winningTrades: filteredTrades.filter(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
+      const pnl = calculatePnLWithCommission(trade, settings) || 0
       return pnl > 0
     }).length,
     losingTrades: filteredTrades.filter(trade => {
-      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
+      const pnl = calculatePnLWithCommission(trade, settings) || 0
       return pnl < 0
     }).length,
   }
@@ -355,6 +384,21 @@ function TradeHistoryContent({ user }: { user: any }) {
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto">
               <div className="p-6 space-y-6">
+                {/* Alert */}
+                {alert && (
+                  <Card className="p-4 bg-yellow-50 border-yellow-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-yellow-800">{alert}</span>
+                      <button 
+                        onClick={() => setAlert(null)}
+                        className="text-yellow-600 hover:text-yellow-800"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </Card>
+                )}
+                
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <Card className="p-4">
@@ -364,7 +408,7 @@ function TradeHistoryContent({ user }: { user: any }) {
                   <Card className="p-4">
                     <h3 className="text-sm text-gray-600">Total P&L</h3>
                     <p className={`text-2xl font-bold ${stats.totalPnL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      ${stats.totalPnL.toFixed(2)}
+                      {formatCurrency(stats.totalPnL, settings)}
                     </p>
                   </Card>
                   <Card className="p-4">
@@ -493,20 +537,21 @@ function TradeHistoryContent({ user }: { user: any }) {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {filteredTrades.map((trade) => {
-                          const pnl = calculateMarketPnL(trade, trade.marketType || null)
+                          const pnl = calculatePnLWithCommission(trade, settings)
                           const result = pnl !== null ? (pnl >= 0 ? 'WIN' : 'LOSS') : '-'
+                          const cellClass = getTableDensityClass(settings.display.tableDensity)
                           return (
                             <tr key={trade.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {trade.entryTime ? new Date(trade.entryTime).toLocaleString() : new Date(trade.createdAt).toLocaleString()}
+                              <td className={`whitespace-nowrap text-gray-900 ${cellClass}`}>
+                                {trade.entryTime ? formatDateTime(trade.entryTime, settings) : formatDateTime(trade.createdAt, settings)}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {trade.exitTime ? new Date(trade.exitTime).toLocaleString() : '-'}
+                              <td className={`whitespace-nowrap text-gray-900 ${cellClass}`}>
+                                {trade.exitTime ? formatDateTime(trade.exitTime, settings) : '-'}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              <td className={`whitespace-nowrap font-medium text-gray-900 ${cellClass}`}>
                                 {trade.symbol}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              <td className={`whitespace-nowrap ${cellClass}`}>
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                   trade.type === 'BUY' 
                                     ? 'bg-green-100 text-green-800' 
@@ -515,21 +560,21 @@ function TradeHistoryContent({ user }: { user: any }) {
                                   {trade.type}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                ${trade.entry.toFixed(2)}
+                              <td className={`whitespace-nowrap text-gray-900 ${cellClass}`}>
+                                {formatCurrency(trade.entry, settings)}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {trade.exit ? `$${trade.exit.toFixed(2)}` : '-'}
+                              <td className={`whitespace-nowrap text-gray-900 ${cellClass}`}>
+                                {trade.exit ? formatCurrency(trade.exit, settings) : '-'}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className={`whitespace-nowrap text-gray-900 ${cellClass}`}>
                                 {trade.quantity}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              <td className={`whitespace-nowrap text-gray-900 ${cellClass}`}>
                                 <span className="px-2 py-1 bg-gray-100 rounded text-xs">
                                   {trade.marketType || 'Unknown'}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              <td className={`whitespace-nowrap ${cellClass}`}>
                                 {result !== '-' ? (
                                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                     result === 'WIN' 
@@ -542,16 +587,16 @@ function TradeHistoryContent({ user }: { user: any }) {
                                   '-'
                                 )}
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              <td className={`whitespace-nowrap ${cellClass}`}>
                                 {pnl !== null ? (
                                   <span className={pnl >= 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
-                                    ${pnl.toFixed(2)}
+                                    {formatCurrency(pnl, settings)}
                                   </span>
                                 ) : (
                                   '-'
                                 )}
                               </td>
-                              <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                              <td className={`text-gray-500 max-w-xs truncate ${cellClass}`}>
                                 {trade.notes || '-'}
                               </td>
                             </tr>
