@@ -7,6 +7,7 @@ import { TimeAnalysisService, type HourlyStats } from '@/lib/services/time-analy
 import { formatCurrency } from '@/lib/calculations'
 import { useSettings } from '@/lib/settings'
 import { cn } from '@/lib/utils'
+import { safePercent, safeToFixed } from '@/lib/utils/safe-format'
 import type { Trade } from '@/lib/db-memory'
 
 interface HourlyHeatmapProps {
@@ -121,7 +122,7 @@ export function HourlyHeatmap({ trades }: HourlyHeatmapProps) {
                 })()}
               </div>
               <div className="text-sm text-muted-foreground">
-                {Math.max(...hourlyStats.map(h => h.winRate), 0).toFixed(1)}% win rate
+                {safePercent(Math.max(...hourlyStats.map(h => h.winRate || 0), 0), 1)} win rate
               </div>
             </div>
           </div>
@@ -246,7 +247,7 @@ export function HourlyHeatmap({ trades }: HourlyHeatmapProps) {
                 
                 <div>
                   <span className="text-muted-foreground">Win Rate</span>
-                  <div className="font-bold">{selectedHour.winRate.toFixed(1)}%</div>
+                  <div className="font-bold">{safePercent(selectedHour.winRate, 1)}</div>
                 </div>
                 
                 <div>

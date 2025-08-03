@@ -21,6 +21,7 @@ import { TimeAnalysisService, type FrequencyStats, type PeriodStats } from '@/li
 import { formatCurrency } from '@/lib/calculations'
 import { useSettings } from '@/lib/settings'
 import { cn } from '@/lib/utils'
+import { safePercent, safeToFixed } from '@/lib/utils/safe-format'
 import { 
   Calendar, 
   TrendingUp, 
@@ -125,7 +126,7 @@ export function TradeFrequency({ trades }: TradeFrequencyProps) {
               const index = context.dataIndex
               const period = periodStats[index]
               return [
-                `Win Rate: ${period.winRate.toFixed(1)}%`,
+                `Win Rate: ${safePercent(period.winRate, 1)}`,
                 `Avg P&L: ${formatCurrency(period.avgPnL, settings)}`
               ]
             }

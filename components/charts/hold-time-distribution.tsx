@@ -21,6 +21,7 @@ import { TimeAnalysisService, type HoldTimeStats } from '@/lib/services/time-ana
 import { formatCurrency } from '@/lib/calculations'
 import { useSettings } from '@/lib/settings'
 import { cn } from '@/lib/utils'
+import { safePercent, safeToFixed } from '@/lib/utils/safe-format'
 import { Clock, TrendingUp, TrendingDown, Activity } from 'lucide-react'
 import type { Trade } from '@/lib/db-memory'
 
@@ -278,7 +279,7 @@ export function HoldTimeDistribution({ trades }: HoldTimeDistributionProps) {
                         range.winRate >= 60 ? "text-green-600" :
                         range.winRate >= 40 ? "text-yellow-600" : "text-red-600"
                       )}>
-                        {range.winRate.toFixed(1)}%
+                        {safePercent(range.winRate, 1)}
                       </span>
                     </td>
                     <td className={cn(
@@ -333,7 +334,7 @@ export function HoldTimeDistribution({ trades }: HoldTimeDistributionProps) {
                     <li>• Your most profitable hold time is {mostProfitableRange.range} (avg: {formatCurrency(mostProfitableRange.avgPnL, settings)})</li>
                   )}
                   {holdTimeStats.avgWinningHoldTime > holdTimeStats.avgLosingHoldTime * 1.5 && (
-                    <li>• You hold winners {((holdTimeStats.avgWinningHoldTime / holdTimeStats.avgLosingHoldTime) - 1).toFixed(0)}x longer than losers - good discipline!</li>
+                    <li>• You hold winners {safeToFixed(((holdTimeStats.avgWinningHoldTime / holdTimeStats.avgLosingHoldTime) - 1), 0)}x longer than losers - good discipline!</li>
                   )}
                   {holdTimeStats.avgLosingHoldTime > holdTimeStats.avgWinningHoldTime && (
                     <li>• ⚠️ You hold losers longer than winners - consider tighter stop losses</li>

@@ -21,6 +21,7 @@ import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { formatCurrency } from '@/lib/calculations'
 import { useSettings } from '@/lib/settings'
 import { cn } from '@/lib/utils'
+import { safePercent, safeToFixed } from '@/lib/utils/safe-format'
 import type { Trade } from '@/lib/db-memory'
 
 interface EnhancedCalendarProps {
@@ -353,7 +354,7 @@ export function EnhancedCalendar({ trades }: EnhancedCalendarProps) {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Win Rate</span>
-                <span className="font-medium">{dayData.winRate.toFixed(0)}%</span>
+                <span className="font-medium">{safePercent(dayData.winRate, 0)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">W/L</span>
@@ -438,7 +439,7 @@ export function EnhancedCalendar({ trades }: EnhancedCalendarProps) {
               <div className="text-xs text-muted-foreground space-y-1">
                 <div>{monthTrades} trades</div>
                 <div>{monthWins}W / {monthLosses}L</div>
-                <div className="font-medium">{monthWinRate.toFixed(0)}% WR</div>
+                <div className="font-medium">{safePercent(monthWinRate, 0)} WR</div>
               </div>
             </>
           ) : (
@@ -482,7 +483,7 @@ export function EnhancedCalendar({ trades }: EnhancedCalendarProps) {
             </div>
             <div>
               <div className="text-sm opacity-80">Win Rate</div>
-              <div className="text-2xl font-bold">{yearWinRate.toFixed(1)}%</div>
+              <div className="text-2xl font-bold">{safePercent(yearWinRate, 1)}</div>
             </div>
             <div>
               <div className="text-sm opacity-80">W/L Ratio</div>
@@ -726,7 +727,7 @@ export function EnhancedCalendar({ trades }: EnhancedCalendarProps) {
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
             <div className="text-xs text-muted-foreground">Win Rate</div>
             <div className="text-lg font-bold flex items-center gap-1">
-              {monthStats.winRate.toFixed(1)}%
+              {safePercent(monthStats.winRate, 1)}
               <Trophy className="h-4 w-4 text-yellow-500" />
             </div>
           </div>
@@ -824,7 +825,7 @@ export function EnhancedCalendar({ trades }: EnhancedCalendarProps) {
                   
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Win Rate</span>
-                    <span className="font-medium">{selectedDay.winRate.toFixed(1)}%</span>
+                    <span className="font-medium">{safePercent(selectedDay.winRate, 1)}</span>
                   </div>
                   
                   <div className="flex justify-between items-center">

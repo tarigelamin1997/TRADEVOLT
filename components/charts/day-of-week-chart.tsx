@@ -19,6 +19,7 @@ import { TimeAnalysisService, type DayStats } from '@/lib/services/time-analysis
 import { formatCurrency } from '@/lib/calculations'
 import { useSettings } from '@/lib/settings'
 import { cn } from '@/lib/utils'
+import { safePercent } from '@/lib/utils/safe-format'
 import type { Trade } from '@/lib/db-memory'
 
 ChartJS.register(
@@ -139,7 +140,7 @@ export function DayOfWeekChart({ trades }: DayOfWeekChartProps) {
               case 'pnl':
                 return `${label}: ${formatCurrency(value, settings)}`
               case 'winrate':
-                return `${label}: ${value.toFixed(1)}%`
+                return `${label}: ${safePercent(value, 1)}`
               default:
                 return `${label}: ${value}`
             }
@@ -313,7 +314,7 @@ export function DayOfWeekChart({ trades }: DayOfWeekChartProps) {
                         day.winRate >= 60 ? "text-green-600" :
                         day.winRate >= 40 ? "text-yellow-600" : "text-red-600"
                       )}>
-                        {day.winRate.toFixed(1)}%
+                        {safePercent(day.winRate, 1)}
                       </span>
                     </td>
                     <td className={cn(
