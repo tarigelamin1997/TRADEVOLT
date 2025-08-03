@@ -18,6 +18,7 @@ import {
 import { TimeAnalysisService } from '@/lib/services/time-analysis-service'
 import { formatCurrency } from '@/lib/calculations'
 import { useSettings } from '@/lib/settings'
+import { safeToFixed } from '@/lib/utils/safe-format'
 import type { Trade } from '@/lib/db-memory'
 
 export default function TimeAnalysisPage() {
@@ -54,13 +55,13 @@ export default function TimeAnalysisPage() {
         const dayStats = TimeAnalysisService.getDayOfWeekStats(trades)
         const frequencyStats = TimeAnalysisService.getTradeFrequency(trades)
         
-        const bestHour = hourlyStats.reduce((best, curr) => 
+        const bestHour = hourlyStats.length > 0 ? hourlyStats.reduce((best, curr) => 
           curr.totalPnL > best.totalPnL ? curr : best
-        , hourlyStats[0])
+        , hourlyStats[0]) : { hour: 0, totalPnL: 0 }
         
-        const bestDay = dayStats.reduce((best, curr) => 
+        const bestDay = dayStats.length > 0 ? dayStats.reduce((best, curr) => 
           curr.totalPnL > best.totalPnL ? curr : best
-        , dayStats[0])
+        , dayStats[0]) : { dayName: 'Monday', totalPnL: 0 }
         
         setQuickStats({
           avgHoldTime: holdTimeStats.avgHoldTime,
@@ -189,7 +190,7 @@ export default function TimeAnalysisPage() {
                 <span className="text-xs opacity-80">Daily Avg</span>
               </div>
               <div className="text-2xl font-bold">
-                {quickStats.avgTradesPerDay?.toFixed(1) || '0.0'}
+                {safeToFixed(quickStats.avgTradesPerDay, 1)}
               </div>
               <div className="text-xs opacity-80">Trades per day</div>
             </motion.div>

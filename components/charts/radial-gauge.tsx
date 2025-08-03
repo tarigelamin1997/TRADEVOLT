@@ -11,6 +11,7 @@ import {
 } from 'chart.js'
 import { Doughnut } from 'react-chartjs-2'
 import { motion } from 'framer-motion'
+import { safeToFixed } from '@/lib/utils/safe-format'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
@@ -84,7 +85,7 @@ export function RadialGauge({
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.4 }}
         >
-          {value.toFixed(1)}{unit}
+          {safeToFixed(value, 1)}{unit}
         </motion.div>
         <motion.div 
           className="text-sm text-muted-foreground"
