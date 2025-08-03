@@ -321,7 +321,7 @@ export function ExcursionStats({ userId }: { userId: string }) {
                 <div className="flex items-start gap-2">
                   <span className="text-amber-600 mt-0.5">•</span>
                   <p>
-                    You're achieving good MFE ({stats.avgMFE.toFixed(1)}%) but only capturing {stats.avgEfficiency.toFixed(0)}% of it. 
+                    You&apos;re achieving good MFE ({stats.avgMFE.toFixed(1)}%) but only capturing {stats.avgEfficiency.toFixed(0)}% of it. 
                     Consider adjusting your exit strategy to capture more profits.
                   </p>
                 </div>

@@ -74,7 +74,7 @@ export function useExcursionData(tradeId: string | null) {
     if (tradeId) {
       fetchExcursionData()
     }
-  }, [tradeId])
+  }, [tradeId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     data,

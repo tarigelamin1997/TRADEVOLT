@@ -1,5 +1,4 @@
-import { prisma } from '@/lib/db'
-import type { Trade } from '@prisma/client'
+import { prisma, type Trade } from '@/lib/db'
 import { ExcursionCalculator } from './excursion-calculator'
 import { priceDataService } from './price-data-service'
 import type { ExcursionData } from '@/lib/types/excursion'
