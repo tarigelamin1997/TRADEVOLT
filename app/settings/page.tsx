@@ -1,441 +1,641 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { 
+import {
   Sidebar,
-  SidebarProvider,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
   SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
   SidebarTrigger,
-  SidebarInset,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { 
   User,
   ChevronsUpDown,
-  Calendar,
   Home,
-  TrendingUp,
-  Search,
-  Settings,
-  Import,
-  BarChart3,
   History,
+  Plus,
+  BarChart3,
+  Settings,
+  Calendar,
+  TrendingUp,
   DollarSign,
   PieChart,
   FileText,
-  Shield,
+  Palette,
+  Globe,
+  Database,
   Bell,
-  Download,
-  Trash2,
+  Target,
   Save,
-  AlertCircle,
-  Crown,
+  RotateCcw
 } from "lucide-react"
-import { useSubscription } from '@/lib/subscription'
+import { useSettings, DEFAULT_SETTINGS, type UserSettings } from '@/lib/settings'
+import { MARKET_TYPES } from '@/lib/market-knowledge'
 
+// Menu items (same as other pages)
 const mainMenuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Trade History", url: "/history", icon: History },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "P&L Report", url: "/pnl", icon: DollarSign },
-  { title: "Import Trades", url: "#import", icon: Import },
-]
-
-const toolsMenuItems = [
-  { title: "Market Analysis", url: "/analysis", icon: TrendingUp },
-  { title: "Performance Metrics", url: "/metrics", icon: PieChart },
-  { title: "Trade Journal", url: "/journal", icon: FileText },
-  { title: "Calendar", url: "/calendar", icon: Calendar },
-]
-
-const settingsMenuItems = [
-  { title: "Search", url: "/search", icon: Search },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { icon: Home, label: 'Dashboard', href: '/dashboard' },
+  { icon: History, label: 'Trade History', href: '/history' },
+  { icon: BarChart3, label: 'Analytics', href: '/analytics' },
+  { icon: TrendingUp, label: 'Performance Metrics', href: '/metrics' },
+  { icon: Calendar, label: 'Calendar', href: '/calendar' },
+  { icon: PieChart, label: 'Market Analysis', href: '/analysis' },
+  { icon: DollarSign, label: 'P&L Report', href: '/pnl' },
+  { icon: FileText, label: 'Trade Journal', href: '/journal' },
+  { icon: Settings, label: 'Settings', href: '/settings' }
 ]
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { subscription } = useSubscription()
-  const [settings, setSettings] = useState({
-    notifications: {
-      emailAlerts: true,
-      winStreakAlerts: true,
-      lossLimitAlerts: true,
-      weeklyReport: false,
-    },
-    trading: {
-      defaultMarketType: 'FUTURES',
-      defaultQuantity: 1,
-      showConfirmation: true,
-      autoSaveJournal: true,
-    },
-    display: {
-      theme: 'light',
-      currency: 'USD',
-      timezone: 'America/New_York',
-      dateFormat: 'MM/DD/YYYY',
-    }
-  })
-  const [saved, setSaved] = useState(false)
+  const { settings, updateSettings } = useSettings()
+  const [localSettings, setLocalSettings] = useState<UserSettings>(settings)
+  const [hasChanges, setHasChanges] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
 
-  const handleMenuClick = (url: string) => {
-    router.push(url)
+  useEffect(() => {
+    setLocalSettings(settings)
+  }, [settings])
+
+  const handleChange = (section: keyof UserSettings, field: string, value: any) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }))
+    setHasChanges(true)
+    setSaveStatus('idle')
+  }
+
+  const handleNestedChange = (section: keyof UserSettings, subsection: string, field: string, value: any) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [subsection]: {
+          ...(prev[section] as any)[subsection],
+          [field]: value
+        }
+      }
+    }))
+    setHasChanges(true)
+    setSaveStatus('idle')
   }
 
   const handleSave = () => {
-    // In production, save to backend
-    localStorage.setItem('userSettings', JSON.stringify(settings))
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+    setSaveStatus('saving')
+    updateSettings(localSettings)
+    setTimeout(() => {
+      setSaveStatus('saved')
+      setHasChanges(false)
+    }, 500)
   }
 
-  const handleExportData = () => {
-    // In production, generate full data export
-    alert('Data export would download all your trades, journal entries, and settings')
-  }
-
-  const handleDeleteAccount = () => {
-    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      alert('Account deletion would be processed here')
-    }
+  const handleReset = () => {
+    setLocalSettings(DEFAULT_SETTINGS)
+    setHasChanges(true)
+    setSaveStatus('idle')
   }
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex h-screen w-full">
         <Sidebar>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {mainMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        onClick={() => handleMenuClick(item.url)}
-                        isActive={item.url === '/settings'}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Tools</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {toolsMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        onClick={() => handleMenuClick(item.url)}
-                        isActive={item.url === '/settings'}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Settings</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {settingsMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        onClick={() => handleMenuClick(item.url)}
-                        isActive={item.url === '/settings'}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-
-          <SidebarFooter>
-            <SidebarGroup>
-              <SidebarMenuButton className="w-full justify-between gap-3 h-12">
-                <div className="flex items-center gap-2">
-                  <User className="h-5 w-5 rounded-md" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-sm font-medium">Demo User</span>
-                    <span className="text-xs text-muted-foreground">demo@tradevolt.com</span>
+          <SidebarHeader>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton size="lg">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+                    <BarChart3 className="size-4" />
                   </div>
-                </div>
-                <ChevronsUpDown className="h-5 w-5" />
-              </SidebarMenuButton>
-            </SidebarGroup>
+                  <span className="font-semibold">Trading Journal</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              {mainMenuItems.map((item) => (
+                <SidebarMenuItem key={item.label}>
+                  <SidebarMenuButton 
+                    onClick={() => router.push(item.href)}
+                    className={item.href === '/settings' ? 'bg-gray-100' : ''}
+                  >
+                    <item.icon className="mr-2 h-4 w-4" />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton>
+                  <User />
+                  <span>user@example.com</span>
+                  <ChevronsUpDown className="ml-auto" />
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
 
-        <SidebarInset>
-          <div className="flex h-full flex-col">
-            <header className="flex h-16 items-center gap-4 border-b px-6">
-              <SidebarTrigger className="h-7 w-7" />
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold">Settings</h1>
-              </div>
-              <Button onClick={handleSave} className="gap-2">
-                <Save className="h-4 w-4" />
-                Save Changes
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <header className="flex items-center justify-between border-b px-6 py-4">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger />
+              <h1 className="text-xl font-semibold">Settings</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReset}
+                disabled={!hasChanges}
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset to Defaults
               </Button>
-            </header>
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={!hasChanges}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {saveStatus === 'saving' ? 'Saving...' : 
+                 saveStatus === 'saved' ? 'Saved!' : 'Save Changes'}
+              </Button>
+            </div>
+          </header>
 
-            <main className="flex-1 overflow-y-auto">
-              <div className="p-6 max-w-4xl mx-auto space-y-6">
-                {saved && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-sm text-green-800">Settings saved successfully!</span>
-                  </div>
-                )}
+          <main className="flex-1 overflow-y-auto">
+            <div className="p-6 max-w-4xl mx-auto">
+              <Tabs defaultValue="trading" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="trading">
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Trading
+                  </TabsTrigger>
+                  <TabsTrigger value="display">
+                    <Palette className="h-4 w-4 mr-2" />
+                    Display
+                  </TabsTrigger>
+                  <TabsTrigger value="data">
+                    <Database className="h-4 w-4 mr-2" />
+                    Data
+                  </TabsTrigger>
+                  <TabsTrigger value="alerts">
+                    <Bell className="h-4 w-4 mr-2" />
+                    Alerts
+                  </TabsTrigger>
+                  <TabsTrigger value="goals">
+                    <Target className="h-4 w-4 mr-2" />
+                    Goals
+                  </TabsTrigger>
+                </TabsList>
 
-                {/* Account & Subscription */}
-                <Card className="p-6">
-                  <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Crown className="h-5 w-5" />
-                    Account & Subscription
-                  </h2>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">Current Plan</p>
-                        <p className="text-sm text-gray-600">
-                          {subscription.plan === 'pro' ? 'Professional' : 'Free'} Plan
-                        </p>
+                <TabsContent value="trading" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Trading Defaults</CardTitle>
+                      <CardDescription>
+                        Set your default trading preferences to save time when entering trades
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Default Market Type</Label>
+                          <select
+                            value={localSettings.trading.defaultMarketType}
+                            onChange={(e) => handleChange('trading', 'defaultMarketType', e.target.value)}
+                            className="w-full p-2 border rounded"
+                          >
+                            {Object.entries(MARKET_TYPES).map(([key, market]) => (
+                              <option key={key} value={key}>
+                                {market.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Account Currency</Label>
+                          <select
+                            value={localSettings.trading.accountCurrency}
+                            onChange={(e) => handleChange('trading', 'accountCurrency', e.target.value)}
+                            className="w-full p-2 border rounded"
+                          >
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="JPY">JPY (¥)</option>
+                            <option value="AUD">AUD (A$)</option>
+                            <option value="CAD">CAD (C$)</option>
+                          </select>
+                        </div>
                       </div>
-                      {subscription.plan === 'free' && (
-                        <Button 
-                          variant="outline"
-                          onClick={() => router.push('/subscribe')}
-                        >
-                          Upgrade to Pro
-                        </Button>
-                      )}
-                    </div>
-                    {subscription.plan === 'pro' && (
-                      <div className="pt-2 border-t">
-                        <Button variant="outline" size="sm">
-                          Manage Subscription
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </Card>
 
-                {/* Notifications */}
-                <Card className="p-6">
-                  <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Bell className="h-5 w-5" />
-                    Notifications
-                  </h2>
-                  <div className="space-y-4">
-                    <label className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Email Alerts</p>
-                        <p className="text-sm text-gray-600">Receive trading alerts via email</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={settings.notifications.emailAlerts}
-                        onChange={(e) => setSettings({
-                          ...settings,
-                          notifications: {
-                            ...settings.notifications,
-                            emailAlerts: e.target.checked
-                          }
-                        })}
-                        className="h-4 w-4"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Win Streak Alerts</p>
-                        <p className="text-sm text-gray-600">Get notified on winning streaks</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={settings.notifications.winStreakAlerts}
-                        onChange={(e) => setSettings({
-                          ...settings,
-                          notifications: {
-                            ...settings.notifications,
-                            winStreakAlerts: e.target.checked
-                          }
-                        })}
-                        className="h-4 w-4"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Loss Limit Alerts</p>
-                        <p className="text-sm text-gray-600">Alert when daily loss limit is reached</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={settings.notifications.lossLimitAlerts}
-                        onChange={(e) => setSettings({
-                          ...settings,
-                          notifications: {
-                            ...settings.notifications,
-                            lossLimitAlerts: e.target.checked
-                          }
-                        })}
-                        className="h-4 w-4"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Weekly Performance Report</p>
-                        <p className="text-sm text-gray-600">
-                          Receive weekly summary via email
-                          {subscription.plan === 'free' && (
-                            <span className="text-blue-600 ml-1">(Pro only)</span>
-                          )}
-                        </p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={settings.notifications.weeklyReport}
-                        disabled={subscription.plan === 'free'}
-                        onChange={(e) => setSettings({
-                          ...settings,
-                          notifications: {
-                            ...settings.notifications,
-                            weeklyReport: e.target.checked
-                          }
-                        })}
-                        className="h-4 w-4"
-                      />
-                    </label>
-                  </div>
-                </Card>
-
-                {/* Trading Preferences */}
-                <Card className="p-6">
-                  <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Trading Preferences
-                  </h2>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block mb-2">
-                        <p className="font-medium mb-1">Default Market Type</p>
-                        <select
-                          value={settings.trading.defaultMarketType}
-                          onChange={(e) => setSettings({
-                            ...settings,
-                            trading: {
-                              ...settings.trading,
-                              defaultMarketType: e.target.value
-                            }
-                          })}
-                          className="w-full p-2 border rounded-md"
-                        >
-                          <option value="FUTURES">Futures</option>
-                          <option value="STOCKS">Stocks</option>
-                          <option value="OPTIONS">Options</option>
-                          <option value="FOREX">Forex</option>
-                          <option value="CRYPTO">Crypto</option>
-                        </select>
-                      </label>
-                    </div>
-                    <div>
-                      <label className="block mb-2">
-                        <p className="font-medium mb-1">Default Quantity</p>
-                        <input
+                      <div className="space-y-2">
+                        <Label>Starting Balance</Label>
+                        <Input
                           type="number"
-                          value={settings.trading.defaultQuantity}
-                          onChange={(e) => setSettings({
-                            ...settings,
-                            trading: {
-                              ...settings.trading,
-                              defaultQuantity: parseInt(e.target.value) || 1
-                            }
-                          })}
-                          className="w-full p-2 border rounded-md"
-                          min="1"
+                          value={localSettings.trading.startingBalance}
+                          onChange={(e) => handleChange('trading', 'startingBalance', parseFloat(e.target.value) || 0)}
+                          placeholder="10000"
                         />
-                      </label>
-                    </div>
-                    <label className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Show Trade Confirmation</p>
-                        <p className="text-sm text-gray-600">Confirm before adding trades</p>
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={settings.trading.showConfirmation}
-                        onChange={(e) => setSettings({
-                          ...settings,
-                          trading: {
-                            ...settings.trading,
-                            showConfirmation: e.target.checked
-                          }
-                        })}
-                        className="h-4 w-4"
-                      />
-                    </label>
-                  </div>
-                </Card>
 
-                {/* Data & Privacy */}
-                <Card className="p-6">
-                  <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    Data & Privacy
-                  </h2>
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-medium mb-2">Export Your Data</h3>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Download all your trades, journal entries, and settings
-                      </p>
-                      <Button variant="outline" onClick={handleExportData} className="gap-2">
-                        <Download className="h-4 w-4" />
-                        Export All Data
-                      </Button>
-                    </div>
-                    <div className="pt-4 border-t">
-                      <h3 className="font-medium mb-2 text-red-600">Danger Zone</h3>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Once you delete your account, there is no going back
-                      </p>
-                      <Button 
-                        variant="outline" 
-                        className="gap-2 text-red-600 hover:text-red-700"
-                        onClick={handleDeleteAccount}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        Delete Account
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            </main>
-          </div>
-        </SidebarInset>
+                      <div className="border-t pt-4">
+                        <h3 className="font-medium mb-4">Commission & Fees</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Per Trade Commission</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={localSettings.trading.commission.perTrade}
+                              onChange={(e) => handleNestedChange('trading', 'commission', 'perTrade', parseFloat(e.target.value) || 0)}
+                              placeholder="0.00"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Per Contract/Lot Fee</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={localSettings.trading.commission.perUnit}
+                              onChange={(e) => handleNestedChange('trading', 'commission', 'perUnit', parseFloat(e.target.value) || 0)}
+                              placeholder="0.00"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <h3 className="font-medium mb-4">Risk Management Defaults</h3>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <Label>Max Risk per Trade (%)</Label>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              value={localSettings.trading.riskManagement.maxRiskPerTrade}
+                              onChange={(e) => handleNestedChange('trading', 'riskManagement', 'maxRiskPerTrade', parseFloat(e.target.value) || 0)}
+                              placeholder="2"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Stop Loss (%)</Label>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              value={localSettings.trading.riskManagement.defaultStopLoss}
+                              onChange={(e) => handleNestedChange('trading', 'riskManagement', 'defaultStopLoss', parseFloat(e.target.value) || 0)}
+                              placeholder="1"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Position Size</Label>
+                            <Input
+                              type="number"
+                              value={localSettings.trading.riskManagement.defaultPositionSize}
+                              onChange={(e) => handleNestedChange('trading', 'riskManagement', 'defaultPositionSize', parseFloat(e.target.value) || 0)}
+                              placeholder="100"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="display" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Display Preferences</CardTitle>
+                      <CardDescription>
+                        Customize how information is displayed throughout the app
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Theme</Label>
+                          <select
+                            value={localSettings.display.theme}
+                            onChange={(e) => handleChange('display', 'theme', e.target.value)}
+                            className="w-full p-2 border rounded"
+                          >
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                            <option value="system">System</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Timezone</Label>
+                          <select
+                            value={localSettings.display.timezone}
+                            onChange={(e) => handleChange('display', 'timezone', e.target.value)}
+                            className="w-full p-2 border rounded"
+                          >
+                            <option value={localSettings.display.timezone}>
+                              {localSettings.display.timezone}
+                            </option>
+                            <option value="America/New_York">New York (EST/EDT)</option>
+                            <option value="America/Chicago">Chicago (CST/CDT)</option>
+                            <option value="America/Los_Angeles">Los Angeles (PST/PDT)</option>
+                            <option value="Europe/London">London (GMT/BST)</option>
+                            <option value="Europe/Frankfurt">Frankfurt (CET/CEST)</option>
+                            <option value="Asia/Tokyo">Tokyo (JST)</option>
+                            <option value="Asia/Singapore">Singapore (SGT)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Date Format</Label>
+                          <select
+                            value={localSettings.display.dateFormat}
+                            onChange={(e) => handleChange('display', 'dateFormat', e.target.value)}
+                            className="w-full p-2 border rounded"
+                          >
+                            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Time Format</Label>
+                          <select
+                            value={localSettings.display.timeFormat}
+                            onChange={(e) => handleChange('display', 'timeFormat', e.target.value)}
+                            className="w-full p-2 border rounded"
+                          >
+                            <option value="12h">12-hour (AM/PM)</option>
+                            <option value="24h">24-hour</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <h3 className="font-medium mb-4">Number Format</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Decimal Places</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              max="6"
+                              value={localSettings.display.numberFormat.decimalPlaces}
+                              onChange={(e) => handleNestedChange('display', 'numberFormat', 'decimalPlaces', parseInt(e.target.value) || 2)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label>Use Thousand Separators</Label>
+                            <Switch
+                              checked={localSettings.display.numberFormat.thousandSeparator}
+                              onCheckedChange={(checked) => handleNestedChange('display', 'numberFormat', 'thousandSeparator', checked)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Table Density</Label>
+                        <select
+                          value={localSettings.display.tableDensity}
+                          onChange={(e) => handleChange('display', 'tableDensity', e.target.value)}
+                          className="w-full p-2 border rounded"
+                        >
+                          <option value="compact">Compact</option>
+                          <option value="comfortable">Comfortable</option>
+                          <option value="spacious">Spacious</option>
+                        </select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="data" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Data Management</CardTitle>
+                      <CardDescription>
+                        Configure how your data is imported, exported, and managed
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Auto-Save Trades</Label>
+                          <p className="text-sm text-gray-500">Automatically save draft trades as you type</p>
+                        </div>
+                        <Switch
+                          checked={localSettings.data.autoSave}
+                          onCheckedChange={(checked) => handleChange('data', 'autoSave', checked)}
+                        />
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <h3 className="font-medium mb-4">CSV Import Settings</h3>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label>Default Date Format</Label>
+                            <Input
+                              value={localSettings.data.csvImport.defaultDateFormat}
+                              onChange={(e) => handleNestedChange('data', 'csvImport', 'defaultDateFormat', e.target.value)}
+                              placeholder="YYYY-MM-DD"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label>Skip First Row (Headers)</Label>
+                            <Switch
+                              checked={localSettings.data.csvImport.skipFirstRow}
+                              onCheckedChange={(checked) => handleNestedChange('data', 'csvImport', 'skipFirstRow', checked)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <h3 className="font-medium mb-4">Export Settings</h3>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label>Default Export Format</Label>
+                            <select
+                              value={localSettings.data.export.defaultFormat}
+                              onChange={(e) => handleNestedChange('data', 'export', 'defaultFormat', e.target.value)}
+                              className="w-full p-2 border rounded"
+                            >
+                              <option value="csv">CSV</option>
+                              <option value="json">JSON</option>
+                              <option value="pdf">PDF Report</option>
+                            </select>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label>Include Open Trades</Label>
+                            <Switch
+                              checked={localSettings.data.export.includeOpenTrades}
+                              onCheckedChange={(checked) => handleNestedChange('data', 'export', 'includeOpenTrades', checked)}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <Label>Include Notes</Label>
+                            <Switch
+                              checked={localSettings.data.export.includeNotes}
+                              onCheckedChange={(checked) => handleNestedChange('data', 'export', 'includeNotes', checked)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="alerts" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Alerts & Notifications</CardTitle>
+                      <CardDescription>
+                        Set up alerts to help you stay on track with your trading
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Enable Notifications</Label>
+                          <p className="text-sm text-gray-500">Get alerts for important trading events</p>
+                        </div>
+                        <Switch
+                          checked={localSettings.alerts.enableNotifications}
+                          onCheckedChange={(checked) => handleChange('alerts', 'enableNotifications', checked)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Daily Loss Limit Alert</Label>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500">Alert me when daily losses exceed</span>
+                          <Input
+                            type="number"
+                            className="w-24"
+                            value={localSettings.alerts.dailyLossLimit}
+                            onChange={(e) => handleChange('alerts', 'dailyLossLimit', parseFloat(e.target.value) || 0)}
+                          />
+                          <span className="text-gray-500">{localSettings.trading.accountCurrency}</span>
+                        </div>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <h3 className="font-medium mb-4">Streak Alerts</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Winning Streak Alert</Label>
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-500">Alert after</span>
+                              <Input
+                                type="number"
+                                className="w-16"
+                                value={localSettings.alerts.streakAlerts.winning}
+                                onChange={(e) => handleNestedChange('alerts', 'streakAlerts', 'winning', parseInt(e.target.value) || 0)}
+                              />
+                              <span className="text-gray-500">wins in a row</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Losing Streak Alert</Label>
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-500">Alert after</span>
+                              <Input
+                                type="number"
+                                className="w-16"
+                                value={localSettings.alerts.streakAlerts.losing}
+                                onChange={(e) => handleNestedChange('alerts', 'streakAlerts', 'losing', parseInt(e.target.value) || 0)}
+                              />
+                              <span className="text-gray-500">losses in a row</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="goals" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Trading Goals</CardTitle>
+                      <CardDescription>
+                        Set targets to track your progress and stay motivated
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Monthly Profit Target</Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            value={localSettings.goals.monthlyProfitTarget}
+                            onChange={(e) => handleChange('goals', 'monthlyProfitTarget', parseFloat(e.target.value) || 0)}
+                            placeholder="1000"
+                          />
+                          <span className="text-gray-500">{localSettings.trading.accountCurrency}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Win Rate Target</Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={localSettings.goals.winRateTarget}
+                            onChange={(e) => handleChange('goals', 'winRateTarget', parseFloat(e.target.value) || 0)}
+                            placeholder="60"
+                          />
+                          <span className="text-gray-500">%</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Maximum Drawdown Limit</Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={localSettings.goals.maxDrawdownLimit}
+                            onChange={(e) => handleChange('goals', 'maxDrawdownLimit', parseFloat(e.target.value) || 0)}
+                            placeholder="10"
+                          />
+                          <span className="text-gray-500">%</span>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          Alert when drawdown exceeds this percentage of your account
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </main>
+        </div>
       </div>
     </SidebarProvider>
   )
