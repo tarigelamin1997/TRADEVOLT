@@ -14,6 +14,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { safeToFixed } from '@/lib/utils/safe-format'
 import {
   ResponsiveContainer,
   Treemap,
@@ -115,7 +116,7 @@ export function SetupPerformanceMatrix({ setupMetrics }: SetupPerformanceMatrixP
               fill="#fff" 
               fontSize={12}
             >
-              ${value.toFixed(0)}
+              ${safeToFixed(value, 0)}
             </text>
             {height > 70 && (
               <text 
@@ -126,7 +127,7 @@ export function SetupPerformanceMatrix({ setupMetrics }: SetupPerformanceMatrixP
                 fontSize={10}
                 opacity={0.8}
               >
-                {winRate.toFixed(1)}% WR
+                {safeToFixed(winRate, 1)}% WR
               </text>
             )}
           </>
@@ -168,7 +169,7 @@ export function SetupPerformanceMatrix({ setupMetrics }: SetupPerformanceMatrixP
                       "text-lg font-semibold",
                       setup.winRate >= 50 ? "text-green-600" : "text-red-600"
                     )}>
-                      {setup.winRate.toFixed(1)}%
+                      {safeToFixed(setup.winRate, 1)}%
                     </p>
                   </div>
                   <div className="text-right">
@@ -185,7 +186,7 @@ export function SetupPerformanceMatrix({ setupMetrics }: SetupPerformanceMatrixP
                       "text-sm font-medium",
                       setup.expectancy >= 0 ? "text-green-600" : "text-red-600"
                     )}>
-                      ${setup.expectancy.toFixed(2)}
+                      ${safeToFixed(setup.expectancy, 2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -194,7 +195,7 @@ export function SetupPerformanceMatrix({ setupMetrics }: SetupPerformanceMatrixP
                       "text-sm font-medium",
                       setup.totalPnL >= 0 ? "text-green-600" : "text-red-600"
                     )}>
-                      ${setup.totalPnL.toFixed(2)}
+                      ${safeToFixed(setup.totalPnL, 2)}
                     </span>
                   </div>
                 </div>
@@ -231,7 +232,7 @@ export function SetupPerformanceMatrix({ setupMetrics }: SetupPerformanceMatrixP
                           <BarChart3 className="h-3 w-3 text-gray-600" />
                         )}
                         <span className="text-xs font-medium">
-                          {(setup.confidenceCorrelation * 100).toFixed(0)}%
+                          {safeToFixed(setup.confidenceCorrelation * 100, 0)}%
                         </span>
                       </div>
                     </div>
@@ -270,8 +271,8 @@ export function SetupPerformanceMatrix({ setupMetrics }: SetupPerformanceMatrixP
                         return (
                           <div className="bg-white p-3 rounded-lg shadow-lg border">
                             <p className="font-semibold">{data.name}</p>
-                            <p className="text-sm">P&L: ${data.value.toFixed(2)}</p>
-                            <p className="text-sm">Win Rate: {data.winRate.toFixed(1)}%</p>
+                            <p className="text-sm">P&L: ${safeToFixed(data.value, 2)}</p>
+                            <p className="text-sm">Win Rate: {safeToFixed(data.winRate, 1)}%</p>
                             <p className="text-sm">Trades: {data.trades}</p>
                           </div>
                         )
@@ -325,10 +326,10 @@ export function SetupPerformanceMatrix({ setupMetrics }: SetupPerformanceMatrixP
                         return (
                           <div className="bg-white p-3 rounded-lg shadow-lg border">
                             <p className="font-semibold">{data.name}</p>
-                            <p className="text-sm">Win Rate: {data.x.toFixed(1)}%</p>
-                            <p className="text-sm">Expectancy: ${data.y.toFixed(2)}</p>
+                            <p className="text-sm">Win Rate: {safeToFixed(data.x, 1)}%</p>
+                            <p className="text-sm">Expectancy: ${safeToFixed(data.y, 2)}</p>
                             <p className="text-sm">Trades: {data.trades}</p>
-                            <p className="text-sm">Total P&L: ${data.totalPnL.toFixed(2)}</p>
+                            <p className="text-sm">Total P&L: ${safeToFixed(data.totalPnL, 2)}</p>
                           </div>
                         )
                       }
@@ -384,7 +385,7 @@ export function SetupPerformanceMatrix({ setupMetrics }: SetupPerformanceMatrixP
                         border: '1px solid #e5e7eb',
                         borderRadius: '6px'
                       }}
-                      formatter={(value: number) => `$${value.toFixed(2)}`}
+                      formatter={(value: number) => `$${safeToFixed(value, 2)}`}
                     />
                     <Legend />
                     {setupMetrics.slice(0, 5).map((setup, index) => (

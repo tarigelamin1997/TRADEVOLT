@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { safeToFixed } from '@/lib/utils/safe-format'
 
 interface MarketInsightsWidgetProps {
   trades: Trade[]
@@ -41,7 +42,7 @@ export function MarketInsightsWidget({ trades }: MarketInsightsWidgetProps) {
       type: 'success' as const,
       icon: TrendingUp,
       title: 'Top Performing Symbol',
-      message: `${topSymbol.symbol} generated $${topSymbol.totalPnL.toFixed(2)} profit`,
+      message: `${topSymbol.symbol} generated $${safeToFixed(topSymbol.totalPnL, 2)} profit`,
       action: () => router.push('/market-analysis?tab=symbols')
     })
   }
@@ -52,7 +53,7 @@ export function MarketInsightsWidget({ trades }: MarketInsightsWidgetProps) {
       type: 'info' as const,
       icon: BarChart3,
       title: 'Best Market Type',
-      message: `${marketComparison.bestMarket} has ${bestMarketData.metrics.winRate.toFixed(1)}% win rate`,
+      message: `${marketComparison.bestMarket} has ${safeToFixed(bestMarketData.metrics.winRate, 1)}% win rate`,
       action: () => router.push('/market-analysis?tab=markets')
     })
   }
@@ -72,7 +73,7 @@ export function MarketInsightsWidget({ trades }: MarketInsightsWidgetProps) {
       type: 'success' as const,
       icon: Activity,
       title: 'High Win Rate Setup',
-      message: `"${topSetup.setup}" wins ${topSetup.winRate.toFixed(1)}% of the time`,
+      message: `"${topSetup.setup}" wins ${safeToFixed(topSetup.winRate, 1)}% of the time`,
       action: () => router.push('/market-analysis?tab=setups')
     })
   }

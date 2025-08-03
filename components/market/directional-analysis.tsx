@@ -12,6 +12,7 @@ import {
   BarChart3
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { safeToFixed } from '@/lib/utils/safe-format'
 import {
   ResponsiveContainer,
   BarChart,
@@ -121,7 +122,7 @@ export function DirectionalAnalysis({ metrics, totalTrades }: DirectionalAnalysi
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-sm font-medium text-white mix-blend-difference">
-                      {metrics.biasStrength.toFixed(0)}% Strength
+                      {safeToFixed(metrics.biasStrength, 0)}% Strength
                     </span>
                   </div>
                 </div>
@@ -177,7 +178,7 @@ export function DirectionalAnalysis({ metrics, totalTrades }: DirectionalAnalysi
                       "text-2xl font-bold",
                       direction.winRate >= 50 ? "text-green-600" : "text-red-600"
                     )}>
-                      {direction.winRate.toFixed(1)}%
+                      {safeToFixed(direction.winRate, 1)}%
                     </p>
                   </div>
                   <div>
@@ -194,7 +195,7 @@ export function DirectionalAnalysis({ metrics, totalTrades }: DirectionalAnalysi
                       "font-semibold",
                       direction.totalPnL >= 0 ? "text-green-600" : "text-red-600"
                     )}>
-                      ${direction.totalPnL.toFixed(2)}
+                      ${safeToFixed(direction.totalPnL, 2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -203,7 +204,7 @@ export function DirectionalAnalysis({ metrics, totalTrades }: DirectionalAnalysi
                       "font-medium",
                       direction.avgPnL >= 0 ? "text-green-600" : "text-red-600"
                     )}>
-                      ${direction.avgPnL.toFixed(2)}
+                      ${safeToFixed(direction.avgPnL, 2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -214,7 +215,7 @@ export function DirectionalAnalysis({ metrics, totalTrades }: DirectionalAnalysi
                       direction.profitFactor >= 1 ? "text-amber-600" :
                       "text-red-600"
                     )}>
-                      {direction.profitFactor.toFixed(2)}
+                      {safeToFixed(direction.profitFactor, 2)}
                     </span>
                   </div>
                 </div>
@@ -225,7 +226,7 @@ export function DirectionalAnalysis({ metrics, totalTrades }: DirectionalAnalysi
                     <Clock className="h-4 w-4" />
                     <span>Avg Hold Time</span>
                   </div>
-                  <span className="font-medium">{direction.avgHoldTime.toFixed(1)}h</span>
+                  <span className="font-medium">{safeToFixed(direction.avgHoldTime, 1)}h</span>
                 </div>
               </CardContent>
             </Card>
@@ -253,7 +254,7 @@ export function DirectionalAnalysis({ metrics, totalTrades }: DirectionalAnalysi
                     <XAxis dataKey="name" />
                     <YAxis domain={[0, 100]} />
                     <Tooltip 
-                      formatter={(value: number) => `${value.toFixed(1)}%`}
+                      formatter={(value: number) => `${safeToFixed(value, 1)}%`}
                       contentStyle={{ 
                         backgroundColor: 'rgba(255, 255, 255, 0.95)',
                         border: '1px solid #e5e7eb',

@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { safeToFixed } from '@/lib/utils/safe-format'
 
 interface SymbolPerformanceTableProps {
   symbols: SymbolMetrics[]
@@ -89,13 +90,13 @@ export function SymbolPerformanceTable({ symbols }: SymbolPerformanceTableProps)
     const rows = filteredAndSortedSymbols.map(s => [
       s.symbol,
       s.totalTrades,
-      s.winRate.toFixed(2),
-      s.totalPnL.toFixed(2),
-      s.avgWin.toFixed(2),
-      s.avgLoss.toFixed(2),
-      s.profitFactor.toFixed(2),
-      s.sharpeRatio.toFixed(2),
-      s.maxDrawdown.toFixed(2)
+      safeToFixed(s.winRate, 2),
+      safeToFixed(s.totalPnL, 2),
+      safeToFixed(s.avgWin, 2),
+      safeToFixed(s.avgLoss, 2),
+      safeToFixed(s.profitFactor, 2),
+      safeToFixed(s.sharpeRatio, 2),
+      safeToFixed(s.maxDrawdown, 2)
     ])
     
     const csv = [headers, ...rows].map(row => row.join(',')).join('\n')
@@ -235,7 +236,7 @@ export function SymbolPerformanceTable({ symbols }: SymbolPerformanceTableProps)
                           "font-medium",
                           symbol.winRate >= 50 ? "text-green-600" : "text-red-600"
                         )}>
-                          {symbol.winRate.toFixed(1)}%
+                          {safeToFixed(symbol.winRate, 1)}%
                         </span>
                       </TableCell>
                       <TableCell>
@@ -248,15 +249,15 @@ export function SymbolPerformanceTable({ symbols }: SymbolPerformanceTableProps)
                             "font-medium",
                             symbol.totalPnL >= 0 ? "text-green-600" : "text-red-600"
                           )}>
-                            ${Math.abs(symbol.totalPnL).toFixed(2)}
+                            ${safeToFixed(Math.abs(symbol.totalPnL), 2)}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          <span className="text-green-600">+${symbol.avgWin.toFixed(2)}</span>
+                          <span className="text-green-600">+${safeToFixed(symbol.avgWin, 2)}</span>
                           <span className="text-muted-foreground"> / </span>
-                          <span className="text-red-600">${symbol.avgLoss.toFixed(2)}</span>
+                          <span className="text-red-600">${safeToFixed(symbol.avgLoss, 2)}</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -265,7 +266,7 @@ export function SymbolPerformanceTable({ symbols }: SymbolPerformanceTableProps)
                           symbol.profitFactor >= 1 ? "text-amber-600" : 
                           "text-red-600"
                         )}>
-                          {symbol.profitFactor === Infinity ? '∞' : symbol.profitFactor.toFixed(2)}
+                          {symbol.profitFactor === Infinity ? '∞' : safeToFixed(symbol.profitFactor, 2)}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -274,7 +275,7 @@ export function SymbolPerformanceTable({ symbols }: SymbolPerformanceTableProps)
                           symbol.sharpeRatio >= 0 ? "text-amber-600" : 
                           "text-red-600"
                         )}>
-                          {symbol.sharpeRatio.toFixed(2)}
+                          {safeToFixed(symbol.sharpeRatio, 2)}
                         </span>
                       </TableCell>
                     </TableRow>
@@ -301,7 +302,7 @@ export function SymbolPerformanceTable({ symbols }: SymbolPerformanceTableProps)
                                         "ml-1",
                                         symbol.longPerformance.winRate >= 50 ? "text-green-600" : "text-red-600"
                                       )}>
-                                        {symbol.longPerformance.winRate.toFixed(1)}%
+                                        {safeToFixed(symbol.longPerformance.winRate, 1)}%
                                       </span>
                                     </span>
                                   </div>
@@ -313,7 +314,7 @@ export function SymbolPerformanceTable({ symbols }: SymbolPerformanceTableProps)
                                         "ml-1",
                                         symbol.shortPerformance.winRate >= 50 ? "text-green-600" : "text-red-600"
                                       )}>
-                                        {symbol.shortPerformance.winRate.toFixed(1)}%
+                                        {safeToFixed(symbol.shortPerformance.winRate, 1)}%
                                       </span>
                                     </span>
                                   </div>
@@ -326,11 +327,11 @@ export function SymbolPerformanceTable({ symbols }: SymbolPerformanceTableProps)
                                 <div className="space-y-1">
                                   <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Max Drawdown</span>
-                                    <span className="text-red-600">-${symbol.maxDrawdown.toFixed(2)}</span>
+                                    <span className="text-red-600">-${safeToFixed(symbol.maxDrawdown, 2)}</span>
                                   </div>
                                   <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Avg Hold Time</span>
-                                    <span>{symbol.avgHoldTime.toFixed(1)}h</span>
+                                    <span>{safeToFixed(symbol.avgHoldTime, 1)}h</span>
                                   </div>
                                 </div>
                               </div>
@@ -342,8 +343,8 @@ export function SymbolPerformanceTable({ symbols }: SymbolPerformanceTableProps)
                                   <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Best Trade</span>
                                     <span className="text-green-600">
-                                      {symbol.bestTrade ? 
-                                        `+$${((symbol.bestTrade.exit! - symbol.bestTrade.entry) * symbol.bestTrade.quantity).toFixed(2)}` : 
+                                      {symbol.bestTrade && symbol.bestTrade.exit !== null && symbol.bestTrade.exit !== undefined ? 
+                                        `+$${safeToFixed((symbol.bestTrade.exit - symbol.bestTrade.entry) * symbol.bestTrade.quantity, 2)}` : 
                                         'N/A'
                                       }
                                     </span>
@@ -351,8 +352,8 @@ export function SymbolPerformanceTable({ symbols }: SymbolPerformanceTableProps)
                                   <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Worst Trade</span>
                                     <span className="text-red-600">
-                                      {symbol.worstTrade ? 
-                                        `-$${Math.abs((symbol.worstTrade.exit! - symbol.worstTrade.entry) * symbol.worstTrade.quantity).toFixed(2)}` : 
+                                      {symbol.worstTrade && symbol.worstTrade.exit !== null && symbol.worstTrade.exit !== undefined ? 
+                                        `-$${safeToFixed(Math.abs((symbol.worstTrade.exit - symbol.worstTrade.entry) * symbol.worstTrade.quantity), 2)}` : 
                                         'N/A'
                                       }
                                     </span>

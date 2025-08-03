@@ -12,6 +12,7 @@ import {
   BarChart3
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { safeToFixed } from '@/lib/utils/safe-format'
 import {
   Radar,
   RadarChart,
@@ -117,7 +118,7 @@ export function MarketTypeComparison({ marketMetrics, timeSeriesData }: MarketTy
                     "text-lg font-semibold",
                     market.metrics.totalPnL >= 0 ? "text-green-600" : "text-red-600"
                   )}>
-                    ${Math.abs(market.metrics.totalPnL).toFixed(2)}
+                    ${safeToFixed(Math.abs(market.metrics.totalPnL), 2)}
                   </span>
                 </div>
 
@@ -135,7 +136,7 @@ export function MarketTypeComparison({ marketMetrics, timeSeriesData }: MarketTy
                       />
                     </div>
                     <span className="text-sm font-medium w-12 text-right">
-                      {market.metrics.winRate.toFixed(1)}%
+                      {safeToFixed(market.metrics.winRate, 1)}%
                     </span>
                   </div>
                 </div>
@@ -152,7 +153,7 @@ export function MarketTypeComparison({ marketMetrics, timeSeriesData }: MarketTy
                       "text-sm font-medium",
                       market.metrics.avgPnL >= 0 ? "text-green-600" : "text-red-600"
                     )}>
-                      ${market.metrics.avgPnL.toFixed(2)}
+                      ${safeToFixed(market.metrics.avgPnL, 2)}
                     </p>
                   </div>
                 </div>
@@ -170,7 +171,7 @@ export function MarketTypeComparison({ marketMetrics, timeSeriesData }: MarketTy
                       "text-sm font-medium",
                       market.comparison.vsOverall >= 0 ? "text-green-600" : "text-red-600"
                     )}>
-                      {market.comparison.vsOverall >= 0 ? '+' : ''}{market.comparison.vsOverall.toFixed(1)}%
+                      {market.comparison.vsOverall >= 0 ? '+' : ''}{safeToFixed(market.comparison.vsOverall, 1)}%
                     </span>
                   </div>
                 </div>
@@ -192,11 +193,11 @@ export function MarketTypeComparison({ marketMetrics, timeSeriesData }: MarketTy
                   <div className="pt-2 border-t text-xs">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Commission</span>
-                      <span className="text-red-600">-${market.metrics.commission.toFixed(2)}</span>
+                      <span className="text-red-600">-${safeToFixed(market.metrics.commission, 2)}</span>
                     </div>
                     <div className="flex justify-between mt-1">
                       <span className="text-muted-foreground">Slippage</span>
-                      <span className="text-red-600">-${market.metrics.slippage.toFixed(2)}</span>
+                      <span className="text-red-600">-${safeToFixed(market.metrics.slippage, 2)}</span>
                     </div>
                   </div>
                 )}
