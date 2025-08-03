@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuthUser } from '@/lib/auth-utils'
+import { useAuthUser } from '@/lib/auth-wrapper'
 import {
   Sidebar,
   SidebarContent,

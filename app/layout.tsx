@@ -4,6 +4,7 @@ import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
 import { SubscriptionProvider } from '@/lib/subscription'
 import { ThemeProvider } from '@/lib/theme-provider'
+import { AuthProvider } from '@/lib/auth-wrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,11 +30,13 @@ export default function RootLayout({
       <ClerkProvider>
         <html lang="en" suppressHydrationWarning>
           <body className={inter.className}>
-            <ThemeProvider>
-              <SubscriptionProvider>
-                {children}
-              </SubscriptionProvider>
-            </ThemeProvider>
+            <AuthProvider>
+              <ThemeProvider>
+                <SubscriptionProvider>
+                  {children}
+                </SubscriptionProvider>
+              </ThemeProvider>
+            </AuthProvider>
           </body>
         </html>
       </ClerkProvider>
@@ -44,11 +47,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider>
-          <SubscriptionProvider>
-            {children}
-          </SubscriptionProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <SubscriptionProvider>
+              {children}
+            </SubscriptionProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )
