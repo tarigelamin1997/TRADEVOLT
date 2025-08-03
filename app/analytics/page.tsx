@@ -67,19 +67,7 @@ const settingsMenuItems = [
   { title: "Settings", url: "/settings", icon: Settings },
 ]
 
-interface Trade {
-  id: string
-  symbol: string
-  type: 'BUY' | 'SELL'
-  entry: number
-  exit?: number | null
-  quantity: number
-  notes?: string | null
-  marketType?: string | null
-  createdAt: string
-  entryTime?: string | null
-  exitTime?: string | null
-}
+import type { Trade } from '@/lib/db-memory'
 
 export default function AnalyticsPage() {
   const router = useRouter()

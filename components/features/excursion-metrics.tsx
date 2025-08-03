@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendingDown, TrendingUp, Target, Flag, Zap } from 'lucide-react'
-import type { Trade } from '@prisma/client'
+import type { Trade } from '@/lib/db-memory'
 import type { ExcursionData } from '@/lib/types/excursion'
 import { RunningPnLChart } from '@/components/charts/running-pnl-chart'
 import { ExcursionCalculator } from '@/lib/services/excursion-calculator'

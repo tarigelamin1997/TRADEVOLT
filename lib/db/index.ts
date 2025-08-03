@@ -1,7 +1,7 @@
 // Export the appropriate database implementation
-// For now, using the mock Prisma client with in-memory database
+// For now, using the in-memory database directly
 
-export { prisma } from '../prisma-mock'
+// Re-export types from db-memory
+export type { Trade } from '../db-memory'
 
-// Re-export types
-export type { Trade, User, TradePriceData, TradeExcursion } from '../prisma-mock'
+// Note: prisma is not exported as we're using db-memory functions directly
