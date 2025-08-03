@@ -70,16 +70,16 @@ export function BehavioralSummaryCard({ trades }: BehavioralSummaryCardProps) {
         
         <CardContent>
           <div className="space-y-4">
-            {/* Zella Score */}
+            {/* Volt Score */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Zella Score™</p>
+                <p className="text-sm text-muted-foreground">Volt Score™</p>
                 <div className="flex items-baseline gap-2">
-                  <span className={cn("text-3xl font-bold", getScoreColor(metrics.zellaScore))}>
-                    {metrics.zellaScore}
+                  <span className={cn("text-3xl font-bold", getScoreColor(metrics.voltScore))}>
+                    {metrics.voltScore}
                   </span>
-                  <span className={cn("text-sm", getScoreColor(metrics.zellaScore))}>
-                    {getScoreLabel(metrics.zellaScore)}
+                  <span className={cn("text-sm", getScoreColor(metrics.voltScore))}>
+                    {getScoreLabel(metrics.voltScore)}
                   </span>
                 </div>
               </div>
@@ -97,11 +97,11 @@ export function BehavioralSummaryCard({ trades }: BehavioralSummaryCardProps) {
                   <motion.path
                     d="M 10 45 A 35 35 0 0 1 90 45"
                     fill="none"
-                    stroke={metrics.zellaScore >= 60 ? '#10b981' : metrics.zellaScore >= 40 ? '#f59e0b' : '#ef4444'}
+                    stroke={metrics.voltScore >= 60 ? '#10b981' : metrics.voltScore >= 40 ? '#f59e0b' : '#ef4444'}
                     strokeWidth="8"
                     strokeLinecap="round"
                     initial={{ pathLength: 0 }}
-                    animate={{ pathLength: metrics.zellaScore / 100 }}
+                    animate={{ pathLength: metrics.voltScore / 100 }}
                     transition={{ duration: 1 }}
                   />
                 </svg>
@@ -152,12 +152,12 @@ export function BehavioralSummaryCard({ trades }: BehavioralSummaryCardProps) {
             {/* Quick Insight */}
             <div className="pt-3 border-t">
               <p className="text-xs text-muted-foreground">
-                {metrics.zellaScore >= 80 ? (
+                {metrics.voltScore >= 80 ? (
                   <>
                     <TrendingUp className="inline h-3 w-3 text-green-600 mr-1" />
                     Excellent trading discipline and consistency
                   </>
-                ) : metrics.zellaScore >= 60 ? (
+                ) : metrics.voltScore >= 60 ? (
                   <>
                     <TrendingUp className="inline h-3 w-3 text-amber-600 mr-1" />
                     Good performance with room for improvement

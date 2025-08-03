@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { SidebarLayout } from '@/components/sidebar-layout'
-import { ZellaScoreGauge } from '@/components/charts/zella-score-gauge'
+import { VoltScoreGauge } from '@/components/charts/volt-score-gauge'
 import { ConsistencyHeatmap } from '@/components/charts/consistency-heatmap'
 import { StreakTracker } from '@/components/charts/streak-tracker'
 import { RevengeAlert } from '@/components/charts/revenge-alert'
@@ -130,9 +130,9 @@ export default function BehavioralPage() {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <Brain className="h-5 w-5 opacity-80" />
-                    <span className="text-xs opacity-80">Zella Score</span>
+                    <span className="text-xs opacity-80">Volt Score</span>
                   </div>
-                  <div className="text-3xl font-bold">{metrics.zellaScore}</div>
+                  <div className="text-3xl font-bold">{metrics.voltScore}</div>
                   <div className="text-xs opacity-80">Overall Performance</div>
                 </motion.div>
 
@@ -204,14 +204,14 @@ export default function BehavioralPage() {
 
               {/* Main Metrics Components */}
               <div className="space-y-6">
-                {/* Zella Score */}
+                {/* Volt Score */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
                 >
-                  <ZellaScoreGauge 
-                    score={metrics.zellaScore} 
+                  <VoltScoreGauge 
+                    score={metrics.voltScore} 
                     components={metrics.components} 
                   />
                 </motion.div>

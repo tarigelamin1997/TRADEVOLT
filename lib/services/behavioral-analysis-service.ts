@@ -1,7 +1,7 @@
 import type { Trade } from '@/lib/db-memory'
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 
-export interface ZellaScoreComponents {
+export interface VoltScoreComponents {
   winRate: number
   profitFactor: number
   riskReward: number
@@ -67,8 +67,8 @@ export interface RevengeAnalysis {
 }
 
 export interface BehavioralMetrics {
-  zellaScore: number
-  components: ZellaScoreComponents
+  voltScore: number
+  components: VoltScoreComponents
   dailyConsistency: DailyConsistency
   outliers: OutlierAnalysis
   streaks: StreakData
@@ -95,12 +95,12 @@ export class BehavioralAnalysisService {
     const streaks = this.analyzeStreaks(sortedTrades)
     const revenge = this.detectRevengeTrading(sortedTrades)
     
-    // Calculate Zella Score components
+    // Calculate Volt Score components
     const components = this.calculateZellaComponents(sortedTrades, consistency, revenge)
-    const zellaScore = this.calculateZellaScore(components)
+    const voltScore = this.calculateVoltScore(components)
 
     return {
-      zellaScore,
+      voltScore,
       components,
       dailyConsistency: consistency,
       outliers,
@@ -109,8 +109,8 @@ export class BehavioralAnalysisService {
     }
   }
 
-  // Calculate Zella Score (0-100)
-  private static calculateZellaScore(components: ZellaScoreComponents): number {
+  // Calculate Volt Score (0-100)
+  private static calculateVoltScore(components: VoltScoreComponents): number {
     const weights = {
       winRate: 0.20,
       profitFactor: 0.20,
@@ -131,12 +131,12 @@ export class BehavioralAnalysisService {
     return Math.min(100, Math.max(0, Math.round(score)))
   }
 
-  // Calculate Zella Score components
+  // Calculate Volt Score components
   private static calculateZellaComponents(
     trades: Trade[], 
     consistency: DailyConsistency,
     revenge: RevengeAnalysis
-  ): ZellaScoreComponents {
+  ): VoltScoreComponents {
     const pnlData = trades.map(t => calculateMarketPnL(t, t.marketType || null) || 0)
     const wins = pnlData.filter(pnl => pnl > 0)
     const losses = pnlData.filter(pnl => pnl < 0)
@@ -474,7 +474,7 @@ export class BehavioralAnalysisService {
   // Get empty metrics for no trades
   private static getEmptyMetrics(): BehavioralMetrics {
     return {
-      zellaScore: 0,
+      voltScore: 0,
       components: {
         winRate: 0,
         profitFactor: 0,

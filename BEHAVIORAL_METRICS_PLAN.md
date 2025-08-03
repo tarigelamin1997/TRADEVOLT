@@ -5,7 +5,7 @@ Adding comprehensive behavioral analysis and consistency metrics to help traders
 
 ## 1. Core Metrics to Implement
 
-### A. Zella Score (0-100)
+### A. Volt Score (0-100)
 A proprietary composite score combining 6 key trading metrics:
 1. **Win Rate** (20%) - Percentage of winning trades
 2. **Profit Factor** (20%) - Gross profit / Gross loss ratio
@@ -16,7 +16,7 @@ A proprietary composite score combining 6 key trading metrics:
 
 Formula:
 ```
-ZellaScore = (WinRate * 0.20) + (ProfitFactor * 0.20) + (RRRatio * 0.15) + 
+VoltScore = (WinRate * 0.20) + (ProfitFactor * 0.20) + (RRRatio * 0.15) + 
              (ConsistencyScore * 0.20) + (RecoveryFactor * 0.15) + (DisciplineScore * 0.10)
 ```
 
@@ -103,7 +103,7 @@ interface BehavioralMetrics {
 
 ### B. Dashboard Components
 
-1. **Zella Score Gauge** (`components/charts/zella-score-gauge.tsx`)
+1. **Volt Score Gauge** (`components/charts/volt-score-gauge.tsx`)
    - Circular gauge showing 0-100 score
    - Color-coded zones (Excellent, Good, Average, Poor)
    - Breakdown of component scores
@@ -135,7 +135,7 @@ interface BehavioralMetrics {
 - Historical trend analysis
 
 ### D. Integration Points
-1. **Main Dashboard**: Add Zella Score summary card
+1. **Main Dashboard**: Add Volt Score summary card
 2. **Trade History**: Show streak indicators
 3. **Trade Entry**: Revenge trading warnings
 4. **Daily Review**: Consistency score tracking
@@ -189,7 +189,7 @@ detectRevengeTrading(trades: Trade[]): RevengeIndicators {
 ## 4. UI/UX Design
 
 ### A. Color Schemes
-- **Zella Score**: Gradient from red (0-40) → yellow (40-70) → green (70-100)
+- **Volt Score**: Gradient from red (0-40) → yellow (40-70) → green (70-100)
 - **Consistency**: Blue gradient for stability
 - **Streaks**: Green for wins, red for losses
 - **Revenge Trading**: Red/orange warning colors
@@ -209,7 +209,7 @@ detectRevengeTrading(trades: Trade[]): RevengeIndicators {
 ## 5. Implementation Timeline
 
 1. **Phase 1**: Core service and calculations (Day 1)
-2. **Phase 2**: Zella Score and Consistency (Day 1)
+2. **Phase 2**: Volt Score and Consistency (Day 1)
 3. **Phase 3**: Streaks and Outliers (Day 1)
 4. **Phase 4**: Revenge Trading Detection (Day 2)
 5. **Phase 5**: Dashboard and Components (Day 2)

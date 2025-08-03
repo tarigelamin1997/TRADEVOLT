@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ZellaScoreComponents } from '@/lib/services/behavioral-analysis-service'
+import { VoltScoreComponents } from '@/lib/services/behavioral-analysis-service'
 import { Info } from 'lucide-react'
 import {
   Tooltip,
@@ -12,12 +12,12 @@ import {
 } from '@/components/ui/tooltip'
 import { safeToFixed } from '@/lib/utils/safe-format'
 
-interface ZellaScoreGaugeProps {
+interface VoltScoreGaugeProps {
   score: number
-  components: ZellaScoreComponents
+  components: VoltScoreComponents
 }
 
-export function ZellaScoreGauge({ score, components }: ZellaScoreGaugeProps) {
+export function VoltScoreGauge({ score, components }: VoltScoreGaugeProps) {
   // Calculate rotation for needle (-90 to 90 degrees)
   const rotation = (score / 100) * 180 - 90
 
@@ -47,14 +47,14 @@ export function ZellaScoreGauge({ score, components }: ZellaScoreGaugeProps) {
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-bold">Zella Score™</CardTitle>
+          <CardTitle className="text-xl font-bold">Volt Score™</CardTitle>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
                 <Info className="h-4 w-4 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p>A comprehensive trading performance score (0-100) that combines win rate, profit factor, risk/reward, consistency, recovery, and discipline metrics.</p>
+                <p>The Volt Score™ measures your trading "voltage" (0-100) by combining win rate, profit factor, risk/reward, consistency, recovery, and discipline metrics. Higher voltage = better performance!</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -198,13 +198,13 @@ export function ZellaScoreGauge({ score, components }: ZellaScoreGaugeProps) {
           <div className="pt-4 border-t">
             <p className="text-sm text-muted-foreground">
               {score >= 80 ? (
-                "🎯 Excellent trading performance! Your metrics show strong discipline and consistency. Keep up the great work!"
+                "⚡ High Voltage Trading! Your performance is fully charged with excellent discipline and consistency. Keep the current flowing!"
               ) : score >= 60 ? (
-                "💪 Good trading performance. Focus on improving your weakest components to reach the next level."
+                "🔌 Good Power Output! Your trading is well-connected. Boost your weakest circuits to reach maximum voltage."
               ) : score >= 40 ? (
-                "📊 Average performance with room for improvement. Work on consistency and risk management."
+                "🔋 Running on Low Power. Recharge your strategy by improving consistency and risk management circuits."
               ) : (
-                "⚠️ Your trading needs significant improvement. Focus on discipline, risk management, and consistency."
+                "⚠️ Power Outage Alert! Your trading system needs a complete rewire. Focus on discipline, risk management, and consistency."
               )}
             </p>
           </div>
