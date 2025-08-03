@@ -189,7 +189,7 @@ export default function TimeAnalysisPage() {
                 <span className="text-xs opacity-80">Daily Avg</span>
               </div>
               <div className="text-2xl font-bold">
-                {quickStats.avgTradesPerDay.toFixed(1)}
+                {quickStats.avgTradesPerDay?.toFixed(1) || '0.0'}
               </div>
               <div className="text-xs opacity-80">Trades per day</div>
             </motion.div>
@@ -270,7 +270,7 @@ export default function TimeAnalysisPage() {
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
                     <span className="text-yellow-600">⚠️</span>
-                    <span>Avoid overtrading - aim for <strong>{Math.round(quickStats.avgTradesPerDay)}</strong> quality trades per day</span>
+                    <span>Avoid overtrading - aim for <strong>{Math.round(quickStats.avgTradesPerDay || 0)}</strong> quality trades per day</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-yellow-600">⚠️</span>

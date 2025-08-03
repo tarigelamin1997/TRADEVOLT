@@ -227,7 +227,7 @@ export function TradeFrequency({ trades }: TradeFrequencyProps) {
                 <span className="text-xs text-muted-foreground">Daily Avg</span>
               </div>
               <div className="text-2xl font-bold">
-                {frequencyStats.avgTradesPerDay.toFixed(1)}
+                {frequencyStats.avgTradesPerDay?.toFixed(1) || '0.0'}
               </div>
               <div className="text-xs text-muted-foreground">trades per day</div>
             </motion.div>
@@ -356,15 +356,15 @@ export function TradeFrequency({ trades }: TradeFrequencyProps) {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Per Day</span>
-                  <span className="font-medium">{frequencyStats.avgTradesPerDay.toFixed(1)}</span>
+                  <span className="font-medium">{frequencyStats.avgTradesPerDay?.toFixed(1) || '0.0'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Per Week</span>
-                  <span className="font-medium">{frequencyStats.avgTradesPerWeek.toFixed(1)}</span>
+                  <span className="font-medium">{frequencyStats.avgTradesPerWeek?.toFixed(1) || '0.0'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Per Month</span>
-                  <span className="font-medium">{frequencyStats.avgTradesPerMonth.toFixed(1)}</span>
+                  <span className="font-medium">{frequencyStats.avgTradesPerMonth?.toFixed(1) || '0.0'}</span>
                 </div>
               </div>
             </div>
@@ -426,7 +426,7 @@ export function TradeFrequency({ trades }: TradeFrequencyProps) {
                 <div className="flex gap-2">
                   <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
                   <p>
-                    <strong className="text-red-600">Overtrading Alert:</strong> You&apos;re averaging {frequencyStats.avgTradesPerDay.toFixed(1)} trades per day with a peak of {frequencyStats.maxTradesInDay}. Consider being more selective with your entries to improve quality over quantity.
+                    <strong className="text-red-600">Overtrading Alert:</strong> You&apos;re averaging {frequencyStats.avgTradesPerDay?.toFixed(1) || '0.0'} trades per day with a peak of {frequencyStats.maxTradesInDay}. Consider being more selective with your entries to improve quality over quantity.
                   </p>
                 </div>
               )}

@@ -432,7 +432,11 @@ export class TimeAnalysisService {
   }
   
   // Format hold time for display
-  static formatHoldTime(minutes: number): string {
+  static formatHoldTime(minutes: number | null | undefined): string {
+    if (minutes === null || minutes === undefined || isNaN(minutes)) {
+      return '0 min'
+    }
+    
     if (minutes < 60) {
       return `${Math.round(minutes)} min`
     } else if (minutes < 1440) {
