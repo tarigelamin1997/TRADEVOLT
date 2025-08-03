@@ -55,13 +55,13 @@ export function RadialGauge({
       data: [percentage, 100 - percentage],
       backgroundColor: [getColor(), backgroundColor],
       borderWidth: 0,
-      cutout: '75%',
     }]
   }
 
   const options: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: true,
+    cutout: '75%',
     plugins: {
       legend: { display: false },
       tooltip: { enabled: false }
