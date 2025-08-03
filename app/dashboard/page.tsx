@@ -354,7 +354,7 @@ export default function VisualDashboardPage() {
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                <TradeForm onSuccess={handleTradeAdded} />
+                <TradeForm onAdd={handleTradeAdded} />
               </motion.div>
             </motion.div>
           )}
