@@ -42,13 +42,15 @@ import {
   Menu,
   Clock,
   Brain,
-  Zap
+  Zap,
+  BookOpen
 } from "lucide-react"
 import { cn } from '@/lib/utils'
 
 // Menu items (same as other pages)
 const mainMenuItems = [
   { icon: Home, label: 'Dashboard', href: '/dashboard' },
+  { icon: BookOpen, label: 'Trading Playbooks', href: '/playbooks' },
   { icon: History, label: 'Trade History', href: '/history' },
   { icon: BarChart3, label: 'Analytics', href: '/analytics' },
   { icon: TrendingUp, label: 'Performance Metrics', href: '/metrics' },

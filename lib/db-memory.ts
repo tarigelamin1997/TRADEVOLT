@@ -10,6 +10,63 @@ interface User {
   createdAt: string
 }
 
+export interface TradingSetup {
+  id: string
+  userId: string
+  name: string
+  description: string
+  category: 'Trend' | 'Reversal' | 'Breakout' | 'Range' | 'News' | 'Other'
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+  
+  // Rules
+  entryRules: SetupRule[]
+  exitRules: SetupRule[]
+  riskRules: SetupRule[]
+  
+  // Ideal Conditions
+  idealConditions: {
+    timeOfDay?: string[]
+    marketType?: string[]
+    volatility?: 'Low' | 'Medium' | 'High'
+    trend?: 'Strong Up' | 'Up' | 'Sideways' | 'Down' | 'Strong Down'
+    minVolume?: number
+  }
+  
+  // Risk Parameters
+  targetRiskReward: number
+  maxLossPerTrade: number
+  maxPositionSize?: number
+  
+  // Performance Tracking
+  stats?: {
+    totalTrades: number
+    winRate: number
+    avgRiskReward: number
+    profitFactor: number
+    expectancy: number
+    lastUsed?: string
+  }
+}
+
+export interface SetupRule {
+  id: string
+  text: string
+  category: 'Entry' | 'Exit' | 'Risk' | 'Psychology'
+  importance: 'Critical' | 'Important' | 'Optional'
+  order: number
+}
+
+export interface RuleChecklist {
+  id: string
+  tradeId: string
+  setupId: string
+  ruleId: string
+  checked: boolean
+  note?: string
+}
+
 export interface Trade {
   id: string
   userId: string
@@ -40,8 +97,22 @@ export interface Trade {
   partialExits?: PartialExit[] | null
   // Setup/Strategy fields
   setup?: string | null
+  setupId?: string | null
   setupTags?: string[] | null
   confidence?: number | null
+  // Rule compliance
+  ruleCompliance?: {
+    score: number // 0-100
+    checkedRules: string[]
+    violatedRules: string[]
+    notes?: string
+  } | null
+  // Market conditions at time of trade
+  marketConditions?: {
+    volatility?: 'Low' | 'Medium' | 'High'
+    trend?: 'Strong Up' | 'Up' | 'Sideways' | 'Down' | 'Strong Down'
+    volume?: 'Low' | 'Average' | 'High'
+  } | null
 }
 
 export interface PartialExit {
