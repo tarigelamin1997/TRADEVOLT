@@ -55,7 +55,7 @@ export function DisciplineTracker() {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchData = async () => {
     try {
@@ -427,7 +427,7 @@ export function DisciplineTracker() {
                 <Alert>
                   <TrendingDown className="h-4 w-4" />
                   <AlertDescription>
-                    You're on a losing streak. Consider taking a break or reducing position sizes.
+                    You&apos;re on a losing streak. Consider taking a break or reducing position sizes.
                   </AlertDescription>
                 </Alert>
               )}

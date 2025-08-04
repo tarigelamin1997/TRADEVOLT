@@ -318,7 +318,7 @@ export function SetupWizard({ setup, onSave, onClose }: SetupWizardProps) {
                   {(!formData[`${currentStep}Rules` as keyof typeof formData] || 
                     formData[`${currentStep}Rules` as keyof typeof formData]?.length === 0) && (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p>No rules added yet. Click "Add Rule" to get started.</p>
+                      <p>No rules added yet. Click &quot;Add Rule&quot; to get started.</p>
                     </div>
                   )}
                 </motion.div>

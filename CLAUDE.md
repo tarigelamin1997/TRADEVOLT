@@ -4,78 +4,142 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TradeVolt is a trading journal application built with Next.js for tracking trades, analyzing performance, and managing trading psychology. It's a weekend MVP project designed to be deployed on Vercel.
+TradeVolt is a comprehensive trading journal application that provides professional-grade analytics for traders. Built as a Next.js 14 application with TypeScript, it offers advanced trade tracking, performance analysis, and AI-powered insights.
 
 ## Development Commands
 
 ### Essential Commands
-- `npm run dev` - Start development server on localhost:3000
-- `npm run build` - Build for production (includes Prisma generation and DB push)
-- `npm run lint` - Run ESLint to check code quality
-- `npm start` - Start production server
+```bash
+npm run dev          # Start development server on localhost:3000
+npm run build        # Build for production (includes Prisma generation and DB push)
+npm run lint         # Run ESLint
+npm start            # Start production server
+```
 
-### Database Setup
-- `npx prisma db push` - Push schema to database
-- `npx prisma generate` - Generate Prisma client
+### Database Commands
+```bash
+npx prisma generate  # Generate Prisma client
+npx prisma db push   # Push schema to database
+npx prisma migrate deploy  # Deploy migrations (production)
+```
 
-Note: Currently using in-memory database for Vercel compatibility. Production requires PostgreSQL setup.
+### Deployment
+```bash
+vercel              # Deploy to Vercel (preview)
+vercel --prod       # Deploy to production
+```
 
 ## Architecture Overview
 
 ### Tech Stack
 - **Framework**: Next.js 14.2.0 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Database**: Prisma with PostgreSQL (in-memory for dev)
-- **Authentication**: Clerk (currently mocked)
-- **UI Components**: Radix UI primitives + custom components
-
-### Key Directories
-- `app/` - Next.js app router pages and API routes
-- `components/` - React components (trade-form, csv-import, ui primitives)
-- `lib/` - Core business logic and database interfaces
-- `prisma/` - Database schema and migrations
+- **Language**: TypeScript (strict mode)
+- **Styling**: Tailwind CSS + Radix UI components
+- **Database**: PostgreSQL (Neon) with Prisma ORM + JSON fallback
+- **Authentication**: Clerk (with demo mode fallback)
+- **Payments**: Stripe (optional, beta features currently free)
+- **AI**: Anthropic Claude API for insights
+- **Charts**: Recharts, Chart.js, React Sparklines
 
 ### Database Architecture
-The app uses a simple two-table schema:
-- **User**: Stores user info with Clerk integration
-- **Trade**: Stores trading records with market type support
 
-Currently using `lib/db-memory.ts` for Vercel deployment. For production, switch to `lib/db.ts` with proper PostgreSQL.
+The application uses a dual database strategy:
+1. **Production**: PostgreSQL via Prisma (`lib/prisma.ts`)
+2. **Fallback**: JSON-based file system (`lib/db.ts`) for development/demo
 
-### Market Type Detection
-The CSV import system intelligently detects trading markets:
-- **FUTURES**: ES, NQ, CL, GC, ZB, ZN with proper multipliers
-- **OPTIONS**: Stock/index options with strike detection
-- **FOREX**: Currency pairs with lot size handling
-- **CRYPTO**: Cryptocurrency spot and futures
-- **STOCKS**: Regular equities
+Key models:
+- **User**: Clerk integration, subscription status
+- **Trade**: Comprehensive trade data with market type support
+- **Advanced**: TradePriceData, TradeExcursion, PartialExit for detailed analysis
 
-### Core Features
-1. **Trade Management**: Manual entry and CSV import
-2. **Analytics**: P&L tracking, win rate, profit factor
-3. **Journal**: Trade reflections and psychology tracking
-4. **Reports**: Period-based P&L breakdowns
+### API Design
 
-## Important Considerations
+Single endpoint architecture (`/api/route.ts`) with action-based routing:
+- `getTrades`: Fetch user trades with filtering
+- `addTrade`: Add new trade with market-specific calculations
+- `importTrades`: Bulk CSV import with validation
+- `getAI`: Claude-powered trade analysis
+- `testConnection`: Database health checks
+- `getSubscription`: Check user subscription status
 
-### Current Limitations
-- Data persistence is in-memory only (resets on cold starts)
-- Authentication is mocked - uncomment Clerk imports for production
-- CSV import needs proper database for persistence
+### Market Type Handling
 
-### P&L Calculations
-Different markets have specific multipliers:
-- Futures: Contract-specific (ES=$50, NQ=$20, etc.)
-- Options: 100 shares per contract
-- Forex/Crypto/Stocks: Direct calculation
+Different markets have specific P&L calculations:
+- **FUTURES**: Contract multipliers (ES=$50, NQ=$20, CL=$1000, etc.)
+- **OPTIONS**: 100 shares per contract
+- **FOREX**: Pip calculations with lot sizes
+- **CRYPTO**: Direct price calculations
+- **STOCKS**: Standard price × quantity
 
-### Error Handling
-- All API endpoints return JSON with error messages
-- CSV import has detailed error reporting with debug info
-- TypeScript strict mode enabled
+### Key Features & Services
 
-### Deployment Notes
-- Environment variables needed: Clerk keys, database URL
-- Build process runs Prisma commands automatically
-- Vercel serverless requires stateless design
+#### Analytics Engine (`lib/services/`)
+- **AnalyticsService**: Core performance metrics (win rate, profit factor, Sharpe ratio)
+- **ExcursionService**: MAE/MFE tracking for trade quality analysis
+- **BehavioralService**: Trading psychology analysis (revenge trading, discipline)
+- **MarketAnalysisService**: Symbol and market type performance
+- **TimeAnalysisService**: Day/hour patterns, hold time analysis
+
+#### Visualization Components
+- **Calendar Heatmap**: Daily P&L visualization
+- **Equity Curve**: Account balance progression
+- **Distribution Charts**: Win/loss patterns
+- **Performance Gauges**: Visual metric displays
+- **Time Heatmaps**: Trading performance by time
+
+### Authentication Flow
+
+Clerk integration with fallback:
+```typescript
+// Automatic detection of Clerk configuration
+const isClerkConfigured = !!(
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+  process.env.CLERK_SECRET_KEY
+)
+
+// Falls back to 'demo-user' when Clerk not configured
+```
+
+### Environment Variables
+
+Required for production:
+```env
+DATABASE_URL                          # PostgreSQL connection string
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY    # Clerk public key
+CLERK_SECRET_KEY                     # Clerk secret key
+ANTHROPIC_API_KEY                    # Claude API key
+```
+
+Optional:
+```env
+STRIPE_SECRET_KEY                    # Payment processing
+STRIPE_PUBLISHABLE_KEY              # Stripe public key
+STRIPE_WEBHOOK_SECRET               # Webhook validation
+```
+
+### Current Production Status
+
+- **URL**: https://tradevolt.vercel.app (https://trading-journal-omega-six.vercel.app)
+- **Database**: PostgreSQL on Neon (Europe West region)
+- **Features**: All 16 professional metrics available during beta
+- **Import**: CSV import working (tested with 112+ trades)
+- **Export**: CSV/JSON export functionality
+
+### Important Architectural Decisions
+
+1. **Single API Endpoint**: Simplifies routing and maintains consistency
+2. **Dual Database Support**: Ensures app works in any environment
+3. **Market-Aware Calculations**: Accurate P&L for different asset types
+4. **Progressive Enhancement**: Core features work without external services
+5. **Type Safety**: Full TypeScript with strict mode
+6. **Subscription Context**: React context for feature gating
+
+### Beta Features Currently Available
+
+All Pro features are currently free during beta:
+- 16 professional trading metrics
+- AI-powered insights
+- Advanced excursion analysis
+- Behavioral analytics
+- Full export capabilities
+- All visualization tools

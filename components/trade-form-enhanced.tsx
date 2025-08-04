@@ -355,7 +355,7 @@ export function TradeFormEnhanced({ onAdd, isExitTrade = false }: TradeFormEnhan
                   <div>
                     <CardTitle>{selectedSetup.name} Checklist</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Check off the rules you're following for this trade
+                      Check off the rules you&apos;re following for this trade
                     </p>
                   </div>
                 </div>
