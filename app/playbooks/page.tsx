@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { SidebarLayout } from '@/components/sidebar-layout'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -103,39 +104,56 @@ export default function PlaybooksPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-96 bg-gray-200 rounded"></div>
+      <SidebarLayout currentPath="/playbooks">
+        <div className="flex h-full flex-col">
+          <header className="flex h-16 items-center gap-4 border-b px-6">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold">Trading Playbooks</h1>
+              <p className="text-sm text-muted-foreground">
+                Define, track, and optimize your trading strategies
+              </p>
+            </div>
+          </header>
+          <main className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+                <div className="h-96 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </main>
         </div>
-      </div>
+      </SidebarLayout>
     )
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-            <BookOpen className="h-6 w-6 text-purple-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">Trading Playbooks</h1>
-            <p className="text-sm text-muted-foreground">
-              Define, track, and optimize your trading strategies
-            </p>
-          </div>
-        </Link>
-        
-        <Button 
-          onClick={() => setShowWizard(true)}
-          className="bg-purple-600 hover:bg-purple-700"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create Setup
-        </Button>
-      </div>
+    <SidebarLayout currentPath="/playbooks">
+      <div className="flex h-full flex-col">
+        <header className="flex h-16 items-center gap-4 border-b px-6">
+          <Link href="/dashboard" className="flex-1 flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+              <BookOpen className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Trading Playbooks</h1>
+              <p className="text-sm text-muted-foreground">
+                Define, track, and optimize your trading strategies
+              </p>
+            </div>
+          </Link>
+          
+          <Button 
+            onClick={() => setShowWizard(true)}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Setup
+          </Button>
+        </header>
+
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-6">
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -326,21 +344,24 @@ export default function PlaybooksPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Setup Wizard Modal */}
-      {showWizard && (
-        <SetupWizard
-          setup={editingSetup}
-          onSave={editingSetup ? 
-            (updates) => handleUpdateSetup(editingSetup.id, updates) : 
-            handleCreateSetup
-          }
-          onClose={() => {
-            setShowWizard(false)
-            setEditingSetup(null)
-          }}
-        />
-      )}
-    </div>
+            {/* Setup Wizard Modal */}
+            {showWizard && (
+              <SetupWizard
+                setup={editingSetup}
+                onSave={editingSetup ? 
+                  (updates) => handleUpdateSetup(editingSetup.id, updates) : 
+                  handleCreateSetup
+                }
+                onClose={() => {
+                  setShowWizard(false)
+                  setEditingSetup(null)
+                }}
+              />
+            )}
+          </div>
+        </main>
+      </div>
+    </SidebarLayout>
   )
 }
 
