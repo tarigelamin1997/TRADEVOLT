@@ -165,7 +165,7 @@ export function DisciplineTracker() {
       setConsecutiveWins(consecutiveW)
 
       // Check for tilt conditions
-      checkForTilt(userTrades, disciplineMetrics)
+      checkForTilt(userTrades, extendedMetrics)
     } catch (error) {
       console.error('Failed to fetch discipline data:', error)
     } finally {
