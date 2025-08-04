@@ -270,32 +270,32 @@ export function SetupEvolution() {
                         <p className="text-muted-foreground">Win Rate</p>
                         <p className={cn(
                           "font-medium",
-                          event.metrics.winRate >= 50 ? "text-green-600" : "text-red-600"
+                          (event.metrics.winRate ?? 0) >= 50 ? "text-green-600" : "text-red-600"
                         )}>
-                          {event.metrics.winRate.toFixed(1)}%
+                          {(event.metrics.winRate ?? 0).toFixed(1)}%
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Profit Factor</p>
                         <p className={cn(
                           "font-medium",
-                          event.metrics.profitFactor >= 1 ? "text-green-600" : "text-red-600"
+                          (event.metrics.profitFactor ?? 0) >= 1 ? "text-green-600" : "text-red-600"
                         )}>
-                          {event.metrics.profitFactor.toFixed(2)}
+                          {(event.metrics.profitFactor ?? 0).toFixed(2)}
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Total P&L</p>
                         <p className={cn(
                           "font-medium",
-                          event.metrics.totalPnL >= 0 ? "text-green-600" : "text-red-600"
+                          (event.metrics.totalPnL ?? 0) >= 0 ? "text-green-600" : "text-red-600"
                         )}>
-                          {formatCurrency(event.metrics.totalPnL, settings)}
+                          {formatCurrency(event.metrics.totalPnL ?? 0, settings)}
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Trades</p>
-                        <p className="font-medium">{event.metrics.totalTrades}</p>
+                        <p className="font-medium">{event.metrics.totalTrades ?? 0}</p>
                       </div>
                     </div>
                   </CardContent>
