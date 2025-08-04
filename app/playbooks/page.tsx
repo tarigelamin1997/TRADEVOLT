@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -115,7 +116,7 @@ export default function PlaybooksPage() {
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-3">
+        <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
             <BookOpen className="h-6 w-6 text-purple-600" />
           </div>
@@ -125,7 +126,7 @@ export default function PlaybooksPage() {
               Define, track, and optimize your trading strategies
             </p>
           </div>
-        </div>
+        </Link>
         
         <Button 
           onClick={() => setShowWizard(true)}
