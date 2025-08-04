@@ -14,6 +14,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  SidebarInset,
 } from "@/components/ui/sidebar"
 import {
   DropdownMenu,
@@ -196,10 +197,13 @@ export function SidebarLayout({ children, currentPath }: SidebarLayoutProps) {
           </SidebarFooter>
         </Sidebar>
 
-        <div className="flex-1 flex flex-col overflow-auto">
+        <SidebarInset>
           {children}
-        </div>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   )
 }
+
+// Export SidebarTrigger for use in pages
+export { SidebarTrigger }

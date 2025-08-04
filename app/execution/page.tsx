@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { SidebarLayout } from '@/components/sidebar-layout'
+import { SidebarLayout, SidebarTrigger } from '@/components/sidebar-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
@@ -106,6 +106,7 @@ export default function ExecutionAnalysisPage() {
       <SidebarLayout currentPath="/execution">
         <div className="flex h-full flex-col">
           <header className="flex h-16 items-center gap-4 border-b px-6">
+            <SidebarTrigger className="h-7 w-7" />
             <div className="flex-1">
               <h1 className="text-2xl font-bold">Execution Quality</h1>
               <p className="text-sm text-muted-foreground">
@@ -135,6 +136,7 @@ export default function ExecutionAnalysisPage() {
       <SidebarLayout currentPath="/execution">
         <div className="flex h-full flex-col">
           <header className="flex h-16 items-center gap-4 border-b px-6">
+            <SidebarTrigger className="h-7 w-7" />
             <div className="flex-1">
               <h1 className="text-2xl font-bold">Execution Quality</h1>
               <p className="text-sm text-muted-foreground">
@@ -165,6 +167,7 @@ export default function ExecutionAnalysisPage() {
     <SidebarLayout currentPath="/execution">
       <div className="flex h-full flex-col">
         <header className="flex h-16 items-center gap-4 border-b px-6">
+          <SidebarTrigger className="h-7 w-7" />
           <div className="flex-1">
             <h1 className="text-2xl font-bold">Execution Quality</h1>
             <p className="text-sm text-muted-foreground">

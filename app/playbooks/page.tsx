@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { SidebarLayout } from '@/components/sidebar-layout'
+import { SidebarLayout, SidebarTrigger } from '@/components/sidebar-layout'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -107,6 +107,7 @@ export default function PlaybooksPage() {
       <SidebarLayout currentPath="/playbooks">
         <div className="flex h-full flex-col">
           <header className="flex h-16 items-center gap-4 border-b px-6">
+            <SidebarTrigger className="h-7 w-7" />
             <div className="flex-1">
               <h1 className="text-2xl font-bold">Trading Playbooks</h1>
               <p className="text-sm text-muted-foreground">
@@ -131,6 +132,7 @@ export default function PlaybooksPage() {
     <SidebarLayout currentPath="/playbooks">
       <div className="flex h-full flex-col">
         <header className="flex h-16 items-center gap-4 border-b px-6">
+          <SidebarTrigger className="h-7 w-7" />
           <Link href="/dashboard" className="flex-1 flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
               <BookOpen className="h-6 w-6 text-purple-600" />
