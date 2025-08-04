@@ -43,11 +43,24 @@ import {
 } from 'recharts'
 import { formatDistanceToNow } from 'date-fns'
 
+interface ExtendedDisciplineMetrics extends DisciplineMetrics {
+  tradesWithSetup: number
+  totalTrades: number
+  avgComplianceScore: number
+  violationsByRule: { rule: string; count: number }[]
+  recentTrades: {
+    wins: number
+    losses: number
+    winRate: number
+    avgHoldTime: number | null
+  }
+}
+
 export function DisciplineTracker() {
   const { settings } = useSettings()
   const [loading, setLoading] = useState(true)
   const [trades, setTrades] = useState<Trade[]>([])
-  const [discipline, setDiscipline] = useState<DisciplineMetrics | null>(null)
+  const [discipline, setDiscipline] = useState<ExtendedDisciplineMetrics | null>(null)
   const [consecutiveLosses, setConsecutiveLosses] = useState(0)
   const [consecutiveWins, setConsecutiveWins] = useState(0)
   const [tiltAlert, setTiltAlert] = useState<{
@@ -68,18 +81,76 @@ export function DisciplineTracker() {
       const userTrades = await findTradesByUserId(user.id)
       setTrades(userTrades)
 
-      const disciplineMetrics = TradingSetupService.calculateDisciplineScore(user.id, userTrades)
-      setDiscipline(disciplineMetrics)
+      const baseDisciplineMetrics = TradingSetupService.calculateDisciplineScore(user.id, userTrades)
+      
+      // Calculate extended metrics
+      const tradesWithCompliance = userTrades.filter(t => t.ruleCompliance)
+      const tradesWithSetup = tradesWithCompliance.filter(t => t.ruleCompliance?.setupId).length
+      const totalTrades = userTrades.length
+      
+      const avgComplianceScore = tradesWithCompliance.length > 0
+        ? tradesWithCompliance.reduce((sum, t) => sum + (t.ruleCompliance?.score || 0), 0) / tradesWithCompliance.length
+        : 0
+      
+      // Calculate violations by rule
+      const violationMap = new Map<string, number>()
+      tradesWithCompliance.forEach(trade => {
+        trade.ruleCompliance?.violatedRules?.forEach(rule => {
+          violationMap.set(rule, (violationMap.get(rule) || 0) + 1)
+        })
+      })
+      const violationsByRule = Array.from(violationMap.entries())
+        .map(([rule, count]) => ({ rule, count }))
+        .sort((a, b) => b.count - a.count)
+      
+      // Calculate recent trades stats
+      const recentClosedTrades = userTrades
+        .filter(t => t.exit)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 20)
+      
+      let wins = 0
+      let losses = 0
+      let totalHoldTime = 0
+      let holdTimeCount = 0
+      
+      recentClosedTrades.forEach(trade => {
+        const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
+        if (pnl > 0) wins++
+        else losses++
+        
+        if (trade.exit && trade.createdAt) {
+          const holdTime = new Date(trade.exit).getTime() - new Date(trade.createdAt).getTime()
+          totalHoldTime += holdTime
+          holdTimeCount++
+        }
+      })
+      
+      const extendedMetrics: ExtendedDisciplineMetrics = {
+        ...baseDisciplineMetrics,
+        tradesWithSetup,
+        totalTrades,
+        avgComplianceScore,
+        violationsByRule,
+        recentTrades: {
+          wins,
+          losses,
+          winRate: recentClosedTrades.length > 0 ? (wins / recentClosedTrades.length) * 100 : 0,
+          avgHoldTime: holdTimeCount > 0 ? totalHoldTime / holdTimeCount : null
+        }
+      }
+      
+      setDiscipline(extendedMetrics)
 
       // Calculate consecutive wins/losses
-      const recentClosedTrades = userTrades
+      const sortedClosedTrades = userTrades
         .filter(t => t.exit)
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       
       let consecutiveL = 0
       let consecutiveW = 0
       
-      for (const trade of recentClosedTrades) {
+      for (const trade of sortedClosedTrades) {
         const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
         if (pnl < 0) {
           if (consecutiveW > 0) break
@@ -440,7 +511,7 @@ export function DisciplineTracker() {
                   <span className="text-2xl font-bold">
                     {discipline.recentTrades.wins}W / {discipline.recentTrades.losses}L
                   </span>
-                  <Badge variant={discipline.recentTrades.winRate >= 50 ? "success" : "destructive"}>
+                  <Badge variant={discipline.recentTrades.winRate >= 50 ? "default" : "destructive"}>
                     {discipline.recentTrades.winRate.toFixed(0)}%
                   </Badge>
                 </div>
