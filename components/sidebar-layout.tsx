@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useAuthUser } from '@/lib/auth-wrapper'
@@ -24,7 +23,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
 import { 
   User,
   ChevronsUpDown,
@@ -38,9 +36,6 @@ import {
   PieChart,
   FileText,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
-  Menu,
   Clock,
   Brain,
   Zap,
@@ -72,7 +67,6 @@ interface SidebarLayoutProps {
 
 export function SidebarLayout({ children, currentPath }: SidebarLayoutProps) {
   const router = useRouter()
-  const [isCollapsed, setIsCollapsed] = useState(false)
   const { user } = useAuthUser()
   
   // Get display values from user
@@ -93,27 +87,15 @@ export function SidebarLayout({ children, currentPath }: SidebarLayoutProps) {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-        <Sidebar className={cn("transition-all duration-300", isCollapsed && "w-16")}>
-          <SidebarHeader className="relative">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute -right-3 top-2 z-50 h-6 w-6 rounded-full border bg-background shadow-md"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-            >
-              {isCollapsed ? (
-                <ChevronRight className="h-3 w-3" />
-              ) : (
-                <ChevronLeft className="h-3 w-3" />
-              )}
-            </Button>
+        <Sidebar>
+          <SidebarHeader>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton size="lg">
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
                     <BarChart3 className="size-4" />
                   </div>
-                  {!isCollapsed && <span className="font-semibold">Trading Journal</span>}
+                  <span className="font-semibold">Trading Journal</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -128,10 +110,9 @@ export function SidebarLayout({ children, currentPath }: SidebarLayoutProps) {
                       "transition-colors",
                       currentPath === item.href && "bg-gray-100 dark:bg-gray-800"
                     )}
-                    tooltip={isCollapsed ? item.label : undefined}
                   >
-                    <item.icon className={cn("h-4 w-4", !isCollapsed && "mr-2")} />
-                    {!isCollapsed && <span>{item.label}</span>}
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -144,10 +125,7 @@ export function SidebarLayout({ children, currentPath }: SidebarLayoutProps) {
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton className="w-full">
                       <div className="flex items-center w-full">
-                        <div className={cn(
-                          "flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-sm font-medium",
-                          isCollapsed && "h-6 w-6"
-                        )}>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-sm font-medium">
                           {user.imageUrl ? (
                             <div className="relative h-full w-full">
                               <Image 
@@ -162,15 +140,11 @@ export function SidebarLayout({ children, currentPath }: SidebarLayoutProps) {
                             initials
                           )}
                         </div>
-                        {!isCollapsed && (
-                          <>
-                            <div className="ml-2 flex-1 text-left">
-                              <p className="text-sm font-medium">{displayName}</p>
-                              <p className="text-xs text-muted-foreground">{email}</p>
-                            </div>
-                            <ChevronsUpDown className="ml-auto h-4 w-4" />
-                          </>
-                        )}
+                        <div className="ml-2 flex-1 text-left">
+                          <p className="text-sm font-medium">{displayName}</p>
+                          <p className="text-xs text-muted-foreground">{email}</p>
+                        </div>
+                        <ChevronsUpDown className="ml-auto h-4 w-4" />
                       </div>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
