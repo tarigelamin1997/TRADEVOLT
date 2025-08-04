@@ -14,6 +14,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarInset,
+  SidebarRail,
 } from "@/components/ui/sidebar"
 import {
   DropdownMenu,
@@ -169,6 +170,7 @@ export function SidebarLayout({ children, currentPath }: SidebarLayoutProps) {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
+          <SidebarRail />
         </Sidebar>
 
         <SidebarInset>
