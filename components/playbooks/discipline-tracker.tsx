@@ -447,22 +447,7 @@ export function DisciplineTracker() {
                 {discipline.violationsByRule.slice(0, 5).map((violation, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                     <div className="flex-1">
-                      <p className="text-sm font-medium">{violation.ruleText || 'Unknown Rule'}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">
-                          {violation.setupName}
-                        </Badge>
-                        <Badge 
-                          variant="outline" 
-                          className={cn(
-                            "text-xs",
-                            violation.importance === 'Critical' && "border-red-600 text-red-600",
-                            violation.importance === 'Important' && "border-amber-600 text-amber-600"
-                          )}
-                        >
-                          {violation.importance}
-                        </Badge>
-                      </div>
+                      <p className="text-sm font-medium">{violation.rule}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-red-600">{violation.count}</p>
