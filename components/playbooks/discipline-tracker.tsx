@@ -47,6 +47,8 @@ export function DisciplineTracker() {
   const [loading, setLoading] = useState(true)
   const [trades, setTrades] = useState<Trade[]>([])
   const [discipline, setDiscipline] = useState<DisciplineMetrics | null>(null)
+  const [consecutiveLosses, setConsecutiveLosses] = useState(0)
+  const [consecutiveWins, setConsecutiveWins] = useState(0)
   const [tiltAlert, setTiltAlert] = useState<{
     active: boolean
     reason: string
@@ -68,6 +70,28 @@ export function DisciplineTracker() {
       const disciplineMetrics = TradingSetupService.calculateDisciplineScore(user.id, userTrades)
       setDiscipline(disciplineMetrics)
 
+      // Calculate consecutive wins/losses
+      const recentClosedTrades = userTrades
+        .filter(t => t.exit)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      
+      let consecutiveL = 0
+      let consecutiveW = 0
+      
+      for (const trade of recentClosedTrades) {
+        const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
+        if (pnl < 0) {
+          if (consecutiveW > 0) break
+          consecutiveL++
+        } else {
+          if (consecutiveL > 0) break
+          consecutiveW++
+        }
+      }
+      
+      setConsecutiveLosses(consecutiveL)
+      setConsecutiveWins(consecutiveW)
+
       // Check for tilt conditions
       checkForTilt(userTrades, disciplineMetrics)
     } catch (error) {
@@ -87,10 +111,20 @@ export function DisciplineTracker() {
     const conditions = []
 
     // 1. Consecutive losses
-    if (metrics.recentTrades.consecutiveLosses >= 3) {
+    let consecutiveLosses = 0
+    for (const trade of recentTrades) {
+      const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
+      if (pnl < 0) {
+        consecutiveLosses++
+      } else {
+        break
+      }
+    }
+    
+    if (consecutiveLosses >= 3) {
       conditions.push({
-        severity: metrics.recentTrades.consecutiveLosses >= 5 ? 'high' : 'medium',
-        reason: `${metrics.recentTrades.consecutiveLosses} consecutive losses detected`
+        severity: consecutiveLosses >= 5 ? 'high' : 'medium',
+        reason: `${consecutiveLosses} consecutive losses detected`
       })
     }
 
@@ -285,11 +319,11 @@ export function DisciplineTracker() {
               <p className="text-sm text-muted-foreground">Current Streak</p>
               <div className="flex items-center justify-center gap-1">
                 <p className="text-lg font-semibold">
-                  {discipline.recentTrades.consecutiveLosses > 0 
-                    ? discipline.recentTrades.consecutiveLosses 
-                    : discipline.recentTrades.consecutiveWins}
+                  {consecutiveLosses > 0 
+                    ? consecutiveLosses 
+                    : consecutiveWins}
                 </p>
-                {discipline.recentTrades.consecutiveLosses > 0 ? (
+                {consecutiveLosses > 0 ? (
                   <ArrowDown className="h-4 w-4 text-red-600" />
                 ) : (
                   <ArrowUp className="h-4 w-4 text-green-600" />
@@ -423,7 +457,7 @@ export function DisciplineTracker() {
             {/* Behavioral Insights */}
             <div className="space-y-2">
               <h5 className="text-sm font-medium">Behavioral Insights</h5>
-              {discipline.recentTrades.consecutiveLosses >= 3 && (
+              {consecutiveLosses >= 3 && (
                 <Alert>
                   <TrendingDown className="h-4 w-4" />
                   <AlertDescription>
