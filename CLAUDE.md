@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TradeVolt is a comprehensive trading journal application that provides professional-grade analytics for traders. Built as a Next.js 14 application with TypeScript, it offers advanced trade tracking, performance analysis, and AI-powered insights.
+TradeVolt is a comprehensive trading journal application that provides professional-grade analytics for traders. Built as a Next.js 14 application with TypeScript, it offers advanced trade tracking, performance analysis, and AI-powered insights. The application features a sophisticated playbooks system for trading setups, behavioral analytics, and discipline tracking.
 
 ## Development Commands
 
@@ -49,7 +49,10 @@ The application uses a dual database strategy:
 
 Key models:
 - **User**: Clerk integration, subscription status
-- **Trade**: Comprehensive trade data with market type support
+- **Trade**: Comprehensive trade data with market type support, rule compliance tracking
+- **TradingSetup**: Trading strategy configurations with entry/exit/risk rules
+- **SetupRule**: Individual rules for trading setups with importance levels
+- **RuleChecklist**: Compliance tracking for trades against setup rules
 - **Advanced**: TradePriceData, TradeExcursion, PartialExit for detailed analysis
 
 ### API Design
@@ -79,6 +82,7 @@ Different markets have specific P&L calculations:
 - **BehavioralService**: Trading psychology analysis (revenge trading, discipline)
 - **MarketAnalysisService**: Symbol and market type performance
 - **TimeAnalysisService**: Day/hour patterns, hold time analysis
+- **TradingSetupService**: Setup management, performance tracking, discipline scoring
 
 #### Visualization Components
 - **Calendar Heatmap**: Daily P&L visualization
@@ -86,6 +90,8 @@ Different markets have specific P&L calculations:
 - **Distribution Charts**: Win/loss patterns
 - **Performance Gauges**: Visual metric displays
 - **Time Heatmaps**: Trading performance by time
+- **Setup Evolution**: Timeline view of trading setup performance
+- **Discipline Tracker**: Real-time monitoring of trading discipline and tilt warnings
 
 ### Authentication Flow
 
@@ -124,6 +130,8 @@ STRIPE_WEBHOOK_SECRET               # Webhook validation
 - **Features**: All 16 professional metrics available during beta
 - **Import**: CSV import working (tested with 112+ trades)
 - **Export**: CSV/JSON export functionality
+- **Trading Setups**: Complete playbooks system with setup wizard and analytics
+- **Build Status**: Pending deployment (fixing TypeScript build errors as of 2025-08-04)
 
 ### Important Architectural Decisions
 
@@ -138,8 +146,22 @@ STRIPE_WEBHOOK_SECRET               # Webhook validation
 
 All Pro features are currently free during beta:
 - 16 professional trading metrics
-- AI-powered insights
-- Advanced excursion analysis
-- Behavioral analytics
-- Full export capabilities
+- AI-powered insights via Claude API
+- Advanced excursion analysis (MAE/MFE)
+- Behavioral analytics and tilt detection
+- Full export capabilities (CSV/JSON)
 - All visualization tools
+- Trading Playbooks system with:
+  - Setup creation wizard
+  - Rule compliance tracking
+  - Setup performance analytics
+  - Discipline monitoring
+  - Evolution timeline view
+
+### Recent Development (August 2025)
+
+- **Playbooks Feature**: Complete trading setup management system
+- **Enhanced Trade Form**: Integration with trading setups and rule compliance
+- **Discipline Tracking**: Real-time monitoring with tilt warnings
+- **Build Fixes**: Resolved multiple TypeScript errors in playbooks components
+- **Type Safety**: Improved type checking for optional properties and array handling
