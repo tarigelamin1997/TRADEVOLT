@@ -90,7 +90,7 @@ export function SetupAnalytics({ setups, trades }: SetupAnalyticsProps) {
     }
     acc[category].totalTrades += metrics.totalTrades
     acc[category].totalPnL += metrics.totalPnL
-    acc[category].wins += metrics.wins
+    acc[category].wins += metrics.winningTrades
     return acc
   }, {} as Record<string, any>)
 
