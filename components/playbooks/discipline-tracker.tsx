@@ -255,7 +255,8 @@ export function DisciplineTracker() {
               <div className="mt-3">
                 <Button 
                   size="sm" 
-                  variant={tiltAlert.severity === 'high' ? 'destructive' : 'default'}
+                  variant="default"
+                  className={tiltAlert.severity === 'high' ? 'bg-red-600 hover:bg-red-700 text-white' : ''}
                   onClick={() => setTiltAlert(null)}
                 >
                   Acknowledge
