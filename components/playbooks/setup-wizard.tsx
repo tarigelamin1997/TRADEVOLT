@@ -281,7 +281,11 @@ export function SetupWizard({ setup, onSave, onClose }: SetupWizardProps) {
                   </div>
                   
                   <div className="space-y-3">
-                    {(formData[`${currentStep}Rules` as keyof typeof formData] || []).map((rule: any, index: number) => (
+                    {(() => {
+                      const rulesKey = `${currentStep}Rules` as keyof typeof formData;
+                      const rules = formData[rulesKey];
+                      return Array.isArray(rules) ? rules : [];
+                    })().map((rule: any, index: number) => (
                       <div key={rule.id} className="flex gap-2 items-start">
                         <GripVertical className="h-5 w-5 text-muted-foreground mt-2 cursor-move" />
                         <div className="flex-1 space-y-2">
@@ -315,7 +319,11 @@ export function SetupWizard({ setup, onSave, onClose }: SetupWizardProps) {
                     ))}
                   </div>
                   
-                  {(!(formData[`${currentStep}Rules` as keyof typeof formData] || []).length) && (
+                  {(() => {
+                    const rulesKey = `${currentStep}Rules` as keyof typeof formData;
+                    const rules = formData[rulesKey];
+                    return !Array.isArray(rules) || rules.length === 0;
+                  })() && (
                     <div className="text-center py-8 text-muted-foreground">
                       <p>No rules added yet. Click &quot;Add Rule&quot; to get started.</p>
                     </div>
