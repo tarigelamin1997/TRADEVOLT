@@ -20,8 +20,8 @@ import {
   Trash2,
   Copy
 } from 'lucide-react'
-import { TradingSetupService, type TradingSetup } from '@/lib/services/trading-setup-service'
-import { findUserByClerkId, findTradesByUserId } from '@/lib/db-memory'
+import { TradingSetupService } from '@/lib/services/trading-setup-service'
+import { findUserByClerkId, findTradesByUserId, type TradingSetup } from '@/lib/db-memory'
 import { SetupCard } from '@/components/playbooks/setup-card'
 import { SetupWizard } from '@/components/playbooks/setup-wizard'
 import { SetupAnalytics } from '@/components/playbooks/setup-analytics'
