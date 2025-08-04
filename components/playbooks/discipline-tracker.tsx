@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress'
 import { TradingSetupService, type DisciplineMetrics } from '@/lib/services/trading-setup-service'
 import { findUserByClerkId, findTradesByUserId, type Trade } from '@/lib/db-memory'
 import { formatCurrency } from '@/lib/calculations'
+import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { useSettings } from '@/lib/settings'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
