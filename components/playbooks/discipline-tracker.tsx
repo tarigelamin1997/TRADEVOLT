@@ -109,7 +109,7 @@ export function DisciplineTracker() {
       .slice(0, 10)
 
     // Check various tilt conditions
-    const conditions = []
+    const conditions: { severity: 'high' | 'medium' | 'low', reason: string }[] = []
 
     // 1. Consecutive losses
     let consecutiveLosses = 0
@@ -167,7 +167,7 @@ export function DisciplineTracker() {
 
     // Set the most severe condition as the active alert
     if (conditions.length > 0) {
-      const severityOrder = { high: 3, medium: 2, low: 1 }
+      const severityOrder: Record<'high' | 'medium' | 'low', number> = { high: 3, medium: 2, low: 1 }
       conditions.sort((a, b) => severityOrder[b.severity] - severityOrder[a.severity])
       setTiltAlert({
         active: true,
