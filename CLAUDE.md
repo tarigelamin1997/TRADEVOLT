@@ -165,3 +165,6 @@ All Pro features are currently free during beta:
 - **Discipline Tracking**: Real-time monitoring with tilt warnings
 - **Build Fixes**: Resolved multiple TypeScript errors in playbooks components
 - **Type Safety**: Improved type checking for optional properties and array handling
+- **UI Consistency**: Refactored all pages to use SidebarLayout component for consistent navigation
+- **Navigation Fix**: Added dashboard link to Trading Playbooks header
+- **Sidebar Toggle**: Fixed visibility of sidebar toggle button across all pages

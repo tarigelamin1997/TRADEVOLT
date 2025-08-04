@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { SidebarLayout } from '@/components/sidebar-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
@@ -102,30 +103,58 @@ export default function ExecutionAnalysisPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
-            ))}
-          </div>
+      <SidebarLayout currentPath="/execution">
+        <div className="flex h-full flex-col">
+          <header className="flex h-16 items-center gap-4 border-b px-6">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold">Execution Quality</h1>
+              <p className="text-sm text-muted-foreground">
+                Analyze your trade execution efficiency
+              </p>
+            </div>
+          </header>
+          <main className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="h-32 bg-gray-200 rounded"></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </main>
         </div>
-      </div>
+      </SidebarLayout>
     )
   }
 
   if (!metrics || trades.length === 0) {
     return (
-      <div className="container mx-auto p-6">
-        <Card className="p-8 text-center">
-          <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No Execution Data</h3>
-          <p className="text-muted-foreground">
-            Start trading to see your execution quality metrics
-          </p>
-        </Card>
-      </div>
+      <SidebarLayout currentPath="/execution">
+        <div className="flex h-full flex-col">
+          <header className="flex h-16 items-center gap-4 border-b px-6">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold">Execution Quality</h1>
+              <p className="text-sm text-muted-foreground">
+                Analyze your trade execution efficiency
+              </p>
+            </div>
+          </header>
+          <main className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              <Card className="p-8 text-center">
+                <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Execution Data</h3>
+                <p className="text-muted-foreground">
+                  Start trading to see your execution quality metrics
+                </p>
+              </Card>
+            </div>
+          </main>
+        </div>
+      </SidebarLayout>
     )
   }
 
@@ -133,22 +162,17 @@ export default function ExecutionAnalysisPage() {
   const marketTypes = Array.from(new Set(trades.map(t => t.marketType || 'UNKNOWN')))
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-            <Zap className="h-6 w-6 text-purple-600" />
-          </div>
-          <div>
+    <SidebarLayout currentPath="/execution">
+      <div className="flex h-full flex-col">
+        <header className="flex h-16 items-center gap-4 border-b px-6">
+          <div className="flex-1">
             <h1 className="text-2xl font-bold">Execution Quality</h1>
             <p className="text-sm text-muted-foreground">
               Analyze your trade execution efficiency
             </p>
           </div>
-        </div>
-        
-        <div className="flex gap-2">
+          
+          <div className="flex gap-2">
           <Select value={timePeriod} onValueChange={setTimePeriod}>
             <SelectTrigger className="w-32">
               <Calendar className="h-4 w-4 mr-2" />
@@ -176,11 +200,13 @@ export default function ExecutionAnalysisPage() {
               ))}
             </SelectContent>
           </Select>
-        </div>
-      </div>
+          </div>
+        </header>
 
-      {/* Execution Score Card */}
-      <ExecutionScoreCard score={metrics.executionScore} insights={metrics.insights} />
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-6">
+            {/* Execution Score Card */}
+            <ExecutionScoreCard score={metrics.executionScore} insights={metrics.insights} />
 
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -301,7 +327,10 @@ export default function ExecutionAnalysisPage() {
             metrics={metrics.partialExits}
           />
         </motion.div>
+            </div>
+          </div>
+        </main>
       </div>
-    </div>
+    </SidebarLayout>
   )
 }

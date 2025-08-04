@@ -2,61 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { 
-  Sidebar,
-  SidebarProvider,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-  SidebarTrigger,
-  SidebarInset,
-} from "@/components/ui/sidebar"
+import { SidebarLayout } from '@/components/sidebar-layout'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { 
-  User,
-  ChevronsUpDown,
   Calendar,
-  Home,
-  TrendingUp,
-  Search,
-  Settings,
-  Import,
-  BarChart3,
-  History,
-  DollarSign,
-  PieChart,
-  FileText,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { safeToFixed } from '@/lib/utils/safe-format'
-
-const mainMenuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Trade History", url: "/history", icon: History },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "P&L Report", url: "/pnl", icon: DollarSign },
-  { title: "Import Trades", url: "#import", icon: Import },
-]
-
-const toolsMenuItems = [
-  { title: "Market Analysis", url: "/analysis", icon: TrendingUp },
-  { title: "Performance Metrics", url: "/metrics", icon: PieChart },
-  { title: "Trade Journal", url: "/journal", icon: FileText },
-  { title: "Calendar", url: "/calendar", icon: Calendar },
-]
-
-const settingsMenuItems = [
-  { title: "Search", url: "/search", icon: Search },
-  { title: "Settings", url: "/settings", icon: Settings },
-]
 
 interface Trade {
   id: string
@@ -97,10 +52,6 @@ export default function CalendarPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleMenuClick = (url: string) => {
-    router.push(url)
   }
 
   // Calendar helpers
@@ -147,91 +98,15 @@ export default function CalendarPage() {
   const selectedDateTrades = selectedDate ? getTradesForDate(selectedDate) : []
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <Sidebar>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {mainMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        onClick={() => handleMenuClick(item.url)}
-                        isActive={item.url === '/calendar'}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+    <SidebarLayout currentPath="/calendar">
+      <div className="flex h-full flex-col">
+        <header className="flex h-16 items-center gap-4 border-b px-6">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">Trading Calendar</h1>
+          </div>
+        </header>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Tools</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {toolsMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        onClick={() => handleMenuClick(item.url)}
-                        isActive={item.url === '/calendar'}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Settings</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {settingsMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton onClick={() => handleMenuClick(item.url)}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-
-          <SidebarFooter>
-            <SidebarGroup>
-              <SidebarMenuButton className="w-full justify-between gap-3 h-12">
-                <div className="flex items-center gap-2">
-                  <User className="h-5 w-5 rounded-md" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-sm font-medium">Demo User</span>
-                    <span className="text-xs text-muted-foreground">demo@tradevolt.com</span>
-                  </div>
-                </div>
-                <ChevronsUpDown className="h-5 w-5" />
-              </SidebarMenuButton>
-            </SidebarGroup>
-          </SidebarFooter>
-        </Sidebar>
-
-        <SidebarInset>
-          <div className="flex h-full flex-col">
-            <header className="flex h-16 items-center gap-4 border-b px-6">
-              <SidebarTrigger className="h-7 w-7" />
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold">Trading Calendar</h1>
-              </div>
-            </header>
-
-            <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto">
               <div className="p-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Calendar */}
@@ -438,10 +313,8 @@ export default function CalendarPage() {
                   </div>
                 </div>
               </div>
-            </main>
-          </div>
-        </SidebarInset>
+        </main>
       </div>
-    </SidebarProvider>
+    </SidebarLayout>
   )
 }

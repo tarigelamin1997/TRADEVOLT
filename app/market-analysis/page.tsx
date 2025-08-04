@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { SidebarLayout } from '@/components/sidebar-layout'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -92,32 +93,41 @@ export default function MarketAnalysisPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-96 bg-gray-200 rounded"></div>
+      <SidebarLayout currentPath="/market-analysis">
+        <div className="flex h-full flex-col">
+          <header className="flex h-16 items-center gap-4 border-b px-6">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold">Market & Symbol Analysis</h1>
+              <p className="text-sm text-muted-foreground">
+                Deep dive into your trading performance
+              </p>
+            </div>
+          </header>
+          <main className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+                <div className="h-96 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </main>
         </div>
-      </div>
+      </SidebarLayout>
     )
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg">
-            <BarChart3 className="h-6 w-6 text-indigo-600" />
-          </div>
-          <div>
+    <SidebarLayout currentPath="/market-analysis">
+      <div className="flex h-full flex-col">
+        <header className="flex h-16 items-center gap-4 border-b px-6">
+          <div className="flex-1">
             <h1 className="text-2xl font-bold">Market & Symbol Analysis</h1>
             <p className="text-sm text-muted-foreground">
               Deep dive into your trading performance
             </p>
           </div>
-        </div>
-        
-        <Select value={timePeriod} onValueChange={setTimePeriod}>
+          
+          <Select value={timePeriod} onValueChange={setTimePeriod}>
           <SelectTrigger className="w-32">
             <Calendar className="h-4 w-4 mr-2" />
             <SelectValue />
@@ -129,11 +139,13 @@ export default function MarketAnalysisPage() {
               </SelectItem>
             ))}
           </SelectContent>
-        </Select>
-      </div>
+          </Select>
+        </header>
 
-      {/* Main Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-6">
+            {/* Main Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid grid-cols-5 w-full lg:w-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="symbols">Symbols</TabsTrigger>
@@ -161,8 +173,11 @@ export default function MarketAnalysisPage() {
         <TabsContent value="setups" className="space-y-6">
           <SetupsTab trades={trades} />
         </TabsContent>
-      </Tabs>
-    </div>
+            </Tabs>
+          </div>
+        </main>
+      </div>
+    </SidebarLayout>
   )
 }
 
