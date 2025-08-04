@@ -85,7 +85,7 @@ export function DisciplineTracker() {
       
       // Calculate extended metrics
       const tradesWithCompliance = userTrades.filter(t => t.ruleCompliance)
-      const tradesWithSetup = tradesWithCompliance.filter(t => t.ruleCompliance?.setupId).length
+      const tradesWithSetup = tradesWithCompliance.filter(t => t.setupId).length
       const totalTrades = userTrades.length
       
       const avgComplianceScore = tradesWithCompliance.length > 0
