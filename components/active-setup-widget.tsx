@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { TradingSetupService, type TradingSetup, type SetupPerformanceMetrics } from '@/lib/services/trading-setup-service'
-import { findUserByClerkId, findTradesByUserId, type Trade } from '@/lib/db-memory'
+import { TradingSetupService, type SetupPerformanceMetrics } from '@/lib/services/trading-setup-service'
+import { findUserByClerkId, findTradesByUserId, type Trade, type TradingSetup } from '@/lib/db-memory'
 import { motion } from 'framer-motion'
 import { 
   BookOpen,

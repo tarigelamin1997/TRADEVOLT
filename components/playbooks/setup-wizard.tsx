@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { TradingSetup, SetupRule } from '@/lib/services/trading-setup-service'
+import { TradingSetup, SetupRule } from '@/lib/db-memory'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   X,

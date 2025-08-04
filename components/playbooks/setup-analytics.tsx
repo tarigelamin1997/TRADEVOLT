@@ -3,7 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { TradingSetupService, type TradingSetup, type SetupPerformanceMetrics } from '@/lib/services/trading-setup-service'
+import { TradingSetupService, type SetupPerformanceMetrics } from '@/lib/services/trading-setup-service'
+import { type TradingSetup } from '@/lib/db-memory'
 import { formatCurrency } from '@/lib/calculations'
 import { useSettings } from '@/lib/settings'
 import { 

@@ -17,7 +17,8 @@ import {
 import { Checkbox } from './ui/checkbox'
 import { MARKET_TYPES } from '@/lib/market-knowledge'
 import { useSettings } from '@/lib/settings'
-import { TradingSetupService, type TradingSetup, type SetupRule } from '@/lib/services/trading-setup-service'
+import { TradingSetupService } from '@/lib/services/trading-setup-service'
+import { type TradingSetup, type SetupRule } from '@/lib/db-memory'
 import { findUserByClerkId } from '@/lib/db-memory'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 

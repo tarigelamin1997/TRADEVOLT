@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { TradingSetup } from '@/lib/services/trading-setup-service'
+import { TradingSetup } from '@/lib/db-memory'
 import { SetupPerformanceMetrics } from '@/lib/services/trading-setup-service'
 import { 
   MoreVertical,
