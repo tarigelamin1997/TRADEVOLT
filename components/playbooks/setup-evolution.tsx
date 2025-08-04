@@ -91,7 +91,7 @@ export function SetupEvolution() {
         setupId: setup.id,
         setupName: setup.name,
         type: 'created',
-        date: setup.createdAt,
+        date: new Date(setup.createdAt),
         description: `Setup "${setup.name}" created`
       })
 
@@ -109,7 +109,7 @@ export function SetupEvolution() {
             setupId: setup.id,
             setupName: setup.name,
             type: 'performance_milestone',
-            date: milestoneTrades[milestone - 1].createdAt,
+            date: new Date(milestoneTrades[milestone - 1].createdAt),
             description: `Reached ${milestone} trades`,
             metrics: {
               winRate: metrics.winRate,
@@ -128,7 +128,7 @@ export function SetupEvolution() {
           setupId: setup.id,
           setupName: setup.name,
           type: 'deactivated',
-          date: setup.updatedAt,
+          date: new Date(setup.updatedAt),
           description: `Setup deactivated`
         })
       }
