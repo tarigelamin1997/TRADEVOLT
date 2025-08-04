@@ -40,7 +40,8 @@ export function calculateNetPnL(trades: Trade[]): number {
   }, 0)
 }
 
-export function calculateWinRate(trades: Trade[]): number {
+// Raw calculation functions (for internal use)
+function calculateWinRateRaw(trades: Trade[]): number {
   const closedTrades = trades.filter(t => t.exit !== null && t.exit !== undefined)
   if (closedTrades.length === 0) return 0
   
@@ -52,7 +53,19 @@ export function calculateWinRate(trades: Trade[]): number {
   return (winningTrades.length / closedTrades.length) * 100
 }
 
-export function calculateProfitFactor(trades: Trade[]): number {
+export function calculateWinRate(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'percentage'; description: string } {
+  const winRateValue = calculateWinRateRaw(trades)
+  
+  return {
+    value: winRateValue,
+    // // formatted: `${winRateValue.toFixed(1)}%`,
+    status: winRateValue >= 50 ? 'good' : winRateValue >= 40 ? 'warning' : 'danger',
+    format: 'percentage',
+    description: 'Percentage of trades that closed in profit'
+  }
+}
+
+function calculateProfitFactorRaw(trades: Trade[]): number {
   let totalWins = 0
   let totalLosses = 0
   
@@ -68,12 +81,33 @@ export function calculateProfitFactor(trades: Trade[]): number {
   return totalLosses === 0 ? (totalWins > 0 ? Infinity : 0) : totalWins / totalLosses
 }
 
-export function calculateExpectancy(trades: Trade[]): number {
+export function calculateProfitFactor(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'decimal'; description: string } {
+  const pfValue = calculateProfitFactorRaw(trades)
+  const displayValue = pfValue === Infinity ? 999 : pfValue
+  
+  return {
+    value: displayValue,
+    // // formatted: displayValue.toFixed(2),
+    status: displayValue >= 1.5 ? 'good' : displayValue >= 1 ? 'warning' : 'danger',
+    format: 'decimal',
+    description: 'Ratio of gross profit to gross loss'
+  }
+}
+
+export function calculateExpectancy(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'currency'; description: string } {
   const closedTrades = trades.filter(t => t.exit !== null && t.exit !== undefined)
-  if (closedTrades.length === 0) return 0
+  if (closedTrades.length === 0) return { value: 0, status: 'warning', format: 'currency', description: 'Average amount made per trade' }
   
   const totalPnL = calculateNetPnL(closedTrades)
-  return totalPnL / closedTrades.length
+  const expectancyValue = totalPnL / closedTrades.length
+  
+  return {
+    value: expectancyValue,
+    // // formatted: `$${Math.abs(expectancyValue).toFixed(2)}`,
+    status: expectancyValue > 0 ? 'good' : expectancyValue === 0 ? 'warning' : 'danger',
+    format: 'currency',
+    description: 'Average amount made per trade'
+  }
 }
 
 export function calculateAverageWin(trades: Trade[]): number {
@@ -110,7 +144,7 @@ export function calculateAverageLoss(trades: Trade[]): number {
 
 // Risk Management Metrics
 
-export function calculateMaxDrawdown(trades: Trade[]): { value: number; points: DrawdownPoint[] } {
+function calculateMaxDrawdownRaw(trades: Trade[]): { value: number; points: DrawdownPoint[] } {
   const points: DrawdownPoint[] = []
   let balance = 10000 // Starting balance
   let peak = balance
@@ -148,8 +182,20 @@ export function calculateMaxDrawdown(trades: Trade[]): { value: number; points: 
   return { value: maxDrawdown, points }
 }
 
+export function calculateMaxDrawdown(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'percentage'; description: string } {
+  const { value: maxDrawdownValue } = calculateMaxDrawdownRaw(trades)
+  
+  return {
+    value: maxDrawdownValue,
+    // // formatted: `${maxDrawdownValue.toFixed(2)}%`,
+    status: maxDrawdownValue < 10 ? 'good' : maxDrawdownValue < 20 ? 'warning' : 'danger',
+    format: 'percentage',
+    description: 'Largest peak-to-trough decline in account value'
+  }
+}
+
 export function calculateAverageDrawdown(trades: Trade[]): number {
-  const { points } = calculateMaxDrawdown(trades)
+  const { points } = calculateMaxDrawdownRaw(trades)
   if (points.length === 0) return 0
   
   const drawdowns = points.filter(p => p.drawdown > 0).map(p => p.drawdown)
@@ -160,7 +206,7 @@ export function calculateAverageDrawdown(trades: Trade[]): number {
 
 export function calculateRecoveryFactor(trades: Trade[]): number {
   const netProfit = calculateNetPnL(trades)
-  const { value: maxDrawdown } = calculateMaxDrawdown(trades)
+  const { value: maxDrawdown } = calculateMaxDrawdownRaw(trades)
   
   if (maxDrawdown === 0) return netProfit > 0 ? Infinity : 0
   
@@ -170,7 +216,7 @@ export function calculateRecoveryFactor(trades: Trade[]): number {
 }
 
 export function calculateRiskOfRuin(trades: Trade[]): RiskOfRuinResult {
-  const winRate = calculateWinRate(trades) / 100
+  const winRate = calculateWinRateRaw(trades) / 100
   const avgWin = calculateAverageWin(trades)
   const avgLoss = calculateAverageLoss(trades)
   
@@ -225,7 +271,7 @@ export function calculateRMultiple(trades: Trade[]): number {
 
 // Advanced Risk-Adjusted Metrics
 
-export function calculateSharpeRatio(trades: Trade[]): number {
+function calculateSharpeRatioRaw(trades: Trade[]): number {
   const returns = calculateReturns(trades)
   if (returns.length === 0) return 0
   
@@ -243,30 +289,53 @@ export function calculateSharpeRatio(trades: Trade[]): number {
   return excessReturn / annualizedStdDev
 }
 
-export function calculateSortinoRatio(trades: Trade[]): number {
+export function calculateSharpeRatio(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'decimal'; description: string } {
+  const sharpeValue = calculateSharpeRatioRaw(trades)
+  
+  return {
+    value: sharpeValue,
+    // // formatted: sharpeValue.toFixed(2),
+    status: sharpeValue > 1 ? 'good' : sharpeValue > 0 ? 'warning' : 'danger',
+    format: 'decimal',
+    description: 'Risk-adjusted return measure'
+  }
+}
+
+export function calculateSortinoRatio(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'decimal'; description: string } {
   const returns = calculateReturns(trades)
-  if (returns.length === 0) return 0
+  if (returns.length === 0) return { value: 0, status: 'warning', format: 'decimal', description: 'Risk-adjusted return using downside deviation' }
   
   const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length
   const annualizedReturn = avgReturn * Math.sqrt(MARKET_ASSUMPTIONS.tradingDaysPerYear)
   
   // Calculate downside deviation (only negative returns)
   const negativeReturns = returns.filter(r => r < 0)
-  if (negativeReturns.length === 0) return annualizedReturn > 0 ? Infinity : 0
+  if (negativeReturns.length === 0) {
+    const value = annualizedReturn > 0 ? 999 : 0
+    return { value, status: value > 0 ? 'good' : 'warning', format: 'decimal', description: 'Risk-adjusted return using downside deviation' }
+  }
   
   const downsideVariance = negativeReturns.reduce((sum, r) => sum + Math.pow(r, 2), 0) / returns.length
   const downsideDeviation = Math.sqrt(downsideVariance)
   const annualizedDownsideDeviation = downsideDeviation * Math.sqrt(MARKET_ASSUMPTIONS.tradingDaysPerYear)
   
-  if (annualizedDownsideDeviation === 0) return 0
+  if (annualizedDownsideDeviation === 0) return { value: 0, status: 'warning', format: 'decimal', description: 'Risk-adjusted return using downside deviation' }
   
   const excessReturn = annualizedReturn - (MARKET_ASSUMPTIONS.riskFreeRate * 100)
-  return excessReturn / annualizedDownsideDeviation
+  const sortinoValue = excessReturn / annualizedDownsideDeviation
+  
+  return {
+    value: sortinoValue,
+    // // formatted: sortinoValue.toFixed(2),
+    status: sortinoValue > 1.5 ? 'good' : sortinoValue > 0 ? 'warning' : 'danger',
+    format: 'decimal',
+    description: 'Risk-adjusted return using downside deviation'
+  }
 }
 
-export function calculateCalmarRatio(trades: Trade[]): number {
+export function calculateCalmarRatio(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'decimal'; description: string } {
   // Calculate annualized return
-  if (trades.length === 0) return 0
+  if (trades.length === 0) return { value: 0, status: 'warning', format: 'decimal', description: 'Annualized return divided by maximum drawdown' }
   
   const firstTradeDate = new Date(
     Math.min(...trades.map(t => new Date(t.createdAt).getTime()))
@@ -276,15 +345,26 @@ export function calculateCalmarRatio(trades: Trade[]): number {
   )
   
   const daysDiff = (lastTradeDate.getTime() - firstTradeDate.getTime()) / (1000 * 60 * 60 * 24)
-  if (daysDiff < 30) return 0 // Need at least 30 days of data
+  if (daysDiff < 30) return { value: 0, status: 'warning', format: 'decimal', description: 'Annualized return divided by maximum drawdown' } // Need at least 30 days of data
   
   const totalReturn = calculateNetPnL(trades) / 10000 // As percentage of starting balance
   const annualizedReturn = (totalReturn * 365) / daysDiff
   
-  const { value: maxDrawdown } = calculateMaxDrawdown(trades)
-  if (maxDrawdown === 0) return annualizedReturn > 0 ? Infinity : 0
+  const { value: maxDrawdown } = calculateMaxDrawdownRaw(trades)
+  if (maxDrawdown === 0) {
+    const value = annualizedReturn > 0 ? 999 : 0
+    return { value, status: value > 0 ? 'good' : 'warning', format: 'decimal', description: 'Annualized return divided by maximum drawdown' }
+  }
   
-  return annualizedReturn / (maxDrawdown / 100)
+  const calmarValue = annualizedReturn / (maxDrawdown / 100)
+  
+  return {
+    value: calmarValue,
+    // // formatted: calmarValue.toFixed(2),
+    status: calmarValue > 1 ? 'good' : calmarValue > 0 ? 'warning' : 'danger',
+    format: 'decimal',
+    description: 'Annualized return divided by maximum drawdown'
+  }
 }
 
 export function calculateTreynorRatio(trades: Trade[]): number {
@@ -319,14 +399,149 @@ export function calculateJensensAlpha(trades: Trade[]): number {
   return (annualizedReturn - expectedReturn) * 100
 }
 
+// Additional Missing Metric Functions
+
+export function calculateWinRateLongShort(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'percentage'; description: string } {
+  const longTrades = trades.filter(t => t.type === 'BUY' && t.exit !== null && t.exit !== undefined)
+  const shortTrades = trades.filter(t => t.type === 'SELL' && t.exit !== null && t.exit !== undefined)
+  
+  const longWinRate = longTrades.length > 0 ? calculateWinRateRaw(longTrades) : 0
+  const shortWinRate = shortTrades.length > 0 ? calculateWinRateRaw(shortTrades) : 0
+  
+  // Return average of long and short win rates
+  const avgWinRate = longTrades.length + shortTrades.length > 0 ? 
+    (longWinRate * longTrades.length + shortWinRate * shortTrades.length) / (longTrades.length + shortTrades.length) : 0
+  
+  return {
+    value: avgWinRate,
+    status: avgWinRate >= 50 ? 'good' : avgWinRate >= 40 ? 'warning' : 'danger',
+    format: 'percentage',
+    description: 'Combined win rate across long and short trades'
+  }
+}
+
+export function calculateAvgWinLoss(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'decimal'; description: string } {
+  const avgWin = calculateAverageWin(trades)
+  const avgLoss = calculateAverageLoss(trades)
+  
+  const ratio = avgLoss > 0 ? avgWin / avgLoss : 0
+  
+  return {
+    value: ratio,
+    // // formatted: ratio.toFixed(2),
+    status: ratio >= 1.5 ? 'good' : ratio >= 1 ? 'warning' : 'danger',
+    format: 'decimal',
+    description: 'Average winning trade divided by average losing trade'
+  }
+}
+
+export function calculateAvgRiskReward(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'decimal'; description: string } {
+  // Same as avgWinLoss for now - represents risk/reward ratio
+  const result = calculateAvgWinLoss(trades)
+  return {
+    ...result,
+    description: 'Average risk to reward ratio across all trades'
+  }
+}
+
+export function calculateKellyPercentage(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'percentage'; description: string } {
+  const riskOfRuin = calculateRiskOfRuin(trades)
+  
+  return {
+    value: riskOfRuin.kellyPercentage,
+    // // formatted: `${riskOfRuin.kellyPercentage.toFixed(1)}%`,
+    status: riskOfRuin.kellyPercentage > 15 ? 'good' : riskOfRuin.kellyPercentage > 5 ? 'warning' : 'danger',
+    format: 'percentage',
+    description: 'Optimal position size according to Kelly Criterion'
+  }
+}
+
+export function calculateProfitFactorLongShort(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'decimal'; description: string } {
+  const longTrades = trades.filter(t => t.type === 'BUY')
+  const shortTrades = trades.filter(t => t.type === 'SELL')
+  
+  const longPF = longTrades.length > 0 ? calculateProfitFactorRaw(longTrades) : 0
+  const shortPF = shortTrades.length > 0 ? calculateProfitFactorRaw(shortTrades) : 0
+  
+  // Return weighted average of long and short profit factors
+  const totalTrades = longTrades.length + shortTrades.length
+  const avgPF = totalTrades > 0 ? 
+    (longPF * longTrades.length + shortPF * shortTrades.length) / totalTrades : 0
+  
+  return {
+    value: avgPF,
+    status: avgPF >= 1.5 ? 'good' : avgPF >= 1 ? 'warning' : 'danger',
+    format: 'decimal',
+    description: 'Combined profit factor across long and short trades'
+  }
+}
+
+export function calculateConsistency(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'percentage'; description: string } {
+  if (trades.length === 0) return { value: 0, status: 'warning', format: 'percentage', description: 'Percentage of profitable months' }
+  
+  // Calculate monthly P&L consistency
+  const monthlyPnL = new Map<string, number>()
+  
+  trades.forEach(trade => {
+    const date = new Date(trade.createdAt)
+    const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`
+    const pnl = calculateMarketPnL(trade, trade.marketType || null) || 0
+    
+    monthlyPnL.set(monthKey, (monthlyPnL.get(monthKey) || 0) + pnl)
+  })
+  
+  const months = Array.from(monthlyPnL.values())
+  if (months.length < 2) return { value: 0, status: 'warning', format: 'percentage', description: 'Percentage of profitable months' }
+  
+  const profitableMonths = months.filter(pnl => pnl > 0).length
+  const consistency = (profitableMonths / months.length) * 100
+  
+  return {
+    value: consistency,
+    // // formatted: `${consistency.toFixed(1)}%`,
+    status: consistency >= 70 ? 'good' : consistency >= 50 ? 'warning' : 'danger',
+    format: 'percentage',
+    description: 'Percentage of profitable months'
+  }
+}
+
+export function calculatePayoffRatio(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'decimal'; description: string } {
+  // Same as average win/loss ratio
+  const result = calculateAvgWinLoss(trades)
+  return {
+    ...result,
+    description: 'Average profit per winning trade vs average loss per losing trade'
+  }
+}
+
+export function calculateUlcerIndex(trades: Trade[]): { value: number; status: 'good' | 'warning' | 'danger'; format: 'percentage'; description: string } {
+  const { points } = calculateMaxDrawdownRaw(trades)
+  if (points.length === 0) return { value: 0, status: 'warning', format: 'percentage', description: 'Risk measure based on depth and duration of drawdowns' }
+  
+  // Calculate squared drawdowns sum
+  const squaredDrawdowns = points.reduce((sum, point) => {
+    return sum + Math.pow(point.drawdown, 2)
+  }, 0)
+  
+  const ulcerIndex = Math.sqrt(squaredDrawdowns / points.length)
+  
+  return {
+    value: ulcerIndex,
+    // // formatted: `${ulcerIndex.toFixed(2)}%`,
+    status: ulcerIndex < 5 ? 'good' : ulcerIndex < 10 ? 'warning' : 'danger',
+    format: 'percentage',
+    description: 'Risk measure based on depth and duration of drawdowns'
+  }
+}
+
 // Generate insights based on metrics
 export function generateInsights(trades: Trade[]): MetricInsight[] {
   const insights: MetricInsight[] = []
   
-  const winRate = calculateWinRate(trades)
-  const profitFactor = calculateProfitFactor(trades)
-  const { value: maxDrawdown } = calculateMaxDrawdown(trades)
-  const sharpeRatio = calculateSharpeRatio(trades)
+  const winRate = calculateWinRateRaw(trades)
+  const profitFactor = calculateProfitFactorRaw(trades)
+  const { value: maxDrawdown } = calculateMaxDrawdownRaw(trades)
+  const sharpeRatio = calculateSharpeRatioRaw(trades)
   const avgWin = calculateAverageWin(trades)
   const avgLoss = calculateAverageLoss(trades)
   

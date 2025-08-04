@@ -8,6 +8,8 @@ interface SubscriptionContextType {
   upgradeToProUrl: string
   checkSubscription: () => Promise<void>
   isLoading: boolean
+  isPro: boolean
+  subscribe: () => void
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined)
@@ -18,6 +20,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false)
   
   const upgradeToProUrl = '/subscribe' // Beta information page
+  const isPro = subscription.plan === 'pro'
   
   const checkSubscription = async () => {
     // During beta, everyone is pro
@@ -25,12 +28,26 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     setIsLoading(false)
   }
   
+  const subscribe = () => {
+    // During beta, redirect to subscribe page for information
+    if (typeof window !== 'undefined') {
+      window.location.href = upgradeToProUrl
+    }
+  }
+  
   useEffect(() => {
     // No need to check during beta
   }, [])
   
   return (
-    <SubscriptionContext.Provider value={{ subscription, upgradeToProUrl, checkSubscription, isLoading }}>
+    <SubscriptionContext.Provider value={{ 
+      subscription, 
+      upgradeToProUrl, 
+      checkSubscription, 
+      isLoading, 
+      isPro, 
+      subscribe 
+    }}>
       {children}
     </SubscriptionContext.Provider>
   )

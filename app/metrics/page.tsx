@@ -81,23 +81,23 @@ export default function MetricsPage() {
     results.expectancy = metrics.calculateExpectancy(closedTrades)
     results.totalNetPnL = {
       value: totalPnL,
-      formatted: `$${Math.abs(totalPnL).toFixed(2)}`,
-      status: totalPnL >= 0 ? 'good' : 'bad',
-      format: 'currency'
+      status: totalPnL >= 0 ? 'good' : 'danger',
+      format: 'currency',
+      description: 'Total profit or loss from all trades'
     }
     results.winRateLongShort = metrics.calculateWinRateLongShort(closedTrades)
     results.avgWinLoss = metrics.calculateAvgWinLoss(closedTrades)
     results.totalTrades = {
       value: filteredTrades.length,
-      formatted: filteredTrades.length.toString(),
-      status: 'neutral',
-      format: 'number'
+      status: 'warning',
+      format: 'number',
+      description: 'Total number of trades entered'
     }
     results.totalClosedTrades = {
       value: closedTrades.length,
-      formatted: closedTrades.length.toString(),
-      status: 'neutral',
-      format: 'number'
+      status: 'warning',
+      format: 'number',
+      description: 'Total number of trades that have been closed'
     }
     
     // Risk Management Metrics

@@ -81,9 +81,9 @@ export default function AnalyticsPage() {
     results.expectancy = metrics.calculateExpectancy(closedTrades)
     results.totalNetPnL = {
       value: totalPnL,
-      formatted: `$${Math.abs(totalPnL).toFixed(2)}`,
-      status: totalPnL >= 0 ? 'good' : 'bad',
-      format: 'currency'
+      status: totalPnL >= 0 ? 'good' : 'danger',
+      format: 'currency',
+      description: 'Total profit or loss from all trades'
     }
     results.winRateLongShort = metrics.calculateWinRateLongShort(closedTrades)
     results.avgWinLoss = metrics.calculateAvgWinLoss(closedTrades)
@@ -109,12 +109,12 @@ export default function AnalyticsPage() {
 
   // Export functionality
   const handleExport = () => {
-    const exportData = generateAnalyticsExport(trades, calculatedMetrics)
+    const exportData = generateAnalyticsExport(filteredTrades, selectedMarket)
     
     if (exportFormat === 'csv') {
-      exportToCSV(exportData, 'trading-analytics')
+      exportToCSV(exportData)
     } else {
-      exportToJSON(exportData, 'trading-analytics')
+      exportToJSON(exportData)
     }
   }
 
@@ -123,7 +123,7 @@ export default function AnalyticsPage() {
     const groupMetrics = METRIC_GROUPS[group]
     if (!groupMetrics) return []
     
-    return groupMetrics.map(metricId => ({
+    return groupMetrics.metrics.map(metricId => ({
       id: metricId,
       definition: METRIC_DEFINITIONS[metricId],
       result: calculatedMetrics[metricId]
@@ -142,12 +142,14 @@ export default function AnalyticsPage() {
           type: 'warning' as const,
           title: 'Low Win Rate',
           message: 'Your win rate is below 40%. Consider reviewing your entry criteria.',
+          actionable: true
         })
       } else if (winRate > 60) {
         insights.push({
           type: 'success' as const,
           title: 'Strong Win Rate',
           message: 'Your win rate is above 60%. Keep up the good work!',
+          actionable: false
         })
       }
     }
@@ -157,15 +159,17 @@ export default function AnalyticsPage() {
       const pf = calculatedMetrics.profitFactor.value as number
       if (pf < 1) {
         insights.push({
-          type: 'error' as const,
+          type: 'danger' as const,
           title: 'Negative Profit Factor',
           message: 'You\'re losing more than you\'re winning. Review your strategy.',
+          actionable: true
         })
       } else if (pf > 2) {
         insights.push({
           type: 'success' as const,
           title: 'Excellent Profit Factor',
           message: 'Your profit factor is above 2. This indicates a strong edge.',
+          actionable: false
         })
       }
     }
@@ -178,6 +182,7 @@ export default function AnalyticsPage() {
           type: 'info' as const,
           title: 'Risk-Reward Ratio',
           message: 'Consider targeting higher reward relative to your risk.',
+          actionable: true
         })
       }
     }
@@ -234,7 +239,13 @@ export default function AnalyticsPage() {
             {insights.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {insights.map((insight, index) => (
-                  <InsightCard key={index} {...insight} />
+                  <InsightCard 
+                    key={index} 
+                    type={insight.type}
+                    title={insight.title}
+                    description={insight.message}
+                    actionable={insight.actionable}
+                  />
                 ))}
               </div>
             )}
@@ -249,7 +260,7 @@ export default function AnalyticsPage() {
 
               <TabsContent value="essential" className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {getMetricsByGroup('essential').map(({ id, definition, result }) => {
+                  {getMetricsByGroup('overview').map(({ id, definition, result }) => {
                     if (id === 'winRate' || id === 'profitFactor' || id === 'expectancy' || id === 'totalNetPnL') {
                       return (
                         <VisualMetricCard
@@ -307,7 +318,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Excursion Stats */}
-                <ExcursionStats trades={filteredTrades} />
+                {/* <ExcursionStats userId="placeholder" /> */}
               </TabsContent>
 
               <TabsContent value="advanced" className="space-y-6">

@@ -1,6 +1,7 @@
 import { Trade } from '@/lib/types/metrics'
 import * as metrics from '@/lib/tradingMetrics'
 import { METRIC_DEFINITIONS } from '@/lib/constants/metrics'
+import { calculateMarketPnL } from '@/lib/market-knowledge'
 
 interface ExportData {
   generatedAt: string
@@ -40,9 +41,9 @@ export function generateAnalyticsExport(trades: Trade[], timeframe: string): Exp
   // Calculate all metrics
   const essentialMetrics = {
     netPnL: metrics.calculateNetPnL(trades),
-    winRate: metrics.calculateWinRate(trades),
-    profitFactor: metrics.calculateProfitFactor(trades),
-    expectancy: metrics.calculateExpectancy(trades),
+    winRate: metrics.calculateWinRate(trades).value,
+    profitFactor: metrics.calculateProfitFactor(trades).value,
+    expectancy: metrics.calculateExpectancy(trades).value,
     averageWin: metrics.calculateAverageWin(trades),
     averageLoss: metrics.calculateAverageLoss(trades),
     totalTrades: trades.length
@@ -57,9 +58,9 @@ export function generateAnalyticsExport(trades: Trade[], timeframe: string): Exp
   }
 
   const advancedMetrics = {
-    sharpeRatio: metrics.calculateSharpeRatio(trades),
-    sortinoRatio: metrics.calculateSortinoRatio(trades),
-    calmarRatio: metrics.calculateCalmarRatio(trades),
+    sharpeRatio: metrics.calculateSharpeRatio(trades).value,
+    sortinoRatio: metrics.calculateSortinoRatio(trades).value,
+    calmarRatio: metrics.calculateCalmarRatio(trades).value,
     treynorRatio: metrics.calculateTreynorRatio(trades),
     jensensAlpha: metrics.calculateJensensAlpha(trades)
   }
@@ -188,5 +189,3 @@ function formatMetricValue(value: number, format: string): string {
   }
 }
 
-// Import the missing function
-import { calculateMarketPnL } from '@/lib/market-knowledge'
