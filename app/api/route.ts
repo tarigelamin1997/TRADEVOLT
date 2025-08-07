@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { MetaAPIService } from '@/lib/services/metaapi-service'
+import { encrypt, decrypt } from '@/lib/utils/crypto'
+import { CreateBrokerConnectionData } from '@/lib/types/broker'
 
 // Check if Clerk is configured
 const isClerkConfigured = !!(
@@ -314,6 +317,270 @@ export async function POST(request: NextRequest) {
         }
       }
       
+      // Broker Integration Actions
+      case 'connectBroker': {
+        console.log('Connecting broker for clerkId:', clerkId)
+        
+        // Validate required fields
+        const connectionData: CreateBrokerConnectionData = body.connectionData
+        if (!connectionData || !connectionData.platform || !connectionData.accountLogin || 
+            !connectionData.password || !connectionData.serverName) {
+          return NextResponse.json({
+            error: 'Missing required connection data'
+          }, { status: 400 })
+        }
+
+        try {
+          // Get or create user
+          let user = await prisma.user.findUnique({
+            where: { clerkId }
+          })
+          
+          if (!user) {
+            user = await prisma.user.create({
+              data: {
+                clerkId,
+                email: body.email || `${clerkId}@placeholder.com`,
+                isPaid: false
+              }
+            })
+          }
+
+          // Initialize MetaAPI
+          if (!process.env.METAAPI_TOKEN) {
+            return NextResponse.json({
+              error: 'MetaAPI not configured'
+            }, { status: 500 })
+          }
+
+          const metaApi = new MetaAPIService(
+            process.env.METAAPI_TOKEN,
+            process.env.METAAPI_REGION || 'new-york'
+          )
+
+          // Get or create provisioning profile
+          const provisioningProfileId = await metaApi.getOrCreateProvisioningProfile(
+            connectionData.serverName,
+            connectionData.platform.toLowerCase() as 'mt4' | 'mt5'
+          )
+
+          // Connect to MT account
+          const { accountId, connectionId } = await metaApi.connectAccount(
+            connectionData,
+            provisioningProfileId
+          )
+
+          // Encrypt password before storing
+          const encryptedPassword = encrypt(connectionData.password)
+
+          // Save connection to database
+          const brokerConnection = await prisma.brokerConnection.create({
+            data: {
+              userId: user.id,
+              platform: connectionData.platform,
+              accountName: connectionData.accountName,
+              accountId: connectionData.accountLogin,
+              accountLogin: connectionData.accountLogin,
+              serverName: connectionData.serverName,
+              metaApiAccountId: accountId,
+              provisioningProfileId,
+              connectionStatus: 'connected',
+              autoSync: connectionData.autoSync || false,
+              encryptedPassword,
+              lastSync: new Date()
+            }
+          })
+
+          // Get account info
+          const accountInfo = await metaApi.getAccountInfo(accountId)
+
+          return NextResponse.json({
+            success: true,
+            connection: {
+              id: brokerConnection.id,
+              accountInfo
+            }
+          })
+        } catch (error) {
+          console.error('Broker connection error:', error)
+          return NextResponse.json({
+            error: 'Failed to connect broker',
+            details: error instanceof Error ? error.message : 'Unknown error'
+          }, { status: 500 })
+        }
+      }
+
+      case 'getBrokerConnections': {
+        // Get user
+        const user = await prisma.user.findUnique({
+          where: { clerkId }
+        })
+        
+        if (!user) {
+          return NextResponse.json({ connections: [] })
+        }
+
+        // Get all broker connections for user
+        const connections = await prisma.brokerConnection.findMany({
+          where: { userId: user.id },
+          orderBy: { createdAt: 'desc' }
+        })
+
+        // Don't send encrypted passwords to client
+        const sanitizedConnections = connections.map(conn => ({
+          ...conn,
+          encryptedPassword: undefined
+        }))
+
+        return NextResponse.json({ connections: sanitizedConnections })
+      }
+
+      case 'syncBrokerTrades': {
+        const { connectionId, startDate, endDate } = body
+        
+        if (!connectionId) {
+          return NextResponse.json({
+            error: 'Missing connection ID'
+          }, { status: 400 })
+        }
+
+        try {
+          // Get connection from database
+          const connection = await prisma.brokerConnection.findUnique({
+            where: { id: connectionId }
+          })
+
+          if (!connection || !connection.metaApiAccountId) {
+            return NextResponse.json({
+              error: 'Invalid connection'
+            }, { status: 404 })
+          }
+
+          // Initialize MetaAPI
+          const metaApi = new MetaAPIService(
+            process.env.METAAPI_TOKEN!,
+            process.env.METAAPI_REGION || 'new-york'
+          )
+
+          // Sync trades
+          const syncResult = await metaApi.syncHistoricalTrades(
+            connection.metaApiAccountId,
+            new Date(startDate || Date.now() - 30 * 24 * 60 * 60 * 1000), // Default 30 days
+            endDate ? new Date(endDate) : new Date()
+          )
+
+          // Update last sync time
+          await prisma.brokerConnection.update({
+            where: { id: connectionId },
+            data: { lastSync: new Date() }
+          })
+
+          return NextResponse.json({
+            success: true,
+            result: syncResult
+          })
+        } catch (error) {
+          console.error('Sync error:', error)
+          return NextResponse.json({
+            error: 'Failed to sync trades',
+            details: error instanceof Error ? error.message : 'Unknown error'
+          }, { status: 500 })
+        }
+      }
+
+      case 'disconnectBroker': {
+        const { connectionId } = body
+        
+        if (!connectionId) {
+          return NextResponse.json({
+            error: 'Missing connection ID'
+          }, { status: 400 })
+        }
+
+        try {
+          // Get connection
+          const connection = await prisma.brokerConnection.findUnique({
+            where: { id: connectionId }
+          })
+
+          if (!connection) {
+            return NextResponse.json({
+              error: 'Connection not found'
+            }, { status: 404 })
+          }
+
+          // Disconnect from MetaAPI if connected
+          if (connection.metaApiAccountId) {
+            const metaApi = new MetaAPIService(
+              process.env.METAAPI_TOKEN!,
+              process.env.METAAPI_REGION || 'new-york'
+            )
+
+            await metaApi.disconnectAccount(connection.metaApiAccountId)
+          }
+
+          // Update status in database
+          await prisma.brokerConnection.update({
+            where: { id: connectionId },
+            data: { connectionStatus: 'disconnected' }
+          })
+
+          return NextResponse.json({ success: true })
+        } catch (error) {
+          console.error('Disconnect error:', error)
+          return NextResponse.json({
+            error: 'Failed to disconnect',
+            details: error instanceof Error ? error.message : 'Unknown error'
+          }, { status: 500 })
+        }
+      }
+
+      case 'removeBrokerConnection': {
+        const { connectionId } = body
+        
+        if (!connectionId) {
+          return NextResponse.json({
+            error: 'Missing connection ID'
+          }, { status: 400 })
+        }
+
+        try {
+          // Get connection
+          const connection = await prisma.brokerConnection.findUnique({
+            where: { id: connectionId }
+          })
+
+          if (!connection) {
+            return NextResponse.json({
+              error: 'Connection not found'
+            }, { status: 404 })
+          }
+
+          // Remove from MetaAPI if exists
+          if (connection.metaApiAccountId) {
+            const metaApi = new MetaAPIService(
+              process.env.METAAPI_TOKEN!,
+              process.env.METAAPI_REGION || 'new-york'
+            )
+
+            await metaApi.removeAccount(connection.metaApiAccountId)
+          }
+
+          // Delete from database
+          await prisma.brokerConnection.delete({
+            where: { id: connectionId }
+          })
+
+          return NextResponse.json({ success: true })
+        } catch (error) {
+          console.error('Remove error:', error)
+          return NextResponse.json({
+            error: 'Failed to remove connection',
+            details: error instanceof Error ? error.message : 'Unknown error'
+          }, { status: 500 })
+        }
+      }
+
       default:
         return new NextResponse('Unknown action', { status: 400 })
     }

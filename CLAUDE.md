@@ -176,3 +176,10 @@ All Pro features are currently free during beta:
   - Fixed sidebar state management and responsive behavior
 - **Metric Functions**: Added 8 missing trading metric calculations
 - **Build Error Fixes**: Resolved all TypeScript compilation errors for Vercel deployment
+- **Broker Integration**: 
+  - Added MetaTrader 4/5 integration via MetaAPI
+  - Secure credential storage with AES-256-GCM encryption
+  - Real-time trade synchronization
+  - Multi-account support
+  - Auto-sync functionality
+  - Settings UI refactoring: moved Goals tab into Trading tab as sub-section

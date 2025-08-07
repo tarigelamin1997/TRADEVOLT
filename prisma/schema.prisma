@@ -98,3 +98,23 @@ model PartialExit {
   
   @@index([tradeId, timestamp])
 }
+
+model BrokerConnection {
+  id                    String   @id @default(cuid())
+  userId                String
+  platform              String   // "MT4" or "MT5"
+  accountName           String
+  accountId             String   @unique
+  accountLogin          String
+  serverName            String
+  metaApiAccountId      String?  @unique
+  provisioningProfileId String?
+  connectionStatus      String   @default("disconnected") // disconnected, connecting, connected, error
+  lastSync              DateTime?
+  autoSync              Boolean  @default(false)
+  encryptedPassword     String   // Encrypted MT4/5 password
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+}

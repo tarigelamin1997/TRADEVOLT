@@ -18,11 +18,16 @@ import {
   CreditCard,
   Check,
   DollarSign,
-  Link2
+  Link2,
+  Plus,
+  Loader2
 } from "lucide-react"
 import { useSettings, DEFAULT_SETTINGS, type UserSettings } from '@/lib/settings'
 import { MARKET_TYPES } from '@/lib/market-knowledge'
 import { useTheme } from '@/lib/theme-provider'
+import { BrokerConnectionDialog } from '@/components/broker/broker-connection-dialog'
+import { BrokerConnectionCard } from '@/components/broker/broker-connection-card'
+import { BrokerConnection } from '@/lib/types/broker'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -31,10 +36,110 @@ export default function SettingsPage() {
   const [localSettings, setLocalSettings] = useState<UserSettings>(settings)
   const [hasChanges, setHasChanges] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  
+  // Broker connection state
+  const [brokerConnections, setBrokerConnections] = useState<BrokerConnection[]>([])
+  const [isLoadingConnections, setIsLoadingConnections] = useState(false)
+  const [showConnectionDialog, setShowConnectionDialog] = useState(false)
 
   useEffect(() => {
     setLocalSettings(settings)
   }, [settings])
+
+  // Load broker connections
+  useEffect(() => {
+    loadBrokerConnections()
+  }, [])
+
+  const loadBrokerConnections = async () => {
+    setIsLoadingConnections(true)
+    try {
+      const response = await fetch('/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getBrokerConnections' })
+      })
+      
+      const data = await response.json()
+      if (data.connections) {
+        setBrokerConnections(data.connections)
+      }
+    } catch (error) {
+      console.error('Failed to load broker connections:', error)
+    } finally {
+      setIsLoadingConnections(false)
+    }
+  }
+
+  const handleBrokerSync = async (connectionId: string) => {
+    try {
+      const response = await fetch('/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'syncBrokerTrades',
+          connectionId
+        })
+      })
+      
+      const data = await response.json()
+      if (data.success) {
+        // Reload connections to update lastSync time
+        loadBrokerConnections()
+      }
+    } catch (error) {
+      console.error('Failed to sync trades:', error)
+    }
+  }
+
+  const handleBrokerDisconnect = async (connectionId: string) => {
+    try {
+      const response = await fetch('/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'disconnectBroker',
+          connectionId
+        })
+      })
+      
+      if (response.ok) {
+        loadBrokerConnections()
+      }
+    } catch (error) {
+      console.error('Failed to disconnect broker:', error)
+    }
+  }
+
+  const handleBrokerRemove = async (connectionId: string) => {
+    if (!confirm('Are you sure you want to remove this connection?')) return
+    
+    try {
+      const response = await fetch('/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'removeBrokerConnection',
+          connectionId
+        })
+      })
+      
+      if (response.ok) {
+        setBrokerConnections(prev => prev.filter(c => c.id !== connectionId))
+      }
+    } catch (error) {
+      console.error('Failed to remove connection:', error)
+    }
+  }
+
+  const handleAutoSyncToggle = async (connectionId: string, enabled: boolean) => {
+    // Update local state immediately for responsiveness
+    setBrokerConnections(prev => 
+      prev.map(c => c.id === connectionId ? { ...c, autoSync: enabled } : c)
+    )
+    
+    // TODO: Implement API call to update autoSync setting
+  }
 
   const handleChange = (section: keyof UserSettings, field: string, value: any) => {
     setLocalSettings(prev => ({
@@ -600,77 +705,87 @@ export default function SettingsPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="space-y-4">
-                        <div className="border rounded-lg p-6 space-y-4">
-                          <div className="flex items-center justify-between">
+                      {/* Connected Accounts */}
+                      {isLoadingConnections ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                        </div>
+                      ) : brokerConnections.length > 0 ? (
+                        <div className="space-y-4">
+                          <h3 className="text-sm font-medium">Connected Accounts</h3>
+                          {brokerConnections.map((connection) => (
+                            <BrokerConnectionCard
+                              key={connection.id}
+                              connection={connection}
+                              onSync={() => handleBrokerSync(connection.id)}
+                              onDisconnect={() => handleBrokerDisconnect(connection.id)}
+                              onRemove={() => handleBrokerRemove(connection.id)}
+                              onToggleAutoSync={(enabled) => 
+                                handleAutoSyncToggle(connection.id, enabled)
+                              }
+                            />
+                          ))}
+                        </div>
+                      ) : null}
+
+                      {/* Add Connection Button */}
+                      <div className="border rounded-lg p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                              <span className="text-lg font-bold text-blue-600 dark:text-blue-400">MT</span>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold">MetaTrader 4/5</h3>
+                              <p className="text-sm text-gray-500">Connect to MetaQuotes platforms</p>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="outline"
+                            onClick={() => setShowConnectionDialog(true)}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Account
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Coming Soon */}
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Coming Soon</h4>
+                        <div className="grid gap-3">
+                          <div className="border rounded-lg p-4 opacity-50">
                             <div className="flex items-center gap-3">
-                              <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                                <span className="text-lg font-bold text-blue-600 dark:text-blue-400">MT</span>
+                              <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                                <span className="text-sm font-bold text-gray-400">TD</span>
                               </div>
                               <div>
-                                <h3 className="font-semibold">MetaTrader 4/5</h3>
-                                <p className="text-sm text-gray-500">Connect to MetaQuotes platforms</p>
+                                <h4 className="text-sm font-medium">TD Ameritrade / ThinkOrSwim</h4>
+                                <p className="text-xs text-gray-500">Schwab API integration</p>
                               </div>
                             </div>
-                            <Button variant="outline">
-                              Configure
-                            </Button>
                           </div>
                           
-                          <div className="border-t pt-4">
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600">Status</span>
-                                <span className="text-orange-600 font-medium">Not Connected</span>
+                          <div className="border rounded-lg p-4 opacity-50">
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                                <span className="text-sm font-bold text-gray-400">IB</span>
                               </div>
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600">Platform</span>
-                                <span className="text-gray-900 dark:text-gray-100">MetaTrader 4/5</span>
-                              </div>
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600">Auto-sync</span>
-                                <Switch disabled />
+                              <div>
+                                <h4 className="text-sm font-medium">Interactive Brokers</h4>
+                                <p className="text-xs text-gray-500">TWS API integration</p>
                               </div>
                             </div>
                           </div>
-                        </div>
-
-                        <div className="space-y-3">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Coming Soon</h4>
-                          <div className="grid gap-3">
-                            <div className="border rounded-lg p-4 opacity-50">
-                              <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
-                                  <span className="text-sm font-bold text-gray-400">TD</span>
-                                </div>
-                                <div>
-                                  <h4 className="text-sm font-medium">TD Ameritrade / ThinkOrSwim</h4>
-                                  <p className="text-xs text-gray-500">Schwab API integration</p>
-                                </div>
+                          
+                          <div className="border rounded-lg p-4 opacity-50">
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                                <span className="text-sm font-bold text-gray-400">TV</span>
                               </div>
-                            </div>
-                            
-                            <div className="border rounded-lg p-4 opacity-50">
-                              <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
-                                  <span className="text-sm font-bold text-gray-400">IB</span>
-                                </div>
-                                <div>
-                                  <h4 className="text-sm font-medium">Interactive Brokers</h4>
-                                  <p className="text-xs text-gray-500">TWS API integration</p>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="border rounded-lg p-4 opacity-50">
-                              <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
-                                  <span className="text-sm font-bold text-gray-400">TV</span>
-                                </div>
-                                <div>
-                                  <h4 className="text-sm font-medium">TradingView</h4>
-                                  <p className="text-xs text-gray-500">Webhook integration</p>
-                                </div>
+                              <div>
+                                <h4 className="text-sm font-medium">TradingView</h4>
+                                <p className="text-xs text-gray-500">Webhook integration</p>
                               </div>
                             </div>
                           </div>
@@ -796,6 +911,15 @@ export default function SettingsPage() {
               </Button>
             )}
           </div>
+
+          {/* Broker Connection Dialog */}
+          <BrokerConnectionDialog
+            open={showConnectionDialog}
+            onOpenChange={setShowConnectionDialog}
+            onSuccess={() => {
+              loadBrokerConnections()
+            }}
+          />
       </>
     </SidebarLayout>
   )
