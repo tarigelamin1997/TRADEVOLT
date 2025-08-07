@@ -11,7 +11,7 @@ import {
   Trash2, 
   Download,
   Link2,
-  LinkOff,
+  Unlink,
   Clock,
   AlertCircle
 } from "lucide-react"
@@ -83,7 +83,7 @@ export function BrokerConnectionCard({
       case 'connecting':
         return <RefreshCw className="h-3 w-3 animate-spin" />
       case 'disconnected':
-        return <LinkOff className="h-3 w-3" />
+        return <Unlink className="h-3 w-3" />
       case 'error':
         return <AlertCircle className="h-3 w-3" />
       default:
@@ -184,7 +184,7 @@ export function BrokerConnectionCard({
                     isDisconnecting
                   }
                 >
-                  <LinkOff className="h-4 w-4 mr-2" />
+                  <Unlink className="h-4 w-4 mr-2" />
                   {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}
                 </DropdownMenuItem>
                 

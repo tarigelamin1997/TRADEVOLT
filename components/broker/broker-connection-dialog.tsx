@@ -217,7 +217,7 @@ export function BrokerConnectionDialog({
                   ))}
                 </datalist>
                 <p className="text-xs text-gray-500">
-                  Your broker's server name (check MT{platform === 'MT4' ? '4' : '5'} terminal)
+                  Your broker&apos;s server name (check MT{platform === 'MT4' ? '4' : '5'} terminal)
                 </p>
               </div>
 
