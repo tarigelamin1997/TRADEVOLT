@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       await prisma.brokerConnection.count()
       tableExists = true
     } catch (e) {
-      error = e.message
+      error = e instanceof Error ? e.message : 'Unknown error'
     }
 
     return NextResponse.json({
