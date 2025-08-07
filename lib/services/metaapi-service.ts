@@ -109,7 +109,7 @@ export class MetaAPIService {
         marginLevel: accountInfo.marginLevel,
         tradeAllowed: accountInfo.tradeAllowed || false,
         investorMode: accountInfo.investorMode || false,
-        accountCurrencyExchangeRate: accountInfo.accountCurrencyExchangeRate
+        accountCurrencyExchangeRate: accountInfo.accountCurrencyExchangeRate || 1
       };
     } catch (error) {
       console.error('Error getting account info:', error);
