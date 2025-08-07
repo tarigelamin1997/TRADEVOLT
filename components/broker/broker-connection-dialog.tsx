@@ -119,9 +119,9 @@ export function BrokerConnectionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Connect MetaTrader Account</DialogTitle>
+          <DialogTitle>Connect Trading Account</DialogTitle>
           <DialogDescription>
-            Connect your MT4 or MT5 account to automatically sync trades
+            {platform ? `Connect your ${platform} account to automatically sync trades` : 'Select your platform and connect your account to sync trades'}
           </DialogDescription>
         </DialogHeader>
 
@@ -136,16 +136,27 @@ export function BrokerConnectionDialog({
             <div className="space-y-4 py-4">
               {/* Platform Selection */}
               <div className="space-y-2">
-                <Label>Platform</Label>
-                <Select value={platform} onValueChange={(value: 'MT4' | 'MT5') => setPlatform(value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MT4">MetaTrader 4</SelectItem>
-                    <SelectItem value="MT5">MetaTrader 5</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Select Your Trading Platform</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant={platform === 'MT4' ? 'default' : 'outline'}
+                    className="h-20 flex flex-col gap-1"
+                    onClick={() => setPlatform('MT4')}
+                  >
+                    <span className="text-lg font-bold">MT4</span>
+                    <span className="text-xs opacity-80">MetaTrader 4</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={platform === 'MT5' ? 'default' : 'outline'}
+                    className="h-20 flex flex-col gap-1"
+                    onClick={() => setPlatform('MT5')}
+                  >
+                    <span className="text-lg font-bold">MT5</span>
+                    <span className="text-xs opacity-80">MetaTrader 5</span>
+                  </Button>
+                </div>
               </div>
 
               {/* Account Name (Optional) */}
