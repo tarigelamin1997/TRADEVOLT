@@ -64,7 +64,6 @@ export class MetaAPIService {
         server: connectionData.serverName,
         platform: connectionData.platform.toLowerCase() as 'mt4' | 'mt5',
         provisioningProfileId,
-        application: 'TradeVolt',
         magic: 0, // Magic number for EA identification
         quoteStreamingIntervalInSeconds: 2.5, // Free tier limitation
         tags: ['tradevolt']
