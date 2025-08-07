@@ -135,15 +135,16 @@ export class MetaAPIService {
         endTime
       );
 
-      const tradesImported = deals.length;
+      const dealsArray = Array.isArray(deals) ? deals : [];
+      const tradesImported = dealsArray.length;
       const errors: string[] = [];
 
       // Convert MetaAPI deals to TradeVolt trades
-      const trades: Partial<Trade>[] = deals.map(deal => {
+      const trades: Partial<Trade>[] = dealsArray.map((deal: any) => {
         try {
           return this.convertDealToTrade(deal);
         } catch (error) {
-          errors.push(`Failed to convert deal ${deal.id}: ${error.message}`);
+          errors.push(`Failed to convert deal ${deal.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           return null;
         }
       }).filter(Boolean) as Partial<Trade>[];
