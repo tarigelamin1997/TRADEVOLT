@@ -161,18 +161,18 @@ export class MetaAPIService {
   }
 
   // Convert MetaAPI deal to TradeVolt trade format
-  private convertDealToTrade(deal: MetaApiDeal): Partial<Trade> {
+  private convertDealToTrade(deal: MetaApiDeal | MetatraderDeal): Partial<Trade> {
     const isBuy = deal.type === 'DEAL_TYPE_BUY';
     
     return {
-      symbol: deal.symbol,
+      symbol: deal.symbol || '',
       type: isBuy ? 'BUY' : 'SELL',
       entry: deal.price,
       quantity: deal.volume,
       entryTime: new Date(deal.time),
-      commission: deal.commission,
-      notes: deal.comment || `Imported from MT${deal.brokerComment?.includes('MT5') ? '5' : '4'}`,
-      marketType: this.detectMarketType(deal.symbol)
+      commission: deal.commission || 0,
+      notes: deal.comment || `Imported from MetaTrader`,
+      marketType: this.detectMarketType(deal.symbol || '')
     };
   }
 
