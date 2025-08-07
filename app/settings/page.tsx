@@ -18,7 +18,8 @@ import {
   RotateCcw,
   CreditCard,
   Check,
-  DollarSign
+  DollarSign,
+  Link2
 } from "lucide-react"
 import { useSettings, DEFAULT_SETTINGS, type UserSettings } from '@/lib/settings'
 import { MARKET_TYPES } from '@/lib/market-knowledge'
@@ -110,7 +111,7 @@ export default function SettingsPage() {
           <main className="flex-1 overflow-y-auto">
             <div className="p-6 max-w-4xl mx-auto">
               <Tabs defaultValue="trading" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-6">
+                <TabsList className="grid w-full grid-cols-7">
                   <TabsTrigger value="trading">
                     <DollarSign className="h-4 w-4 mr-2" />
                     Trading
@@ -130,6 +131,10 @@ export default function SettingsPage() {
                   <TabsTrigger value="goals">
                     <Target className="h-4 w-4 mr-2" />
                     Goals
+                  </TabsTrigger>
+                  <TabsTrigger value="broker">
+                    <Link2 className="h-4 w-4 mr-2" />
+                    Broker Integration
                   </TabsTrigger>
                   <TabsTrigger value="subscription">
                     <CreditCard className="h-4 w-4 mr-2" />
@@ -592,6 +597,101 @@ export default function SettingsPage() {
                         </div>
                         <p className="text-sm text-gray-500">
                           Alert when drawdown exceeds this percentage of your account
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="broker" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Broker Integration</CardTitle>
+                      <CardDescription>
+                        Connect your trading account to automatically sync trades
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="space-y-4">
+                        <div className="border rounded-lg p-6 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                                <span className="text-lg font-bold text-blue-600 dark:text-blue-400">MT</span>
+                              </div>
+                              <div>
+                                <h3 className="font-semibold">MetaTrader 4/5</h3>
+                                <p className="text-sm text-gray-500">Connect to MetaQuotes platforms</p>
+                              </div>
+                            </div>
+                            <Button variant="outline">
+                              Configure
+                            </Button>
+                          </div>
+                          
+                          <div className="border-t pt-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600">Status</span>
+                                <span className="text-orange-600 font-medium">Not Connected</span>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600">Platform</span>
+                                <span className="text-gray-900 dark:text-gray-100">MetaTrader 4/5</span>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600">Auto-sync</span>
+                                <Switch disabled />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Coming Soon</h4>
+                          <div className="grid gap-3">
+                            <div className="border rounded-lg p-4 opacity-50">
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                                  <span className="text-sm font-bold text-gray-400">TD</span>
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-medium">TD Ameritrade / ThinkOrSwim</h4>
+                                  <p className="text-xs text-gray-500">Schwab API integration</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="border rounded-lg p-4 opacity-50">
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                                  <span className="text-sm font-bold text-gray-400">IB</span>
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-medium">Interactive Brokers</h4>
+                                  <p className="text-xs text-gray-500">TWS API integration</p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="border rounded-lg p-4 opacity-50">
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                                  <span className="text-sm font-bold text-gray-400">TV</span>
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-medium">TradingView</h4>
+                                  <p className="text-xs text-gray-500">Webhook integration</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="border-t pt-4">
+                        <p className="text-sm text-gray-500">
+                          Broker integrations allow automatic trade synchronization. Your credentials are encrypted and never stored on our servers.
                         </p>
                       </div>
                     </CardContent>
