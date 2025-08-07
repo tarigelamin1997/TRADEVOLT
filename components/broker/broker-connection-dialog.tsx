@@ -136,27 +136,26 @@ export function BrokerConnectionDialog({
             <div className="space-y-4 py-4">
               {/* Platform Selection */}
               <div className="space-y-2">
-                <Label>Select Your Trading Platform</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    type="button"
-                    variant={platform === 'MT4' ? 'default' : 'outline'}
-                    className="h-20 flex flex-col gap-1"
-                    onClick={() => setPlatform('MT4')}
-                  >
-                    <span className="text-lg font-bold">MT4</span>
-                    <span className="text-xs opacity-80">MetaTrader 4</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={platform === 'MT5' ? 'default' : 'outline'}
-                    className="h-20 flex flex-col gap-1"
-                    onClick={() => setPlatform('MT5')}
-                  >
-                    <span className="text-lg font-bold">MT5</span>
-                    <span className="text-xs opacity-80">MetaTrader 5</span>
-                  </Button>
-                </div>
+                <Label className="text-base font-semibold">Platform</Label>
+                <Select value={platform} onValueChange={(value: 'MT4' | 'MT5') => setPlatform(value)}>
+                  <SelectTrigger className="h-12 text-base">
+                    <SelectValue placeholder="Select trading platform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MT4" className="py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold">MT4</span>
+                        <span className="text-gray-500">- MetaTrader 4</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="MT5" className="py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold">MT5</span>
+                        <span className="text-gray-500">- MetaTrader 5</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Account Name (Optional) */}
