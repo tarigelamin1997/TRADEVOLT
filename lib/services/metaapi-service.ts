@@ -107,8 +107,8 @@ export class MetaAPIService {
         credit: accountInfo.credit,
         platform: accountInfo.platform,
         marginLevel: accountInfo.marginLevel,
-        tradeAllowed: accountInfo.tradeAllowed,
-        investorMode: accountInfo.investorMode,
+        tradeAllowed: accountInfo.tradeAllowed || false,
+        investorMode: accountInfo.investorMode || false,
         accountCurrencyExchangeRate: accountInfo.accountCurrencyExchangeRate
       };
     } catch (error) {
