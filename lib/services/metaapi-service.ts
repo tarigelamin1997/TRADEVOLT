@@ -25,7 +25,7 @@ import { Trade } from '@prisma/client';
 
 // MetaAPI Service for handling MT4/MT5 broker connections
 export class MetaAPIService {
-  private api: MetaApi;
+  private api: any;
   private accountApi: MetatraderAccountApi;
   private provisioningApi: ProvisioningProfileApi;
 
