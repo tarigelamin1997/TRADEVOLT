@@ -142,18 +142,8 @@ export function BrokerConnectionDialog({
                     <SelectValue placeholder="Select trading platform" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MT4" className="py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold">MT4</span>
-                        <span className="text-gray-500">- MetaTrader 4</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="MT5" className="py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold">MT5</span>
-                        <span className="text-gray-500">- MetaTrader 5</span>
-                      </div>
-                    </SelectItem>
+                    <SelectItem value="MT4">MetaTrader 4</SelectItem>
+                    <SelectItem value="MT5">MetaTrader 5</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
