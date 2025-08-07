@@ -1,4 +1,10 @@
-import MetaApi from 'metaapi.cloud-sdk';
+// Dynamic import to avoid window reference during SSR
+let MetaApi: any;
+if (typeof window === 'undefined') {
+  // Server-side
+  MetaApi = require('metaapi.cloud-sdk').default;
+}
+
 import type { 
   MetatraderAccount, 
   MetatraderAccountApi,
