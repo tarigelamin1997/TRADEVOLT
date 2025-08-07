@@ -4,7 +4,8 @@ import type {
   MetatraderAccountApi,
   ProvisioningProfileApi,
   MetatraderAccountCredentials,
-  SynchronizationListener
+  SynchronizationListener,
+  MetatraderDeal
 } from 'metaapi.cloud-sdk';
 import { 
   BrokerConnection, 
@@ -34,29 +35,16 @@ export class MetaAPIService {
     platform: 'mt4' | 'mt5'
   ) {
     try {
-      // List existing profiles
-      const profiles = await this.provisioningApi.getProvisioningProfiles();
+      // For now, use a default provisioning profile ID
+      // In production, you would manage these through MetaAPI dashboard
+      // or implement proper profile management
+      const defaultProfileId = platform === 'mt4' 
+        ? 'default-mt4-profile' 
+        : 'default-mt5-profile';
       
-      // Find matching profile
-      const existingProfile = profiles.find(
-        p => p.name === `${brokerName}_${platform}` && p.version === parseInt(platform.slice(2))
-      );
-
-      if (existingProfile) {
-        return existingProfile.id;
-      }
-
-      // Create new profile if not exists
-      const newProfile = await this.provisioningApi.createProvisioningProfile({
-        name: `${brokerName}_${platform}`,
-        version: parseInt(platform.slice(2)), // 4 or 5
-        brokerTimezone: 'EET', // Default to Eastern European Time
-        brokerDSTSwitchTimezone: 'EET'
-      });
-
-      return newProfile.id;
+      return defaultProfileId;
     } catch (error) {
-      console.error('Error creating provisioning profile:', error);
+      console.error('Error with provisioning profile:', error);
       throw error;
     }
   }
@@ -70,7 +58,7 @@ export class MetaAPIService {
       // Create MetaAPI account
       const account = await this.accountApi.createAccount({
         name: connectionData.accountName,
-        type: 'cloud',
+        type: 'cloud' as any,
         login: connectionData.accountLogin,
         password: connectionData.password,
         server: connectionData.serverName,
@@ -223,8 +211,8 @@ export class MetaAPIService {
       await connection.waitSynchronized();
 
       // Create synchronization listener
-      class TradeSyncListener extends SynchronizationListener {
-        async onDealAdded(instanceIndex: number, deal: any) {
+      class TradeSyncListener implements SynchronizationListener {
+        async onDealAdded(instanceIndex: string, deal: MetatraderDeal): Promise<any> {
           try {
             const trade = self.convertDealToTrade(deal);
             onNewTrade(trade);
