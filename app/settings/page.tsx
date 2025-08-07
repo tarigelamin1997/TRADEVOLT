@@ -13,7 +13,6 @@ import {
   Palette,
   Database,
   Bell,
-  Target,
   Save,
   RotateCcw,
   CreditCard,
@@ -111,7 +110,7 @@ export default function SettingsPage() {
           <main className="flex-1 overflow-y-auto">
             <div className="p-6 max-w-4xl mx-auto">
               <Tabs defaultValue="trading" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-7">
+                <TabsList className="grid w-full grid-cols-6">
                   <TabsTrigger value="trading">
                     <DollarSign className="h-4 w-4 mr-2" />
                     Trading
@@ -127,10 +126,6 @@ export default function SettingsPage() {
                   <TabsTrigger value="alerts">
                     <Bell className="h-4 w-4 mr-2" />
                     Alerts
-                  </TabsTrigger>
-                  <TabsTrigger value="goals">
-                    <Target className="h-4 w-4 mr-2" />
-                    Goals
                   </TabsTrigger>
                   <TabsTrigger value="broker">
                     <Link2 className="h-4 w-4 mr-2" />
@@ -250,6 +245,57 @@ export default function SettingsPage() {
                               onChange={(e) => handleNestedChange('trading', 'riskManagement', 'defaultPositionSize', parseFloat(e.target.value) || 0)}
                               placeholder="100"
                             />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        <h3 className="font-medium mb-4">Trading Goals</h3>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label>Monthly Profit Target</Label>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                value={localSettings.goals.monthlyProfitTarget}
+                                onChange={(e) => handleChange('goals', 'monthlyProfitTarget', parseFloat(e.target.value) || 0)}
+                                placeholder="1000"
+                              />
+                              <span className="text-gray-500">{localSettings.trading.accountCurrency}</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Win Rate Target</Label>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={localSettings.goals.winRateTarget}
+                                onChange={(e) => handleChange('goals', 'winRateTarget', parseFloat(e.target.value) || 0)}
+                                placeholder="60"
+                              />
+                              <span className="text-gray-500">%</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Maximum Drawdown Limit</Label>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={localSettings.goals.maxDrawdownLimit}
+                                onChange={(e) => handleChange('goals', 'maxDrawdownLimit', parseFloat(e.target.value) || 0)}
+                                placeholder="10"
+                              />
+                              <span className="text-gray-500">%</span>
+                            </div>
+                            <p className="text-sm text-gray-500">
+                              Alert when drawdown exceeds this percentage of your account
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -540,64 +586,6 @@ export default function SettingsPage() {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="goals" className="space-y-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Trading Goals</CardTitle>
-                      <CardDescription>
-                        Set targets to track your progress and stay motivated
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label>Monthly Profit Target</Label>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            value={localSettings.goals.monthlyProfitTarget}
-                            onChange={(e) => handleChange('goals', 'monthlyProfitTarget', parseFloat(e.target.value) || 0)}
-                            placeholder="1000"
-                          />
-                          <span className="text-gray-500">{localSettings.trading.accountCurrency}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Win Rate Target</Label>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={localSettings.goals.winRateTarget}
-                            onChange={(e) => handleChange('goals', 'winRateTarget', parseFloat(e.target.value) || 0)}
-                            placeholder="60"
-                          />
-                          <span className="text-gray-500">%</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Maximum Drawdown Limit</Label>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={localSettings.goals.maxDrawdownLimit}
-                            onChange={(e) => handleChange('goals', 'maxDrawdownLimit', parseFloat(e.target.value) || 0)}
-                            placeholder="10"
-                          />
-                          <span className="text-gray-500">%</span>
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          Alert when drawdown exceeds this percentage of your account
-                        </p>
                       </div>
                     </CardContent>
                   </Card>
