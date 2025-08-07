@@ -55,7 +55,7 @@ export class MetaAPIService {
     provisioningProfileId: string
   ): Promise<{ accountId: string; connectionId: string }> {
     try {
-      // Create MetaAPI account
+      // Create MetaAPI account with minimal required fields
       const account = await this.accountApi.createAccount({
         name: connectionData.accountName,
         type: 'cloud' as any,
@@ -63,11 +63,8 @@ export class MetaAPIService {
         password: connectionData.password,
         server: connectionData.serverName,
         platform: connectionData.platform.toLowerCase() as 'mt4' | 'mt5',
-        provisioningProfileId,
-        magic: 0, // Magic number for EA identification
-        quoteStreamingIntervalInSeconds: 2.5, // Free tier limitation
-        tags: ['tradevolt']
-      });
+        provisioningProfileId
+      } as any);
 
       // Deploy account (start cloud server)
       await account.deploy();
