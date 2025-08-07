@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,6 +15,7 @@ interface BrokerConnectionDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess?: (connectionId: string) => void
+  initialPlatform?: 'MT4' | 'MT5'
 }
 
 // Popular MT4/5 servers for autocomplete
@@ -46,20 +47,28 @@ const POPULAR_SERVERS = {
 export function BrokerConnectionDialog({ 
   open, 
   onOpenChange,
-  onSuccess 
+  onSuccess,
+  initialPlatform 
 }: BrokerConnectionDialogProps) {
   const [isConnecting, setIsConnecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   
   // Form fields
-  const [platform, setPlatform] = useState<'MT4' | 'MT5'>('MT4')
+  const [platform, setPlatform] = useState<'MT4' | 'MT5'>(initialPlatform || 'MT4')
   const [accountName, setAccountName] = useState('')
   const [accountLogin, setAccountLogin] = useState('')
   const [password, setPassword] = useState('')
   const [serverName, setServerName] = useState('')
   const [autoSync, setAutoSync] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+
+  // Reset platform when dialog opens with new initialPlatform
+  useEffect(() => {
+    if (open && initialPlatform) {
+      setPlatform(initialPlatform)
+    }
+  }, [open, initialPlatform])
 
   const handleConnect = async () => {
     setError(null)
@@ -119,9 +128,9 @@ export function BrokerConnectionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Connect Trading Account</DialogTitle>
+          <DialogTitle>Connect {platform} Account</DialogTitle>
           <DialogDescription>
-            {platform ? `Connect your ${platform} account to automatically sync trades` : 'Select your platform and connect your account to sync trades'}
+            Enter your {platform} account credentials to automatically sync trades
           </DialogDescription>
         </DialogHeader>
 
@@ -134,20 +143,6 @@ export function BrokerConnectionDialog({
         ) : (
           <>
             <div className="space-y-4 py-4">
-              {/* Platform Selection */}
-              <div className="space-y-2">
-                <Label className="text-base font-semibold">Platform</Label>
-                <Select value={platform} onValueChange={(value: 'MT4' | 'MT5') => setPlatform(value)}>
-                  <SelectTrigger className="h-12 text-base">
-                    <SelectValue placeholder="Select trading platform" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MT4">MetaTrader 4</SelectItem>
-                    <SelectItem value="MT5">MetaTrader 5</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Account Name (Optional) */}
               <div className="space-y-2">
                 <Label>Account Name (Optional)</Label>

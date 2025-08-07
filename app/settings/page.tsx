@@ -41,6 +41,7 @@ export default function SettingsPage() {
   const [brokerConnections, setBrokerConnections] = useState<BrokerConnection[]>([])
   const [isLoadingConnections, setIsLoadingConnections] = useState(false)
   const [showConnectionDialog, setShowConnectionDialog] = useState(false)
+  const [selectedPlatform, setSelectedPlatform] = useState<'MT4' | 'MT5' | null>(null)
 
   useEffect(() => {
     setLocalSettings(settings)
@@ -728,25 +729,57 @@ export default function SettingsPage() {
                         </div>
                       ) : null}
 
-                      {/* Add Connection Button */}
-                      <div className="border rounded-lg p-6 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                              <span className="text-lg font-bold text-blue-600 dark:text-blue-400">MT</span>
+                      {/* Platform Selection Cards */}
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-medium">Available Platforms</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* MetaTrader 4 */}
+                          <div className="border rounded-lg p-6 space-y-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                                <span className="text-lg font-bold text-blue-600 dark:text-blue-400">MT4</span>
+                              </div>
+                              <div>
+                                <h3 className="font-semibold">MetaTrader 4</h3>
+                                <p className="text-sm text-gray-500">Connect to MT4 accounts</p>
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="font-semibold">MetaTrader 4/5</h3>
-                              <p className="text-sm text-gray-500">Connect to MetaQuotes platforms</p>
-                            </div>
+                            <Button 
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => {
+                                setSelectedPlatform('MT4')
+                                setShowConnectionDialog(true)
+                              }}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Account
+                            </Button>
                           </div>
-                          <Button 
-                            variant="outline"
-                            onClick={() => setShowConnectionDialog(true)}
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Account
-                          </Button>
+
+                          {/* MetaTrader 5 */}
+                          <div className="border rounded-lg p-6 space-y-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-12 w-12 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center">
+                                <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">MT5</span>
+                              </div>
+                              <div>
+                                <h3 className="font-semibold">MetaTrader 5</h3>
+                                <p className="text-sm text-gray-500">Connect to MT5 accounts</p>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => {
+                                setSelectedPlatform('MT5')
+                                setShowConnectionDialog(true)
+                              }}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Account
+                            </Button>
+                          </div>
                         </div>
                       </div>
 
@@ -915,9 +948,14 @@ export default function SettingsPage() {
           {/* Broker Connection Dialog */}
           <BrokerConnectionDialog
             open={showConnectionDialog}
-            onOpenChange={setShowConnectionDialog}
+            onOpenChange={(open) => {
+              setShowConnectionDialog(open)
+              if (!open) setSelectedPlatform(null)
+            }}
+            initialPlatform={selectedPlatform || undefined}
             onSuccess={() => {
               loadBrokerConnections()
+              setSelectedPlatform(null)
             }}
           />
       </>
