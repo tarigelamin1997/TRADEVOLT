@@ -208,7 +208,8 @@ export class MetaAPIService {
       await connection.waitSynchronized();
 
       // Create synchronization listener
-      class TradeSyncListener implements SynchronizationListener {
+      const self = this;
+      const listener = {
         async onDealAdded(instanceIndex: string, deal: MetatraderDeal): Promise<any> {
           try {
             const trade = self.convertDealToTrade(deal);
@@ -217,10 +218,8 @@ export class MetaAPIService {
             console.error('Error processing new deal:', error);
           }
         }
-      }
+      } as SynchronizationListener;
 
-      const self = this;
-      const listener = new TradeSyncListener();
       connection.addSynchronizationListener(listener);
 
       // Return cleanup function
