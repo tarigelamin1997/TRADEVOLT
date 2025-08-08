@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CTraderService } from '@/lib/services/ctrader-service';
 import { prisma } from '@/lib/prisma';
-import { currentUser } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { encrypt } from '@/lib/utils/crypto';
 
 export async function GET(request: NextRequest) {
@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Get current user
-    const user = await currentUser();
-    const userId = user?.id || 'demo-user';
+    const { userId: clerkUserId } = auth();
+    const userId = clerkUserId || 'demo-user';
 
     // Create cTrader service instance
     const ctraderService = new CTraderService({});

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CTraderService } from '@/lib/services/ctrader-service';
-import { currentUser } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 
 export async function GET(request: NextRequest) {
   try {
     // Get current user
-    const user = await currentUser();
-    const userId = user?.id || 'demo-user';
+    const { userId: clerkUserId } = auth();
+    const userId = clerkUserId || 'demo-user';
 
     // Create cTrader service instance
     const ctraderService = new CTraderService({
