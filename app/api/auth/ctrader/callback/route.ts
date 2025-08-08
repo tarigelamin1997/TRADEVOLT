@@ -48,13 +48,8 @@ export async function GET(request: NextRequest) {
     const account = accounts[0];
 
     // Encrypt sensitive data
-    const encryptionKey = process.env.ENCRYPTION_KEY;
-    if (!encryptionKey) {
-      throw new Error('ENCRYPTION_KEY environment variable is not set');
-    }
-
-    const encryptedAccessToken = encrypt(tokenResponse.access_token, encryptionKey);
-    const encryptedRefreshToken = encrypt(tokenResponse.refresh_token, encryptionKey);
+    const encryptedAccessToken = encrypt(tokenResponse.access_token);
+    const encryptedRefreshToken = encrypt(tokenResponse.refresh_token);
 
     // Save the connection to database
     await prisma.brokerConnection.create({
