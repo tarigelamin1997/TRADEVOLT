@@ -41,7 +41,7 @@ export default function SettingsPage() {
   const [brokerConnections, setBrokerConnections] = useState<BrokerConnection[]>([])
   const [isLoadingConnections, setIsLoadingConnections] = useState(false)
   const [showConnectionDialog, setShowConnectionDialog] = useState(false)
-  const [selectedPlatform, setSelectedPlatform] = useState<'MT4' | 'MT5' | null>(null)
+  const [selectedPlatform, setSelectedPlatform] = useState<'MT4' | 'MT5' | 'cTrader' | null>(null)
 
   useEffect(() => {
     setLocalSettings(settings)
@@ -732,7 +732,7 @@ export default function SettingsPage() {
                       {/* Platform Selection Cards */}
                       <div className="space-y-4">
                         <h3 className="text-sm font-medium">Available Platforms</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {/* MetaTrader 4 */}
                           <div className="border rounded-lg p-6 space-y-4">
                             <div className="flex items-center gap-3">
@@ -773,6 +773,32 @@ export default function SettingsPage() {
                               className="w-full"
                               onClick={() => {
                                 setSelectedPlatform('MT5')
+                                setShowConnectionDialog(true)
+                              }}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Account
+                            </Button>
+                          </div>
+
+                          {/* cTrader */}
+                          <div className="border rounded-lg p-6 space-y-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-12 w-12 bg-gradient-to-br from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 rounded-lg flex items-center justify-center shadow-sm">
+                                <svg viewBox="0 0 24 24" className="h-7 w-7 text-white" fill="currentColor">
+                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                </svg>
+                              </div>
+                              <div>
+                                <h3 className="font-semibold">cTrader</h3>
+                                <p className="text-sm text-gray-500">OAuth secure connection</p>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => {
+                                setSelectedPlatform('cTrader')
                                 setShowConnectionDialog(true)
                               }}
                             >
