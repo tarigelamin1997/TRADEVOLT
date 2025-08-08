@@ -711,7 +711,7 @@ export default function UnifiedJournalPage() {
                           <div>
                             <Label>Notes & Analysis</Label>
                             <RichTextEditor
-                              value={journalEntries[selectedTrade.id]?.notes || ''}
+                              content={journalEntries[selectedTrade.id]?.notes || ''}
                               onChange={(value) => {
                                 const entry = journalEntries[selectedTrade.id] || { 
                                   tradeId: selectedTrade.id, 
