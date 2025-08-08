@@ -134,7 +134,7 @@ export abstract class BrokerServiceBase {
   protected convertToTrade(brokerData: any): Partial<Trade> {
     // Override in specific implementations
     // This is a base implementation that can be customized
-    return {
+    const trade: Partial<Trade> = {
       symbol: brokerData.symbol,
       type: this.normalizeSide(brokerData.side),
       entry: brokerData.price || brokerData.entryPrice,
@@ -143,10 +143,17 @@ export abstract class BrokerServiceBase {
       exitTime: brokerData.closeTime ? new Date(brokerData.closeTime) : undefined,
       exit: brokerData.closePrice,
       commission: brokerData.commission || 0,
-      pnl: brokerData.profit || brokerData.pnl,
       notes: `Imported from ${this.platform}`,
       marketType: this.detectMarketType(brokerData.symbol)
     };
+    
+    // Store P&L data in notes if available (will be calculated from entry/exit)
+    if (brokerData.profit || brokerData.pnl) {
+      const pnl = brokerData.profit || brokerData.pnl;
+      trade.notes = `${trade.notes} | Broker P&L: ${pnl}`;
+    }
+    
+    return trade;
   }
   
   protected normalizeSide(side: any): 'BUY' | 'SELL' {
