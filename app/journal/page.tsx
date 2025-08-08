@@ -60,7 +60,7 @@ interface JournalEntry {
 }
 
 function TradeRow({ trade, onClick, settings }: { trade: Trade, onClick: () => void, settings: any }) {
-  const pnl = calculateMarketPnL(trade)
+  const pnl = calculateMarketPnL(trade, trade.marketType || 'STOCKS')
   const { pnlWithCommission } = calculatePnLWithCommission(trade, settings)
   
   return (
@@ -141,10 +141,10 @@ export default function UnifiedJournalPage() {
     const calculateTotalPnL = (trades: Trade[]) => 
       trades.reduce((sum, t) => sum + calculatePnLWithCommission(t, settings).pnlWithCommission, 0)
     
-    const wins = trades.filter(t => calculateMarketPnL(t) > 0)
-    const losses = trades.filter(t => calculateMarketPnL(t) < 0)
-    const totalWins = wins.reduce((sum, t) => sum + calculateMarketPnL(t), 0)
-    const totalLosses = Math.abs(losses.reduce((sum, t) => sum + calculateMarketPnL(t), 0))
+    const wins = trades.filter(t => (calculateMarketPnL(t, t.marketType || 'STOCKS') || 0) > 0)
+    const losses = trades.filter(t => (calculateMarketPnL(t, t.marketType || 'STOCKS') || 0) < 0)
+    const totalWins = wins.reduce((sum, t) => sum + (calculateMarketPnL(t, t.marketType || 'STOCKS') || 0), 0)
+    const totalLosses = Math.abs(losses.reduce((sum, t) => sum + (calculateMarketPnL(t, t.marketType || 'STOCKS') || 0), 0))
     
     return {
       todayPnL: calculateTotalPnL(todayTrades),
@@ -226,7 +226,7 @@ export default function UnifiedJournalPage() {
         case 'symbol':
           return a.symbol.localeCompare(b.symbol)
         case 'pnl':
-          return calculateMarketPnL(b) - calculateMarketPnL(a)
+          return (calculateMarketPnL(b, b.marketType || 'STOCKS') || 0) - (calculateMarketPnL(a, a.marketType || 'STOCKS') || 0)
         default:
           return 0
       }
@@ -488,7 +488,7 @@ export default function UnifiedJournalPage() {
                         </thead>
                         <tbody>
                           {filteredTrades.map(trade => {
-                            const pnl = calculateMarketPnL(trade)
+                            const pnl = calculateMarketPnL(trade, trade.marketType || 'STOCKS')
                             const { pnlWithCommission } = calculatePnLWithCommission(trade, settings)
                             const hasJournal = !!journalEntries[trade.id]
                             
@@ -620,7 +620,7 @@ export default function UnifiedJournalPage() {
                         </div>
                         <div>
                           <Label>P&L</Label>
-                          <p className={`text-xl font-bold ${calculateMarketPnL(selectedTrade) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          <p className={`text-xl font-bold ${(calculateMarketPnL(selectedTrade, selectedTrade.marketType || 'STOCKS') || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {formatCurrency(calculatePnLWithCommission(selectedTrade, settings).pnlWithCommission, settings)}
                           </p>
                         </div>
