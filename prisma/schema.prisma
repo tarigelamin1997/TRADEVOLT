@@ -102,19 +102,46 @@ model PartialExit {
 model BrokerConnection {
   id                    String   @id @default(cuid())
   userId                String
-  platform              String   // "MT4" or "MT5"
+  platform              String   // Extended to support all platforms (MT4, MT5, Binance, TradingView, etc.)
   accountName           String
   accountId             String   @unique
-  accountLogin          String
-  serverName            String
-  metaApiAccountId      String?  @unique
-  provisioningProfileId String?
-  connectionStatus      String   @default("disconnected") // disconnected, connecting, connected, error
+  accountLogin          String?  // Optional for OAuth/API key based platforms
+  serverName            String?  // Optional for non-MT platforms
+  
+  // Platform-specific IDs
+  metaApiAccountId      String?  @unique  // MetaTrader via MetaAPI
+  provisioningProfileId String?           // MetaAPI provisioning
+  externalAccountId     String?           // Platform's native account ID
+  
+  // Authentication fields (encrypted)
+  encryptedPassword     String?  // MT4/5 password
+  encryptedApiKey       String?  // API key for REST APIs
+  encryptedApiSecret    String?  // API secret
+  encryptedAccessToken  String?  // OAuth access token
+  encryptedRefreshToken String?  // OAuth refresh token
+  webhookSecret         String?  // Webhook verification secret
+  
+  // Connection management
+  connectionStatus      String   @default("disconnected") // disconnected, connecting, connected, error, webhook_only
+  connectionMethod      String?  // rest-api, websocket, oauth2, webhook, csv-import
   lastSync              DateTime?
   autoSync              Boolean  @default(false)
-  encryptedPassword     String   // Encrypted MT4/5 password
+  syncInterval          Int?     @default(60) // Minutes between syncs
+  
+  // Feature flags
+  supportsRealtime      Boolean  @default(false)
+  supportsHistorical    Boolean  @default(true)
+  supportsPositions     Boolean  @default(false)
+  supportsOrders        Boolean  @default(false)
+  
+  // Metadata
+  brokerName            String?  // Actual broker name (e.g., "OANDA", "Pepperstone")
+  accountType           String?  // live, demo, paper
+  accountCurrency       String?  // USD, EUR, etc.
+  
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
   @@index([userId])
+  @@index([platform])
 }
