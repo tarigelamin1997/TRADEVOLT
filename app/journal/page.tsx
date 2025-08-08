@@ -74,7 +74,7 @@ function TradeRow({ trade, onClick, settings }: { trade: Trade, onClick: () => v
           {trade.type}
         </Badge>
       </td>
-      <td className="p-3">{formatDateTime(trade.entryTime || trade.createdAt)}</td>
+      <td className="p-3">{formatDateTime(trade.entryTime || trade.createdAt, settings)}</td>
       <td className="p-3 text-right">{safeToFixed(trade.entry)}</td>
       <td className="p-3 text-right">{trade.exit ? safeToFixed(trade.exit) : '-'}</td>
       <td className="p-3 text-right">{trade.quantity}</td>
@@ -505,7 +505,7 @@ export default function UnifiedJournalPage() {
                                   </Badge>
                                 </td>
                                 <td className="p-3">{trade.marketType || 'STOCKS'}</td>
-                                <td className="p-3">{formatDateTime(trade.entryTime || trade.createdAt)}</td>
+                                <td className="p-3">{formatDateTime(trade.entryTime || trade.createdAt, settings)}</td>
                                 <td className="p-3 text-right">{safeToFixed(trade.entry)}</td>
                                 <td className="p-3 text-right">{trade.exit ? safeToFixed(trade.exit) : '-'}</td>
                                 <td className="p-3 text-right">{trade.quantity}</td>
@@ -593,7 +593,7 @@ export default function UnifiedJournalPage() {
                         <div>
                           <CardTitle className="text-2xl">{selectedTrade.symbol}</CardTitle>
                           <CardDescription>
-                            {formatDateTime(selectedTrade.entryTime || selectedTrade.createdAt)}
+                            {formatDateTime(selectedTrade.entryTime || selectedTrade.createdAt, settings)}
                           </CardDescription>
                         </div>
                         <Badge 
