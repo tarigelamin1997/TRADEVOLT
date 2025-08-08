@@ -156,6 +156,7 @@ export class MetaAPIService {
       }).filter(Boolean) as Partial<Trade>[];
 
       return {
+        success: true,
         tradesImported,
         errors,
         lastSyncTime: new Date()

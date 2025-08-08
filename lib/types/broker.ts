@@ -109,7 +109,9 @@ export interface CreateBrokerConnectionData {
 }
 
 export interface BrokerSyncResult {
+  success: boolean;
   tradesImported: number;
   errors: string[];
   lastSyncTime: Date;
+  nextSyncAvailable?: Date;
 }

@@ -1,6 +1,7 @@
 // Abstract base class for all broker integrations
 import { Trade } from '@prisma/client';
 import { BrokerPlatform, BrokerPlatformConfig, BROKER_PLATFORMS } from '@/lib/types/broker-platforms';
+import { BrokerSyncResult } from '@/lib/types/broker';
 
 export interface BrokerCredentials {
   apiKey?: string;
@@ -58,14 +59,6 @@ export interface BrokerOrder {
   averagePrice?: number;
   createdAt: Date;
   [key: string]: any;
-}
-
-export interface BrokerSyncResult {
-  success: boolean;
-  tradesImported: number;
-  errors: string[];
-  lastSyncTime: Date;
-  nextSyncAvailable?: Date;
 }
 
 export interface BrokerConnectionOptions {
