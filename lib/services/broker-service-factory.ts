@@ -2,6 +2,7 @@
 import { BrokerPlatform } from '@/lib/types/broker-platforms';
 import { BrokerServiceBase, BrokerCredentials, BrokerConnectionOptions } from './broker-service-base';
 import { MetaAPIService } from './metaapi-service';
+import { CTraderService } from './ctrader-service';
 
 // Import all broker service implementations
 // These will be created as we implement each platform
@@ -164,6 +165,9 @@ const BROKER_SERVICES: Partial<Record<BrokerPlatform, BrokerServiceConstructor>>
       );
     }
   },
+
+  // cTrader implementation
+  cTrader: CTraderService as any,
 
   // Placeholder implementations for platforms coming soon
   TradingView: class TradingViewService extends BrokerServiceBase {

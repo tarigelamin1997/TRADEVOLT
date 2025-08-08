@@ -3,14 +3,19 @@
 export interface BrokerConnection {
   id: string;
   userId: string;
-  platform: 'MT4' | 'MT5';
+  platform: 'MT4' | 'MT5' | 'cTrader' | string; // Extended for all platforms
   accountName: string;
   accountId: string;
-  accountLogin: string;
-  serverName: string;
+  accountLogin?: string; // Optional for OAuth platforms
+  serverName?: string; // Optional for non-MT platforms
   metaApiAccountId?: string;
   provisioningProfileId?: string;
+  externalAccountId?: string; // Platform's native account ID
+  brokerName?: string; // Actual broker name
+  accountType?: 'live' | 'demo' | 'paper';
+  accountCurrency?: string;
   connectionStatus: 'disconnected' | 'connecting' | 'connected' | 'error';
+  connectionMethod?: 'rest-api' | 'websocket' | 'oauth2' | 'webhook' | 'csv-import';
   lastSync?: Date;
   autoSync: boolean;
   createdAt: Date;
