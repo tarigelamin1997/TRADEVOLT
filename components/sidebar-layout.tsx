@@ -53,7 +53,7 @@ import { cn } from '@/lib/utils'
 const mainMenuItems = [
   { icon: Home, label: 'Dashboard', href: '/dashboard' },
   { icon: BookOpen, label: 'Trading Playbooks', href: '/playbooks' },
-  { icon: History, label: 'Trade History', href: '/history' },
+  { icon: FileText, label: 'Trading Journal', href: '/journal' },
   { icon: BarChart3, label: 'Analytics', href: '/analytics' },
   { icon: TrendingUp, label: 'Performance Metrics', href: '/metrics' },
   { icon: Calendar, label: 'Calendar', href: '/calendar' },
@@ -62,7 +62,6 @@ const mainMenuItems = [
   { icon: Zap, label: 'Execution Quality', href: '/execution' },
   { icon: PieChart, label: 'Market Analysis', href: '/analysis' },
   { icon: DollarSign, label: 'P&L Report', href: '/pnl' },
-  { icon: FileText, label: 'Trade Journal', href: '/journal' },
   { icon: Users, label: 'Affiliate', href: '/affiliate' },
   { icon: Settings, label: 'Settings', href: '/settings' }
 ]
