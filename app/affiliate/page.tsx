@@ -59,16 +59,24 @@ export default function AffiliatePage() {
   }
   
   // Mock data - will be replaced with real data from database
+  // Dynamically adjust stats based on selected tier for demo
+  const tierStats = {
+    bronze: { currentMonthSales: 1850.00, totalEarnings: 2847.50, activeCustomers: 38 },
+    silver: { currentMonthSales: 3500.00, totalEarnings: 5847.50, activeCustomers: 48 },
+    gold: { currentMonthSales: 7200.00, totalEarnings: 12847.50, activeCustomers: 71 },
+    diamond: { currentMonthSales: 15000.00, totalEarnings: 28470.50, activeCustomers: 103 }
+  }
+  
   const stats = {
-    totalEarnings: 2847.50,
-    pendingPayout: 847.50,
-    monthlyEarnings: 1247.50,
-    totalReferrals: 42,
-    activeCustomers: 38,
+    totalEarnings: tierStats[currentTier].totalEarnings,
+    pendingPayout: tierStats[currentTier].totalEarnings * 0.3,
+    monthlyEarnings: tierStats[currentTier].currentMonthSales * 0.35,
+    totalReferrals: Math.floor(tierStats[currentTier].activeCustomers * 1.1),
+    activeCustomers: tierStats[currentTier].activeCustomers,
     conversionRate: 12.5,
     lifetimeValue: 4250.00,
     nextPayoutDate: '2025-09-10',
-    currentMonthSales: 1850.00, // For tier calculation
+    currentMonthSales: tierStats[currentTier].currentMonthSales,
   }
 
   const tiers = [
@@ -119,8 +127,8 @@ export default function AffiliatePage() {
     return 'bronze'
   }
 
-  const currentTierData = tiers.find(t => t.name.toLowerCase() === getCurrentTier())
-  const nextTierData = tiers[Math.min(tiers.findIndex(t => t.name.toLowerCase() === getCurrentTier()) + 1, tiers.length - 1)]
+  const currentTierData = tiers.find(t => t.name.toLowerCase() === currentTier)
+  const nextTierData = tiers[Math.min(tiers.findIndex(t => t.name.toLowerCase() === currentTier) + 1, tiers.length - 1)]
   const progressToNextTier = currentTierData && nextTierData && nextTierData !== currentTierData
     ? ((stats.currentMonthSales - currentTierData.min) / (nextTierData.min - currentTierData.min)) * 100
     : 100
@@ -201,23 +209,31 @@ export default function AffiliatePage() {
                 </div>
               )}
 
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg text-center mb-4">
+                <p className="text-sm text-blue-600 dark:text-blue-400">
+                  <Info className="h-4 w-4 inline mr-1" />
+                  Demo Mode: Click any tier below to simulate different commission levels
+                </p>
+              </div>
+
               <div className="grid grid-cols-4 gap-4">
                 {tiers.map((tier, index) => (
-                  <div 
+                  <button
                     key={tier.name}
-                    className={`p-4 rounded-lg text-center transition-all ${
-                      tier.name.toLowerCase() === getCurrentTier()
+                    onClick={() => setCurrentTier(tier.name.toLowerCase() as 'bronze' | 'silver' | 'gold' | 'diamond')}
+                    className={`p-4 rounded-lg text-center transition-all cursor-pointer hover:scale-105 ${
+                      tier.name.toLowerCase() === currentTier
                         ? 'bg-gradient-to-br ' + tier.color + ' text-white scale-105 shadow-lg'
-                        : 'bg-gray-100 dark:bg-gray-800'
+                        : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
                     }`}
                   >
                     <tier.icon className={`h-6 w-6 mx-auto mb-2 ${
-                      tier.name.toLowerCase() === getCurrentTier() ? 'text-white' : 'text-gray-600 dark:text-gray-400'
+                      tier.name.toLowerCase() === currentTier ? 'text-white' : 'text-gray-600 dark:text-gray-400'
                     }`} />
                     <p className="font-bold text-sm">{tier.name}</p>
                     <p className="text-xs mt-1">{tier.commission}</p>
                     <p className="text-xs opacity-75">{tier.range}</p>
-                  </div>
+                  </button>
                 ))}
               </div>
             </CardContent>
