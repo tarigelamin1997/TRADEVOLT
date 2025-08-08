@@ -220,7 +220,7 @@ export class AffiliatePDFGenerator {
     
     // Welcome section
     this.addSection('Welcome to TradeVolt Affiliate Program', [
-      'Thank you for joining our elite affiliate program! As a TradeVolt affiliate partner, you're positioned to earn industry-leading commissions while helping traders transform their performance with professional analytics.',
+      'Thank you for joining our elite affiliate program! As a TradeVolt affiliate partner, you are positioned to earn industry-leading commissions while helping traders transform their performance with professional analytics.',
       '',
       'This comprehensive guide contains everything you need to successfully promote TradeVolt and maximize your earnings potential.'
     ], true)
@@ -265,10 +265,10 @@ export class AffiliatePDFGenerator {
     
     this.addSection('Email Templates', [
       '#Subject Line Examples',
-      '• "The $29 Tool That Transformed My Trading Results"',
-      '• "How I Improved My Win Rate by 23% in 30 Days"',
-      '• "Stop Guessing, Start Tracking: My Secret Trading Weapon"',
-      '• "Why I Switched from [Competitor] to TradeVolt"',
+      '• The $29 Tool That Transformed My Trading Results',
+      '• How I Improved My Win Rate by 23% in 30 Days',
+      '• Stop Guessing, Start Tracking: My Secret Trading Weapon',
+      '• Why I Switched from [Competitor] to TradeVolt',
       '',
       '#Email Template 1: Personal Success Story',
       'Subject: How I Went from Break-Even to Profitable in 60 Days',
@@ -305,7 +305,7 @@ export class AffiliatePDFGenerator {
       '• Optimal position size: 2% risk (not 1% like I thought)',
       '• My setup actually works better on 15-min timeframe',
       '',
-      `If you're serious about trading, you need this: tradevolt.com/ref/${referralCode}`,
+      `If you are serious about trading, you need this: tradevolt.com/ref/${referralCode}`,
       '',
       '#Instagram Caption',
       '📊 From amateur to professional trader in 3 months',
@@ -362,7 +362,7 @@ export class AffiliatePDFGenerator {
       '✓ Focus on the value TradeVolt provides',
       '✓ Be transparent about your affiliate relationship',
       '✓ Provide helpful content alongside promotions',
-      '✓ Respect your audience's trust'
+      '✓ Respect your audience trust'
     ], true)
     
     // Support section
