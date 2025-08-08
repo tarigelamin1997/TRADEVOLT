@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { CTraderService } from '@/lib/services/ctrader-service';
 import { auth } from '@clerk/nextjs/server';
 
+// Mark as dynamic route
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Get current user
@@ -29,8 +32,9 @@ export async function GET(request: NextRequest) {
     console.error('cTrader connect error:', error);
     
     const errorMessage = error instanceof Error ? error.message : 'Failed to initiate cTrader connection';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tradevolt.vercel.app';
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/settings?tab=broker&error=${encodeURIComponent(errorMessage)}`
+      `${baseUrl}/settings?tab=broker&error=${encodeURIComponent(errorMessage)}`
     );
   }
 }

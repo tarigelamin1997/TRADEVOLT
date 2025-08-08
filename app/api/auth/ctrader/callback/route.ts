@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
 import { encrypt } from '@/lib/utils/crypto';
 
+// Mark as dynamic route
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // Get the authorization code from query params
@@ -13,15 +16,17 @@ export async function GET(request: NextRequest) {
     const error = searchParams.get('error');
 
     // Handle errors from cTrader
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tradevolt.vercel.app';
+    
     if (error) {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/settings?tab=broker&error=${encodeURIComponent(error)}`
+        `${baseUrl}/settings?tab=broker&error=${encodeURIComponent(error)}`
       );
     }
 
     if (!code) {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/settings?tab=broker&error=No authorization code received`
+        `${baseUrl}/settings?tab=broker&error=No authorization code received`
       );
     }
 
@@ -40,7 +45,7 @@ export async function GET(request: NextRequest) {
     
     if (accounts.length === 0) {
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/settings?tab=broker&error=No trading accounts found`
+        `${baseUrl}/settings?tab=broker&error=No trading accounts found`
       );
     }
 
@@ -77,14 +82,15 @@ export async function GET(request: NextRequest) {
 
     // Redirect back to settings with success
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/settings?tab=broker&success=cTrader account connected successfully`
+      `${baseUrl}/settings?tab=broker&success=cTrader account connected successfully`
     );
   } catch (error) {
     console.error('cTrader OAuth callback error:', error);
     
     const errorMessage = error instanceof Error ? error.message : 'Failed to connect cTrader account';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tradevolt.vercel.app';
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/settings?tab=broker&error=${encodeURIComponent(errorMessage)}`
+      `${baseUrl}/settings?tab=broker&error=${encodeURIComponent(errorMessage)}`
     );
   }
 }
