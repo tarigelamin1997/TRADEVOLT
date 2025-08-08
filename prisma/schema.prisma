@@ -13,7 +13,16 @@ model User {
   clerkId   String   @unique
   isPaid    Boolean  @default(false)
   trades    Trade[]
+  
+  // Affiliate fields
+  isAffiliate       Boolean       @default(false)
+  affiliateProfile  Affiliate?
+  referredBy        String?       // Affiliate code that referred this user
+  referredByAffiliate Affiliate?  @relation("ReferredUsers", fields: [referredBy], references: [referralCode])
+  
   createdAt DateTime @default(now())
+  
+  @@index([referredBy])
 }
 
 model Trade {
@@ -144,4 +153,206 @@ model BrokerConnection {
 
   @@index([userId])
   @@index([platform])
+}
+
+// Affiliate System Models
+model Affiliate {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
+  
+  // Basic Information
+  referralCode     String   @unique
+  customLink       String?  // Custom vanity URL
+  status           String   @default("pending") // pending, active, suspended, terminated
+  
+  // Commission Tier
+  currentTier      String   @default("bronze") // bronze, silver, gold, diamond
+  customCommission Float?   // Override default tier commission
+  
+  // Performance Metrics
+  totalEarnings    Float    @default(0)
+  pendingPayout    Float    @default(0)
+  lifetimeValue    Float    @default(0)
+  totalReferrals   Int      @default(0)
+  activeCustomers  Int      @default(0)
+  conversionRate   Float    @default(0)
+  
+  // Payment Information
+  paymentMethod    String?  // bank_transfer, paypal, wise, crypto
+  paymentDetails   Json?    // Encrypted payment details
+  taxFormStatus    String?  // pending, submitted, verified
+  taxFormData      Json?    // W-9/W-8 information
+  
+  // Marketing Materials
+  hasCustomMaterials Boolean @default(false)
+  customBranding   Json?    // Custom colors, logos, etc.
+  
+  // Notifications
+  emailNewReferral Boolean  @default(true)
+  emailMonthlyReport Boolean @default(true)
+  emailPayouts     Boolean  @default(true)
+  
+  // Timestamps
+  approvedAt       DateTime?
+  lastActiveAt     DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  referrals        AffiliateReferral[]
+  commissions      AffiliateCommission[]
+  payouts          AffiliatePayout[]
+  tierHistory      AffiliateTierHistory[]
+  referredUsers    User[]    @relation("ReferredUsers")
+  
+  @@index([referralCode])
+  @@index([status])
+  @@index([currentTier])
+}
+
+model AffiliateReferral {
+  id               String   @id @default(cuid())
+  affiliateId      String
+  affiliate        Affiliate @relation(fields: [affiliateId], references: [id])
+  
+  // Customer Information
+  customerId       String
+  customerEmail    String
+  customerName     String?
+  
+  // Tracking
+  clickId          String?  @unique // Tracking click ID
+  ipAddress        String?
+  userAgent        String?
+  referrerUrl      String?
+  landingPage      String?
+  utmSource        String?
+  utmMedium        String?
+  utmCampaign      String?
+  
+  // Status
+  status           String   @default("clicked") // clicked, trial, active, churned, refunded
+  subscriptionPlan String?  // starter, pro, premium
+  discountCode     String?
+  discountAmount   Float?
+  
+  // Dates
+  clickedAt        DateTime @default(now())
+  signedUpAt       DateTime?
+  subscribedAt     DateTime?
+  churnedAt        DateTime?
+  
+  // Metrics
+  monthlyValue     Float    @default(0)
+  lifetimeValue    Float    @default(0)
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([affiliateId])
+  @@index([customerId])
+  @@index([status])
+  @@index([clickedAt])
+}
+
+model AffiliateCommission {
+  id               String   @id @default(cuid())
+  affiliateId      String
+  affiliate        Affiliate @relation(fields: [affiliateId], references: [id])
+  
+  // Commission Details
+  referralId       String
+  amount           Float
+  percentage       Float    // Commission percentage used
+  tier             String   // Tier at time of commission
+  
+  // Period
+  month            Int      // 1-12
+  year             Int      // e.g., 2025
+  
+  // Status
+  status           String   @default("pending") // pending, approved, paid, cancelled
+  
+  // Payment
+  payoutId         String?
+  payout           AffiliatePayout? @relation(fields: [payoutId], references: [id])
+  
+  // Metadata
+  description      String?
+  customerEmail    String?
+  subscriptionPlan String?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([affiliateId])
+  @@index([status])
+  @@index([month, year])
+  @@index([payoutId])
+}
+
+model AffiliatePayout {
+  id               String   @id @default(cuid())
+  affiliateId      String
+  affiliate        Affiliate @relation(fields: [affiliateId], references: [id])
+  
+  // Payout Details
+  amount           Float
+  currency         String   @default("USD")
+  method           String   // bank_transfer, paypal, wise, crypto
+  
+  // Status
+  status           String   @default("pending") // pending, processing, completed, failed
+  
+  // Period
+  periodStart      DateTime
+  periodEnd        DateTime
+  
+  // Transaction Details
+  transactionId    String?  @unique
+  transactionFee   Float?
+  netAmount        Float?
+  
+  // Metadata
+  notes            String?
+  failureReason    String?
+  
+  // Dates
+  scheduledDate    DateTime
+  processedDate    DateTime?
+  completedDate    DateTime?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  commissions      AffiliateCommission[]
+  
+  @@index([affiliateId])
+  @@index([status])
+  @@index([scheduledDate])
+}
+
+model AffiliateTierHistory {
+  id               String   @id @default(cuid())
+  affiliateId      String
+  affiliate        Affiliate @relation(fields: [affiliateId], references: [id])
+  
+  // Tier Change
+  previousTier     String
+  newTier          String
+  
+  // Performance at Change
+  monthlySales     Float
+  monthlyReferrals Int
+  
+  // Period
+  month            Int
+  year             Int
+  
+  createdAt        DateTime @default(now())
+  
+  @@index([affiliateId])
+  @@index([createdAt])
 }

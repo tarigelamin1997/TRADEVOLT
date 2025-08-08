@@ -44,7 +44,8 @@ import {
   Zap,
   BookOpen,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Users
 } from "lucide-react"
 import { cn } from '@/lib/utils'
 
@@ -62,6 +63,7 @@ const mainMenuItems = [
   { icon: PieChart, label: 'Market Analysis', href: '/analysis' },
   { icon: DollarSign, label: 'P&L Report', href: '/pnl' },
   { icon: FileText, label: 'Trade Journal', href: '/journal' },
+  { icon: Users, label: 'Affiliate', href: '/affiliate' },
   { icon: Settings, label: 'Settings', href: '/settings' }
 ]
 
