@@ -263,17 +263,19 @@ export function BrokerConnectionDialog({
                     <Switch
                       checked={autoSync}
                       onCheckedChange={setAutoSync}
-                />
-              </div>
+                    />
+                  </div>
 
-              {/* Security Notice */}
-              <Alert className="bg-blue-50 dark:bg-blue-950">
-                <Shield className="h-4 w-4" />
-                <AlertDescription className="text-xs">
-                  Your credentials are encrypted and never stored on our servers. 
-                  We recommend using an investor (read-only) password for added security.
-                </AlertDescription>
-              </Alert>
+                  {/* Security Notice */}
+                  <Alert className="bg-blue-50 dark:bg-blue-950">
+                    <Shield className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      Your credentials are encrypted and never stored on our servers. 
+                      We recommend using an investor (read-only) password for added security.
+                    </AlertDescription>
+                  </Alert>
+                </>
+              )}
 
               {/* Error Display */}
               {error && (
