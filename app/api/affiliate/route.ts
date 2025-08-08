@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { AffiliateService } from '@/lib/services/affiliate-service'
 
+export const dynamic = 'force-dynamic'
+
 // Dynamic import for auth to avoid build issues
 async function getAuth() {
   try {

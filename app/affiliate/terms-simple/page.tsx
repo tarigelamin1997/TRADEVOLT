@@ -116,7 +116,7 @@ export default function AffiliateTermsSimplePage() {
                 <ul className="space-y-1 text-sm">
                   <li>🚫 Use fake accounts or stolen cards</li>
                   <li>🚫 Send spam emails</li>
-                  <li>🚫 Bid on "TradeVolt" in Google Ads</li>
+                  <li>🚫 Bid on &quot;TradeVolt&quot; in Google Ads</li>
                   <li>🚫 Buy through your own link</li>
                   <li>🚫 Promise unrealistic profits</li>
                   <li>🚫 Give financial advice</li>
@@ -132,7 +132,7 @@ export default function AffiliateTermsSimplePage() {
               <div className="space-y-3">
                 <div className="p-3 border-l-4 border-purple-600 bg-purple-50 dark:bg-purple-900/20">
                   <strong>Always disclose you&apos;re an affiliate:</strong>
-                  <p className="text-sm mt-1 italic">"I may earn a commission if you sign up through my link"</p>
+                  <p className="text-sm mt-1 italic">&quot;I may earn a commission if you sign up through my link&quot;</p>
                 </div>
                 <div className="p-3 border-l-4 border-orange-600 bg-orange-50 dark:bg-orange-900/20">
                   <strong>Refunds affect you:</strong>
@@ -155,7 +155,7 @@ export default function AffiliateTermsSimplePage() {
                 </div>
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded">
                   <strong>Q: Can I run Facebook/Google ads?</strong>
-                  <p className="text-sm">A: Yes! Just don&apos;t bid on "TradeVolt" keywords.</p>
+                  <p className="text-sm">A: Yes! Just don&apos;t bid on &quot;TradeVolt&quot; keywords.</p>
                 </div>
                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded">
                   <strong>Q: What payment methods?</strong>
@@ -178,7 +178,7 @@ export default function AffiliateTermsSimplePage() {
                 </li>
                 <li className="flex gap-2">
                   <span className="font-bold text-yellow-600">2.</span>
-                  <span>Using "TradeVolt" in your domain name</span>
+                  <span>Using &quot;TradeVolt&quot; in your domain name</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="font-bold text-yellow-600">3.</span>

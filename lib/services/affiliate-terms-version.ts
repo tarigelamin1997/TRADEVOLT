@@ -199,7 +199,7 @@ export class AffiliateTermsVersionControl {
   /**
    * Check if terms update is pending for an affiliate
    */
-  static async hasP pendingTermsUpdate(affiliateId: string): Promise<boolean> {
+  static async hasPendingTermsUpdate(affiliateId: string): Promise<boolean> {
     const hasAccepted = await this.hasAcceptedCurrentVersion(affiliateId)
     return !hasAccepted
   }
