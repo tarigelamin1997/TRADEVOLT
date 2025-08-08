@@ -79,7 +79,8 @@ export type BrokerFeature =
   | 'alerts'
   | 'webhooks'
   | 'paper-trading'
-  | 'multi-account';
+  | 'multi-account'
+  | 'csv-import';
 
 export type ConnectionMethod = 
   | 'rest-api'
