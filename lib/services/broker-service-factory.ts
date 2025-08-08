@@ -188,7 +188,14 @@ const BROKER_SERVICES: Partial<Record<BrokerPlatform, BrokerServiceConstructor>>
     }
     
     async getAccountInfo() {
-      throw new Error('TradingView does not provide account information');
+      // TradingView doesn't provide account info via webhooks
+      return {
+        accountId: 'tradingview-webhook',
+        accountName: 'TradingView Webhook',
+        balance: 0,
+        currency: 'USD',
+        accountType: 'paper' as const
+      };
     }
     
     async syncTrades() {
@@ -367,7 +374,14 @@ const BROKER_SERVICES: Partial<Record<BrokerPlatform, BrokerServiceConstructor>>
     }
     
     async getAccountInfo() {
-      throw new Error('Robinhood requires manual CSV import');
+      // Robinhood requires manual CSV import
+      return {
+        accountId: 'robinhood-csv',
+        accountName: 'Robinhood (CSV Import)',
+        balance: 0,
+        currency: 'USD',
+        accountType: 'live' as const
+      };
     }
     
     async syncTrades() {
