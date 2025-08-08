@@ -56,7 +56,6 @@ const mainMenuItems = [
   { icon: FileText, label: 'Trading Journal', href: '/journal' },
   { icon: BarChart3, label: 'Analytics', href: '/analytics' },
   { icon: TrendingUp, label: 'Performance Metrics', href: '/metrics' },
-  { icon: Calendar, label: 'Calendar', href: '/calendar' },
   { icon: Clock, label: 'Time Analysis', href: '/time-analysis' },
   { icon: Brain, label: 'Behavioral Analysis', href: '/behavioral' },
   { icon: Zap, label: 'Execution Quality', href: '/execution' },

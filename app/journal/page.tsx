@@ -32,6 +32,7 @@ import {
   DollarSign,
   Activity,
   Calendar,
+  CalendarDays,
   Edit,
   Save,
   X,
@@ -46,7 +47,8 @@ import {
   Target,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  Info
 } from "lucide-react"
 
 // Check if Clerk is configured
@@ -115,6 +117,10 @@ export default function UnifiedJournalPage() {
   const [selectedTradeId, setSelectedTradeId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [currentTab, setCurrentTab] = useState('overview')
+  
+  // Calendar state
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   
   // Calculate stats for overview
   const stats = useMemo(() => {
@@ -245,6 +251,37 @@ export default function UnifiedJournalPage() {
   
   // Get recent trades for overview
   const recentTrades = filteredTrades.slice(0, 10)
+  
+  // Calendar helper functions
+  const getMonthData = () => {
+    const year = currentDate.getFullYear()
+    const month = currentDate.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+    return { year, month, daysInMonth, startingDayOfWeek }
+  }
+
+  const getTradesForDate = (date: Date) => {
+    return trades.filter(trade => {
+      const tradeDate = new Date(trade.createdAt)
+      return tradeDate.toDateString() === date.toDateString()
+    })
+  }
+
+  const getPnLForDate = (date: Date) => {
+    const dateTrades = getTradesForDate(date)
+    return dateTrades.reduce((sum, trade) => {
+      const pnl = calculatePnLWithCommission(trade, settings) || 0
+      return sum + pnl
+    }, 0)
+  }
+  
+  const { year, month, daysInMonth, startingDayOfWeek } = getMonthData()
+  const monthName = currentDate.toLocaleString('default', { month: 'long' })
+  const today = new Date()
+  const selectedDateTrades = selectedDate ? getTradesForDate(selectedDate) : []
 
   return (
     <SidebarLayout currentPath="/journal">
@@ -284,7 +321,7 @@ export default function UnifiedJournalPage() {
 
         <div className="p-6">
           <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+            <TabsList className="grid w-full grid-cols-4 max-w-3xl">
               <TabsTrigger value="overview">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Overview
@@ -301,6 +338,10 @@ export default function UnifiedJournalPage() {
                     {selectedTrade.symbol}
                   </Badge>
                 )}
+              </TabsTrigger>
+              <TabsTrigger value="calendar">
+                <CalendarDays className="h-4 w-4 mr-2" />
+                Calendar
               </TabsTrigger>
             </TabsList>
 
@@ -771,6 +812,181 @@ export default function UnifiedJournalPage() {
                   </Card>
                 </div>
               )}
+            </TabsContent>
+
+            {/* Calendar Tab */}
+            <TabsContent value="calendar" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Trading Calendar</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentDate(new Date(year, month - 1))}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="font-medium min-w-[150px] text-center">
+                        {monthName} {year}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentDate(new Date(year, month + 1))}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setCurrentDate(new Date())
+                          setSelectedDate(new Date())
+                        }}
+                      >
+                        Today
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
+                    {/* Day headers */}
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                      <div 
+                        key={day} 
+                        className="bg-gray-50 dark:bg-gray-800 p-2 text-center text-sm font-medium"
+                      >
+                        {day}
+                      </div>
+                    ))}
+                    
+                    {/* Empty cells for days before month starts */}
+                    {Array.from({ length: startingDayOfWeek }, (_, i) => (
+                      <div 
+                        key={`empty-${i}`} 
+                        className="bg-white dark:bg-gray-900 p-2 min-h-[80px]"
+                      />
+                    ))}
+                    
+                    {/* Calendar days */}
+                    {Array.from({ length: daysInMonth }, (_, i) => {
+                      const date = new Date(year, month, i + 1)
+                      const dayPnL = getPnLForDate(date)
+                      const dayTrades = getTradesForDate(date)
+                      const isToday = date.toDateString() === today.toDateString()
+                      const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString()
+                      
+                      return (
+                        <button
+                          key={i + 1}
+                          onClick={() => setSelectedDate(date)}
+                          className={`
+                            bg-white dark:bg-gray-900 p-2 min-h-[80px] text-left
+                            hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors
+                            ${isToday ? 'ring-2 ring-blue-500' : ''}
+                            ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                          `}
+                        >
+                          <div className="font-medium text-sm mb-1">{i + 1}</div>
+                          {dayTrades.length > 0 && (
+                            <>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {dayTrades.length} trade{dayTrades.length !== 1 ? 's' : ''}
+                              </div>
+                              <div className={`text-xs font-bold ${
+                                dayPnL >= 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {formatCurrency(dayPnL, settings)}
+                              </div>
+                            </>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  
+                  {/* Selected date trades */}
+                  {selectedDate && (
+                    <div className="mt-6">
+                      <Separator className="mb-4" />
+                      <h3 className="font-medium mb-3">
+                        Trades for {selectedDate.toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </h3>
+                      {selectedDateTrades.length === 0 ? (
+                        <p className="text-gray-500 text-center py-4">No trades on this date</p>
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b text-left">
+                                <th className="p-2 text-sm">Symbol</th>
+                                <th className="p-2 text-sm">Type</th>
+                                <th className="p-2 text-sm">Entry</th>
+                                <th className="p-2 text-sm">Exit</th>
+                                <th className="p-2 text-sm">Qty</th>
+                                <th className="p-2 text-sm text-right">P&L</th>
+                                <th className="p-2"></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {selectedDateTrades.map(trade => {
+                                const pnl = calculatePnLWithCommission(trade, settings) || 0
+                                
+                                return (
+                                  <tr 
+                                    key={trade.id}
+                                    className="border-b hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                                    onClick={() => {
+                                      setSelectedTradeId(trade.id)
+                                      setCurrentTab('details')
+                                    }}
+                                  >
+                                    <td className="p-2 font-medium">{trade.symbol}</td>
+                                    <td className="p-2">
+                                      <Badge variant={trade.type === 'BUY' ? 'default' : 'secondary'} className="text-xs">
+                                        {trade.type}
+                                      </Badge>
+                                    </td>
+                                    <td className="p-2 text-sm">{safeToFixed(trade.entry)}</td>
+                                    <td className="p-2 text-sm">{trade.exit ? safeToFixed(trade.exit) : '-'}</td>
+                                    <td className="p-2 text-sm">{trade.quantity}</td>
+                                    <td className={`p-2 text-sm text-right font-bold ${
+                                      pnl >= 0 ? 'text-green-600' : 'text-red-600'
+                                    }`}>
+                                      {formatCurrency(pnl, settings)}
+                                    </td>
+                                    <td className="p-2">
+                                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                                    </td>
+                                  </tr>
+                                )
+                              })}
+                            </tbody>
+                          </table>
+                          <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium">Day Total:</span>
+                              <span className={`text-lg font-bold ${
+                                getPnLForDate(selectedDate) >= 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {formatCurrency(getPnLForDate(selectedDate), settings)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
