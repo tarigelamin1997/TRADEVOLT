@@ -37,6 +37,109 @@ export default function AffiliatePage() {
   const [referralCode] = useState('TRADE2025')
   const [currentTier, setCurrentTier] = useState<'bronze' | 'silver' | 'gold' | 'diamond'>('bronze')
   
+  const handleDownloadMaterials = () => {
+    // Create a simple marketing materials info document
+    const materialsInfo = `
+TRADEVOLT AFFILIATE MARKETING MATERIALS
+========================================
+
+Welcome to the TradeVolt Affiliate Program!
+
+Your Referral Link:
+https://tradevolt.com/ref/${referralCode}
+
+Your Referral Code: ${referralCode}
+
+AVAILABLE MARKETING MATERIALS:
+------------------------------
+
+1. EMAIL TEMPLATES
+   - Welcome Email Series (3 emails)
+   - Product Launch Announcement
+   - Feature Highlight Emails (5 templates)
+   - Success Story Templates
+
+2. SOCIAL MEDIA POSTS
+   - Twitter/X Thread Templates (10)
+   - LinkedIn Post Templates (8)
+   - Instagram Caption Templates (15)
+   - Facebook Post Templates (12)
+
+3. BANNER ADS
+   - 728x90 Leaderboard
+   - 300x250 Medium Rectangle
+   - 160x600 Wide Skyscraper
+   - 320x50 Mobile Banner
+   - 300x600 Half Page
+
+4. LANDING PAGE COPY
+   - Short Form Sales Page
+   - Long Form Sales Page
+   - Comparison Page Template
+   - FAQ Template
+
+5. VIDEO SCRIPTS
+   - 30-Second Promo Script
+   - 2-Minute Demo Script
+   - 5-Minute Tutorial Script
+   - Testimonial Interview Questions
+
+QUICK COPY TEMPLATES:
+----------------------
+
+Short Social Post:
+"Transform your trading with data-driven insights! TradeVolt helps you track, analyze, and improve your performance. Get 20% off with my code: ${referralCode} → tradevolt.com/ref/${referralCode}"
+
+Email Subject Lines:
+- "The Trading Tool That Changed Everything For Me"
+- "How I Improved My Win Rate by 23% in 30 Days"
+- "Stop Guessing, Start Tracking Your Trades"
+
+Key Selling Points:
+✓ Professional analytics (16+ metrics)
+✓ Real-time P&L tracking
+✓ Risk management tools
+✓ Trading playbooks
+✓ Behavioral analysis
+✓ 14-day free trial
+✓ $29/month (affordable pricing)
+
+COMMISSION STRUCTURE:
+---------------------
+Bronze (< $2,000): 10% = $2.90 per sale
+Silver ($2K-$5K): 25% = $7.25 per sale
+Gold ($5K-$10K): 35% = $10.15 per sale
+Diamond ($10K+): 50% = $14.50 per sale
+
+IMPORTANT REMINDERS:
+--------------------
+• Always disclose your affiliate relationship
+• Include: "I may earn a commission if you purchase through my link"
+• Do not make unrealistic income claims
+• Do not bid on "TradeVolt" keywords in PPC
+• Follow FTC guidelines for endorsements
+
+NEED HELP?
+----------
+Email: affiliates@tradevolt.com
+Response time: 24-48 hours
+
+Good luck with your promotions!
+The TradeVolt Team
+    `.trim()
+    
+    // Create and download the text file
+    const blob = new Blob([materialsInfo], { type: 'text/plain' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `TradeVolt_Affiliate_Materials_${referralCode}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  }
+  
   // Mock data - will be replaced with real data from database
   const stats = {
     totalEarnings: 2847.50,
@@ -133,7 +236,11 @@ export default function AffiliatePage() {
                 Earn up to 50% recurring commission on every referral
               </p>
             </div>
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              onClick={handleDownloadMaterials}
+            >
               <Download className="h-4 w-4 mr-2" />
               Download Materials
             </Button>
