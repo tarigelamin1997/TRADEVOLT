@@ -373,7 +373,7 @@ export class CTraderService extends BrokerServiceBase {
   }
 
   // Helper to detect if symbol is forex
-  private detectMarketType(symbol: string): string {
+  protected detectMarketType(symbol: string): string {
     // cTrader is primarily forex and CFDs
     if (symbol.match(/^[A-Z]{6}$/)) {
       return 'FOREX';
