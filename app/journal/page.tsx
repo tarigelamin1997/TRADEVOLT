@@ -785,13 +785,28 @@ export default function UnifiedJournalPage() {
 
         {/* Add Trade Modal */}
         {showAddTrade && (
-          <TradeFormEnhanced 
-            onClose={() => setShowAddTrade(false)}
-            onSuccess={() => {
-              setShowAddTrade(false)
-              fetchTrades()
-            }}
-          />
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Add New Trade</CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowAddTrade(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <TradeFormEnhanced 
+                  onAdd={() => {
+                    fetchTrades()
+                    setShowAddTrade(false)
+                  }} 
+                />
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </SidebarLayout>
