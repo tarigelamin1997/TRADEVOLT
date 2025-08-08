@@ -70,7 +70,7 @@ const BROKER_SERVICES: Partial<Record<BrokerPlatform, BrokerServiceConstructor>>
         marginUsed: info.margin,
         marginAvailable: info.freeMargin,
         broker: info.broker,
-        accountType: info.investorMode ? 'demo' : 'live'
+        accountType: (info.investorMode ? 'demo' : 'live') as 'demo' | 'live'
       };
     }
     
@@ -146,7 +146,7 @@ const BROKER_SERVICES: Partial<Record<BrokerPlatform, BrokerServiceConstructor>>
         marginUsed: info.margin,
         marginAvailable: info.freeMargin,
         broker: info.broker,
-        accountType: info.investorMode ? 'demo' : 'live'
+        accountType: (info.investorMode ? 'demo' : 'live') as 'demo' | 'live'
       };
     }
     
