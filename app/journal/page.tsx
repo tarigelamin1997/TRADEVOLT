@@ -61,7 +61,7 @@ interface JournalEntry {
 
 function TradeRow({ trade, onClick, settings }: { trade: Trade, onClick: () => void, settings: any }) {
   const pnl = calculateMarketPnL(trade, trade.marketType || 'STOCKS')
-  const { pnlWithCommission } = calculatePnLWithCommission(trade, settings)
+  const pnlWithCommission = calculatePnLWithCommission(trade, settings) || 0
   
   return (
     <tr 
@@ -139,7 +139,7 @@ export default function UnifiedJournalPage() {
     const monthTrades = trades.filter(t => new Date(t.createdAt) >= monthStart)
     
     const calculateTotalPnL = (trades: Trade[]) => 
-      trades.reduce((sum, t) => sum + calculatePnLWithCommission(t, settings).pnlWithCommission, 0)
+      trades.reduce((sum, t) => sum + (calculatePnLWithCommission(t, settings) || 0), 0)
     
     const wins = trades.filter(t => (calculateMarketPnL(t, t.marketType || 'STOCKS') || 0) > 0)
     const losses = trades.filter(t => (calculateMarketPnL(t, t.marketType || 'STOCKS') || 0) < 0)
@@ -489,7 +489,7 @@ export default function UnifiedJournalPage() {
                         <tbody>
                           {filteredTrades.map(trade => {
                             const pnl = calculateMarketPnL(trade, trade.marketType || 'STOCKS')
-                            const { pnlWithCommission } = calculatePnLWithCommission(trade, settings)
+                            const pnlWithCommission = calculatePnLWithCommission(trade, settings) || 0
                             const hasJournal = !!journalEntries[trade.id]
                             
                             return (
@@ -621,7 +621,7 @@ export default function UnifiedJournalPage() {
                         <div>
                           <Label>P&L</Label>
                           <p className={`text-xl font-bold ${(calculateMarketPnL(selectedTrade, selectedTrade.marketType || 'STOCKS') || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {formatCurrency(calculatePnLWithCommission(selectedTrade, settings).pnlWithCommission, settings)}
+                            {formatCurrency(calculatePnLWithCommission(selectedTrade, settings) || 0, settings)}
                           </p>
                         </div>
                       </div>
