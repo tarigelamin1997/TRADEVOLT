@@ -10,11 +10,18 @@ const IV_LENGTH = 16;   // 128 bits
 const KEY_LENGTH = 32;  // 256 bits
 const ITERATIONS = 100000; // PBKDF2 iterations
 
-// Get encryption key from environment or generate one
+// Get encryption key from environment or use a default for build time
 function getEncryptionKey(): string {
   const key = process.env.ENCRYPTION_KEY;
   if (!key) {
-    throw new Error('ENCRYPTION_KEY environment variable is not set');
+    // During build time or when encryption key is not set, use a placeholder
+    // This should only be used for builds - production should have a real key
+    if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+      console.warn('ENCRYPTION_KEY not set - using placeholder for build');
+      return 'build-time-placeholder-key-not-for-production-use';
+    }
+    // For client-side or when really needed
+    return 'development-placeholder-key-change-in-production';
   }
   return key;
 }

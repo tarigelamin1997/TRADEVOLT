@@ -35,7 +35,7 @@ import { formatCurrency } from '@/lib/calculations'
 import { safeToFixed } from '@/lib/utils/safe-format'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { Trade } from '@/lib/db-memory'
-import { SAMPLE_TRADES } from '@/lib/sample-trades'
+import { COMPREHENSIVE_SAMPLE_TRADES } from '@/lib/comprehensive-sample-trades'
 import { useAuthUser } from '@/lib/auth-wrapper'
 
 interface DashboardStats {
@@ -82,8 +82,10 @@ export default function VisualDashboardPage() {
 
   useEffect(() => {
     if (isDemoMode) {
-      // Load sample trades for demo mode
-      setTrades(SAMPLE_TRADES as Trade[])
+      // Load comprehensive sample trades for demo mode
+      const sampleTrades = COMPREHENSIVE_SAMPLE_TRADES as Trade[]
+      setTrades(sampleTrades)
+      calculateStats(sampleTrades)
       setIsLoading(false)
     } else {
       fetchTrades()
