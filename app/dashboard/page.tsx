@@ -248,6 +248,35 @@ export default function VisualDashboardPage() {
           </motion.div>
         )}
         
+        {/* Load Sample Data Banner - Show when user has no trades */}
+        {!isDemoMode && trades.length === 0 && !isLoading && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Activity className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <span className="font-medium text-purple-900 dark:text-purple-100">No trades yet?</span>
+                </div>
+                <span className="text-sm text-purple-700 dark:text-purple-300">
+                  Load sample data to explore all features and see metrics in action
+                </span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => router.push('/dashboard/load-sample')}
+                className="border-purple-300 hover:bg-purple-100 dark:border-purple-700 dark:hover:bg-purple-900/50"
+              >
+                Load Sample Data
+              </Button>
+            </div>
+          </motion.div>
+        )}
+        
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
