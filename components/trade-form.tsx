@@ -28,6 +28,7 @@ interface TradeFormProps {
 
 export function TradeForm({ onAdd }: TradeFormProps) {
   const { settings } = useSettings()
+  const [showSuccess, setShowSuccess] = useState(false)
   
   // Get last used market type from localStorage or use settings default
   const getLastMarketType = () => {
@@ -112,13 +113,17 @@ export function TradeForm({ onAdd }: TradeFormProps) {
       const data = await res.json()
       onAdd(data.trade)
       
+      // Show success message
+      setShowSuccess(true)
+      setTimeout(() => setShowSuccess(false), 3000)
+      
       // Reset form but keep market type
       setTrade({ 
         symbol: '', 
         type: 'BUY', 
         entry: '', 
         exit: '', 
-        quantity: '', 
+        quantity: settings.trading.riskManagement.defaultPositionSize.toString(), 
         entryDate: new Date().toISOString().split('T')[0],
         entryTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
         exitDate: '',
@@ -136,7 +141,18 @@ export function TradeForm({ onAdd }: TradeFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div>
+      {/* Success Message */}
+      {showSuccess && (
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center gap-2">
+          <svg className="h-5 w-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span className="text-green-700 dark:text-green-300 font-medium">Trade added successfully!</span>
+        </div>
+      )}
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
       {/* Market Type and Symbol Row */}
       <div className="grid grid-cols-3 gap-4">
         <div>
@@ -356,5 +372,6 @@ export function TradeForm({ onAdd }: TradeFormProps) {
       
       <Button type="submit" className="w-full">Add Trade</Button>
     </form>
+    </div>
   )
 }

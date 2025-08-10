@@ -101,74 +101,90 @@ export async function POST(request: NextRequest) {
     // Giant switch statement - fight me
     switch (body.action) {
       case 'getTrades': {
-        // Get or create user
-        let user = await prisma.user.findUnique({
-          where: { clerkId },
-          include: { trades: true }
-        })
-        
-        if (!user) {
-          user = await prisma.user.create({
-            data: {
-              clerkId,
-              email: body.email || `${clerkId}@placeholder.com`,
-              isPaid: false
-            },
+        try {
+          // Get or create user
+          let user = await prisma.user.findUnique({
+            where: { clerkId },
             include: { trades: true }
           })
+          
+          if (!user) {
+            user = await prisma.user.create({
+              data: {
+                clerkId,
+                email: body.email || `${clerkId}@placeholder.com`,
+                isPaid: false
+              },
+              include: { trades: true }
+            })
+          }
+          
+          // Sort trades by creation date
+          const sortedTrades = user.trades.sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+          
+          return NextResponse.json({
+            trades: sortedTrades || [],
+            isPaid: user.isPaid || false
+          })
+        } catch (error) {
+          console.error('getTrades error:', error)
+          return NextResponse.json(
+            { error: 'Failed to fetch trades. Please try again.' }, 
+            { status: 500 }
+          )
         }
-        
-        // Sort trades by creation date
-        const sortedTrades = user.trades.sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )
-        
-        return NextResponse.json({
-          trades: sortedTrades || [],
-          isPaid: user.isPaid || false
-        })
       }
       
       case 'addTrade': {
-        console.log('Adding trade for clerkId:', clerkId)
-        console.log('Trade data:', body.trade)
-        
-        // Get or create user
-        let user = await prisma.user.findUnique({
-          where: { clerkId }
-        })
-        
-        if (!user) {
-          console.log('Creating new user')
-          user = await prisma.user.create({
+        try {
+          console.log('Adding trade for clerkId:', clerkId)
+          console.log('Trade data:', body.trade)
+          
+          // Get or create user
+          let user = await prisma.user.findUnique({
+            where: { clerkId }
+          })
+          
+          if (!user) {
+            console.log('Creating new user')
+            user = await prisma.user.create({
+              data: {
+                clerkId,
+                email: body.email || `${clerkId}@placeholder.com`,
+                isPaid: false
+              }
+            })
+          }
+          
+          console.log('User found/created:', user.id)
+          
+          const trade = await prisma.trade.create({
             data: {
-              clerkId,
-              email: body.email || `${clerkId}@placeholder.com`,
-              isPaid: false
+              userId: user.id,
+              symbol: body.trade.symbol,
+              type: body.trade.type,
+              entry: body.trade.entry,
+              exit: body.trade.exit || null,
+              quantity: body.trade.quantity,
+              notes: body.trade.notes || null,
+              marketType: body.trade.marketType || null,
+              entryTime: body.trade.entryTime ? new Date(body.trade.entryTime) : null,
+              exitTime: body.trade.exitTime ? new Date(body.trade.exitTime) : null
             }
           })
+          
+          console.log('Trade created:', trade.id)
+          
+          return NextResponse.json({ trade })
+        } catch (error) {
+          console.error('addTrade error:', error)
+          return NextResponse.json(
+            { error: 'Failed to add trade. Please try again.' }, 
+            { status: 500 }
+          )
         }
-        
-        console.log('User found/created:', user.id)
-        
-        const trade = await prisma.trade.create({
-          data: {
-            userId: user.id,
-            symbol: body.trade.symbol,
-            type: body.trade.type,
-            entry: body.trade.entry,
-            exit: body.trade.exit || null,
-            quantity: body.trade.quantity,
-            notes: body.trade.notes || null,
-            marketType: body.trade.marketType || null,
-            entryTime: body.trade.entryTime ? new Date(body.trade.entryTime) : null,
-            exitTime: body.trade.exitTime ? new Date(body.trade.exitTime) : null
-          }
-        })
-        
-        console.log('Trade created:', trade.id)
-        
-        return NextResponse.json({ trade })
       }
       
       case 'getAI': {
@@ -208,54 +224,62 @@ export async function POST(request: NextRequest) {
       }
       
       case 'importTrades': {
-        const trades = body.trades
-        if (!trades || !Array.isArray(trades)) {
-          return new NextResponse('Invalid trades data', { status: 400 })
-        }
+        try {
+          const trades = body.trades
+          if (!trades || !Array.isArray(trades)) {
+            return new NextResponse('Invalid trades data', { status: 400 })
+          }
 
-        console.log(`Importing ${trades.length} trades for user ${clerkId}`)
+          console.log(`Importing ${trades.length} trades for user ${clerkId}`)
 
-        // Get or create user
-        let user = await prisma.user.findUnique({
-          where: { clerkId }
-        })
-        
-        if (!user) {
-          user = await prisma.user.create({
-            data: {
-              clerkId,
-              email: body.email || `${clerkId}@placeholder.com`,
-              isPaid: false
-            }
+          // Get or create user
+          let user = await prisma.user.findUnique({
+            where: { clerkId }
           })
+          
+          if (!user) {
+            user = await prisma.user.create({
+              data: {
+                clerkId,
+                email: body.email || `${clerkId}@placeholder.com`,
+                isPaid: false
+              }
+            })
+          }
+
+          // Import all trades
+          const createResult = await prisma.trade.createMany({
+            data: trades.map(trade => ({
+              userId: user.id,
+              symbol: trade.symbol,
+              type: trade.type,
+              entry: parseFloat(trade.entry),
+              exit: trade.exit ? parseFloat(trade.exit) : null,
+              quantity: parseFloat(trade.quantity),
+              notes: trade.notes || null,
+              marketType: trade.marketType || null,
+              entryTime: trade.entryTime ? new Date(trade.entryTime) : null,
+              exitTime: trade.exitTime ? new Date(trade.exitTime) : null
+            }))
+          })
+
+          // Fetch and return all trades
+          const allTrades = await prisma.trade.findMany({
+            where: { userId: user.id },
+            orderBy: { createdAt: 'desc' }
+          })
+
+          return NextResponse.json({ 
+            trades: allTrades,
+            imported: createResult.count 
+          })
+        } catch (error) {
+          console.error('importTrades error:', error)
+          return NextResponse.json(
+            { error: 'Failed to import trades. Please check your CSV format and try again.' }, 
+            { status: 500 }
+          )
         }
-
-        // Import all trades
-        const createResult = await prisma.trade.createMany({
-          data: trades.map(trade => ({
-            userId: user.id,
-            symbol: trade.symbol,
-            type: trade.type,
-            entry: parseFloat(trade.entry),
-            exit: trade.exit ? parseFloat(trade.exit) : null,
-            quantity: parseFloat(trade.quantity),
-            notes: trade.notes || null,
-            marketType: trade.marketType || null,
-            entryTime: trade.entryTime ? new Date(trade.entryTime) : null,
-            exitTime: trade.exitTime ? new Date(trade.exitTime) : null
-          }))
-        })
-
-        // Fetch and return all trades
-        const allTrades = await prisma.trade.findMany({
-          where: { userId: user.id },
-          orderBy: { createdAt: 'desc' }
-        })
-
-        return NextResponse.json({ 
-          trades: allTrades,
-          imported: createResult.count 
-        })
       }
       
       case 'getSubscription': {

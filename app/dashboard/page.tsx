@@ -33,8 +33,10 @@ import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { useSettings } from '@/lib/settings'
 import { formatCurrency } from '@/lib/calculations'
 import { safeToFixed } from '@/lib/utils/safe-format'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { Trade } from '@/lib/db-memory'
+import { SAMPLE_TRADES } from '@/lib/sample-trades'
+import { useAuth } from '@/lib/auth-wrapper'
 
 interface DashboardStats {
   totalTrades: number
@@ -55,6 +57,8 @@ interface DashboardStats {
 
 export default function VisualDashboardPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { user } = useAuth()
   const { settings } = useSettings()
   const [trades, setTrades] = useState<Trade[]>([])
   const [stats, setStats] = useState<DashboardStats>({
@@ -72,10 +76,19 @@ export default function VisualDashboardPage() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [showTradeForm, setShowTradeForm] = useState(false)
+  
+  // Check for demo mode
+  const isDemoMode = !user || searchParams?.get('demo') === 'true'
 
   useEffect(() => {
-    fetchTrades()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (isDemoMode) {
+      // Load sample trades for demo mode
+      setTrades(SAMPLE_TRADES as Trade[])
+      setIsLoading(false)
+    } else {
+      fetchTrades()
+    }
+  }, [isDemoMode]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchTrades = async () => {
     try {
@@ -194,8 +207,9 @@ export default function VisualDashboardPage() {
   if (isLoading) {
     return (
       <SidebarLayout>
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading your trades...</p>
         </div>
       </SidebarLayout>
     )
@@ -205,6 +219,33 @@ export default function VisualDashboardPage() {
     <SidebarLayout>
       <div className="min-h-screen overflow-y-auto">
         <div className="space-y-6 p-6">
+        {/* Demo Mode Banner */}
+        {isDemoMode && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <span className="font-medium text-blue-900 dark:text-blue-100">Demo Mode</span>
+                <span className="text-sm text-blue-700 dark:text-blue-300">
+                  Exploring with sample data. Sign up to save your real trades!
+                </span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => router.push('/sign-up')}
+                className="border-blue-300 hover:bg-blue-100 dark:border-blue-700 dark:hover:bg-blue-900/50"
+              >
+                Sign Up
+              </Button>
+            </div>
+          </motion.div>
+        )}
+        
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -215,7 +256,11 @@ export default function VisualDashboardPage() {
             <h1 className="text-3xl font-bold">Trading Dashboard</h1>
             <p className="text-muted-foreground">Track your performance with beautiful visualizations</p>
           </div>
-          <Button onClick={() => setShowTradeForm(true)} className="gap-2">
+          <Button 
+            onClick={() => setShowTradeForm(true)} 
+            className="gap-2"
+            disabled={isDemoMode}
+          >
             <Plus className="h-4 w-4" />
             New Trade
           </Button>
