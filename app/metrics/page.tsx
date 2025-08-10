@@ -14,6 +14,7 @@ import * as metrics from '@/lib/tradingMetrics'
 import { useSubscription } from '@/lib/subscription'
 import { COMPREHENSIVE_SAMPLE_TRADES } from '@/lib/comprehensive-sample-trades'
 import { useAuthUser } from '@/lib/auth-wrapper'
+import { AdvancedAnalyticsDashboard } from '@/components/advanced-analytics-dashboard'
 
 export default function MetricsPage() {
   const router = useRouter()
@@ -240,6 +241,20 @@ export default function MetricsPage() {
                   )
                 })}
               </div>
+            </div>
+
+            {/* Enhanced Visual Analytics Dashboard */}
+            <div>
+              <AdvancedAnalyticsDashboard 
+                metrics={{
+                  winRate: calculatedMetrics.winRate?.value || 0,
+                  profitFactor: calculatedMetrics.profitFactor?.value || 0,
+                  sharpeRatio: calculatedMetrics.sharpeRatio?.value || 0,
+                  maxDrawdown: Math.abs(calculatedMetrics.maxDrawdown?.value || 0),
+                  consistency: calculatedMetrics.consistency?.value || 0,
+                  kellyPercentage: calculatedMetrics.kellyPercentage?.value || 0
+                }}
+              />
             </div>
 
             {/* Info Card */}
