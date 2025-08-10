@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator"
 import { CSVImport } from '@/components/csv-import'
 import { TradeFormEnhanced } from '@/components/trade-form-enhanced'
 import { RichTextEditor } from '@/components/rich-text-editor'
+import { ExecutionQuality } from '@/components/execution-quality'
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { useUser } from '@clerk/nextjs'
 import { useSettings } from '@/lib/settings'
@@ -331,7 +332,7 @@ export default function UnifiedJournalPage() {
 
         <div className="p-6">
           <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-4 max-w-3xl">
+            <TabsList className="grid w-full grid-cols-5 max-w-4xl">
               <TabsTrigger value="overview">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Overview
@@ -352,6 +353,10 @@ export default function UnifiedJournalPage() {
               <TabsTrigger value="calendar">
                 <CalendarDays className="h-4 w-4 mr-2" />
                 Calendar
+              </TabsTrigger>
+              <TabsTrigger value="execution">
+                <Activity className="h-4 w-4 mr-2" />
+                Execution Quality
               </TabsTrigger>
             </TabsList>
 
@@ -1092,6 +1097,11 @@ export default function UnifiedJournalPage() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Execution Quality Tab */}
+            <TabsContent value="execution" className="space-y-4">
+              <ExecutionQuality trades={filteredTrades} settings={settings} />
             </TabsContent>
           </Tabs>
         </div>
