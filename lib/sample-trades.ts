@@ -9,8 +9,8 @@ export const SAMPLE_TRADES = [
     exit: 182.30,
     quantity: 100,
     marketType: 'STOCKS',
-    entryTime: new Date('2025-01-15T09:30:00'),
-    exitTime: new Date('2025-01-15T14:30:00'),
+    entryTime: '2025-01-15T09:30:00',
+    exitTime: '2025-01-15T14:30:00',
     notes: 'Strong breakout above resistance',
     createdAt: '2025-01-15T14:30:00'
   },
@@ -23,8 +23,8 @@ export const SAMPLE_TRADES = [
     exit: 1.0820,
     quantity: 10000,
     marketType: 'FOREX',
-    entryTime: new Date('2025-01-16T10:00:00'),
-    exitTime: new Date('2025-01-16T16:00:00'),
+    entryTime: '2025-01-16T10:00:00',
+    exitTime: '2025-01-16T16:00:00',
     notes: 'Bearish engulfing pattern',
     createdAt: '2025-01-16T16:00:00'
   },
@@ -37,8 +37,8 @@ export const SAMPLE_TRADES = [
     exit: 43200,
     quantity: 0.5,
     marketType: 'CRYPTO',
-    entryTime: new Date('2025-01-17T08:00:00'),
-    exitTime: new Date('2025-01-17T20:00:00'),
+    entryTime: '2025-01-17T08:00:00',
+    exitTime: '2025-01-17T20:00:00',
     notes: 'Support bounce',
     createdAt: '2025-01-17T20:00:00'
   },
@@ -51,8 +51,8 @@ export const SAMPLE_TRADES = [
     exit: 4745,
     quantity: 2,
     marketType: 'FUTURES',
-    entryTime: new Date('2025-01-18T09:30:00'),
-    exitTime: new Date('2025-01-18T10:30:00'),
+    entryTime: '2025-01-18T09:30:00',
+    exitTime: '2025-01-18T10:30:00',
     notes: 'False breakout - stopped out',
     createdAt: '2025-01-18T10:30:00'
   },
@@ -65,8 +65,8 @@ export const SAMPLE_TRADES = [
     exit: 228.50,
     quantity: 50,
     marketType: 'STOCKS',
-    entryTime: new Date('2025-01-19T11:00:00'),
-    exitTime: new Date('2025-01-19T15:00:00'),
+    entryTime: '2025-01-19T11:00:00',
+    exitTime: '2025-01-19T15:00:00',
     notes: 'Rejection at moving average',
     createdAt: '2025-01-19T15:00:00'
   },
@@ -79,8 +79,8 @@ export const SAMPLE_TRADES = [
     exit: 189.20,
     quantity: 5000,
     marketType: 'FOREX',
-    entryTime: new Date('2025-01-20T02:00:00'),
-    exitTime: new Date('2025-01-20T08:00:00'),
+    entryTime: '2025-01-20T02:00:00',
+    exitTime: '2025-01-20T08:00:00',
     notes: 'Asian session range breakout',
     createdAt: '2025-01-20T08:00:00'
   },
@@ -93,8 +93,8 @@ export const SAMPLE_TRADES = [
     exit: 16800,
     quantity: 1,
     marketType: 'FUTURES',
-    entryTime: new Date('2025-01-21T13:00:00'),
-    exitTime: new Date('2025-01-21T15:30:00'),
+    entryTime: '2025-01-21T13:00:00',
+    exitTime: '2025-01-21T15:30:00',
     notes: 'Trend continuation short',
     createdAt: '2025-01-21T15:30:00'
   },
@@ -107,7 +107,7 @@ export const SAMPLE_TRADES = [
     exit: null,
     quantity: 20,
     marketType: 'STOCKS',
-    entryTime: new Date('2025-01-22T10:00:00'),
+    entryTime: '2025-01-22T10:00:00',
     exitTime: null,
     notes: 'Swing trade - still open',
     createdAt: '2025-01-22T10:00:00'
@@ -121,8 +121,8 @@ export const SAMPLE_TRADES = [
     exit: 2280,
     quantity: 2,
     marketType: 'CRYPTO',
-    entryTime: new Date('2025-01-22T14:00:00'),
-    exitTime: new Date('2025-01-22T18:00:00'),
+    entryTime: '2025-01-22T14:00:00',
+    exitTime: '2025-01-22T18:00:00',
     notes: 'Failed breakout attempt',
     createdAt: '2025-01-22T18:00:00'
   },
@@ -135,8 +135,8 @@ export const SAMPLE_TRADES = [
     exit: 625.75,
     quantity: 30,
     marketType: 'STOCKS',
-    entryTime: new Date('2025-01-23T09:45:00'),
-    exitTime: new Date('2025-01-23T14:00:00'),
+    entryTime: '2025-01-23T09:45:00',
+    exitTime: '2025-01-23T14:00:00',
     notes: 'Earnings momentum play',
     createdAt: '2025-01-23T14:00:00'
   }

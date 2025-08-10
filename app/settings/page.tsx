@@ -941,14 +941,24 @@ export default function SettingsPage() {
                           </ul>
                         </div>
                         
-                        <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => router.push('/subscribe')}>
-                          Upgrade to Pro
+                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                          <p className="text-sm text-yellow-800 dark:text-yellow-200 text-center font-medium">
+                            Payments Coming Soon - All Pro features currently FREE during beta!
+                          </p>
+                        </div>
+                        
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700" disabled>
+                          Upgrade to Pro (Coming Soon)
                         </Button>
                       </div>
 
                       <div className="border-t pt-4">
                         <h4 className="font-medium mb-2">Billing Information</h4>
                         <p className="text-sm text-gray-600">No payment method on file</p>
+                        <div className="mt-3 flex items-center gap-2">
+                          <CreditCard className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm text-gray-500">Payment processing coming soon</span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
