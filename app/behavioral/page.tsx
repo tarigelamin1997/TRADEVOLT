@@ -39,7 +39,7 @@ export default function BehavioralPage() {
     } else {
       fetchTrades()
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
     if (trades.length > 0) {

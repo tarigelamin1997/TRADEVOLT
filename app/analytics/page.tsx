@@ -44,7 +44,7 @@ export default function AnalyticsPage() {
     } else {
       fetchTrades()
     }
-  }, [])
+  }, [user])
 
   const fetchTrades = async () => {
     try {

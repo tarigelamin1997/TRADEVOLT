@@ -36,7 +36,7 @@ export default function MetricsPage() {
     } else {
       fetchTrades()
     }
-  }, [])
+  }, [user])
 
   const fetchTrades = async () => {
     try {

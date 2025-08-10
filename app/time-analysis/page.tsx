@@ -49,7 +49,7 @@ export default function TimeAnalysisPage() {
     } else {
       fetchTrades()
     }
-  }, [])
+  }, [user])
 
   const calculateStats = (trades: Trade[]) => {
     if (trades.length > 0) {

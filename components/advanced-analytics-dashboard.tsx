@@ -333,7 +333,7 @@ export function AdvancedAnalyticsDashboard({ metrics }: AdvancedAnalyticsDashboa
                   <Trophy className="h-4 w-4 text-green-600 mt-0.5" />
                   <div className="text-sm">
                     <p className="font-medium text-green-900">Excellent Performance!</p>
-                    <p className="text-green-700">You're in the top tier. Consider increasing position size gradually while maintaining discipline.</p>
+                    <p className="text-green-700">You&apos;re in the top tier. Consider increasing position size gradually while maintaining discipline.</p>
                   </div>
                 </div>
               )}
