@@ -21,6 +21,7 @@ import { calculatePnLWithCommission, formatCurrency, formatDateTime, checkDailyL
 import { TimeAnalysisService } from '@/lib/services/time-analysis-service'
 import { safeToFixed } from '@/lib/utils/safe-format'
 import type { Trade } from '@/lib/db-memory'
+import { COMPREHENSIVE_SAMPLE_TRADES } from '@/lib/comprehensive-sample-trades'
 import { 
   BookOpen,
   Plus,
@@ -165,7 +166,16 @@ export default function UnifiedJournalPage() {
   }, [trades, settings])
 
   useEffect(() => {
-    fetchTrades()
+    // Check if demo mode
+    const isDemoMode = user.id === 'demo-user' || !isClerkConfigured
+    
+    if (isDemoMode) {
+      // Load comprehensive sample trades for demo mode
+      setTrades(COMPREHENSIVE_SAMPLE_TRADES as Trade[])
+      setIsLoading(false)
+    } else {
+      fetchTrades()
+    }
     loadJournalEntries()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

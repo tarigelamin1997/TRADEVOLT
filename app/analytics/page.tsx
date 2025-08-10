@@ -20,6 +20,7 @@ import { useAuthUser } from '@/lib/auth-wrapper'
 import { VisualMetricCard } from '@/components/visual-metric-card'
 import { RadialGauge } from '@/components/charts/radial-gauge'
 import { MAEMFEScatter } from '@/components/charts/mae-mfe-scatter'
+import { COMPREHENSIVE_SAMPLE_TRADES } from '@/lib/comprehensive-sample-trades'
 
 export default function AnalyticsPage() {
   const router = useRouter()
@@ -33,7 +34,16 @@ export default function AnalyticsPage() {
 
   // Fetch trades when component mounts
   useEffect(() => {
-    fetchTrades()
+    // Check if demo mode
+    const isDemoMode = !user || user.id === 'demo-user'
+    
+    if (isDemoMode) {
+      // Load comprehensive sample trades for demo mode
+      setTrades(COMPREHENSIVE_SAMPLE_TRADES)
+      setLoading(false)
+    } else {
+      fetchTrades()
+    }
   }, [])
 
   const fetchTrades = async () => {
