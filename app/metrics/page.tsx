@@ -12,9 +12,12 @@ import { METRIC_DEFINITIONS, METRIC_THRESHOLDS } from '@/lib/constants/metrics'
 import { MetricResult, MetricStatus } from '@/lib/types/metrics'
 import * as metrics from '@/lib/tradingMetrics'
 import { useSubscription } from '@/lib/subscription'
+import { COMPREHENSIVE_SAMPLE_TRADES } from '@/lib/comprehensive-sample-trades'
+import { useAuthUser } from '@/lib/auth-wrapper'
 
 export default function MetricsPage() {
   const router = useRouter()
+  const { user } = useAuthUser()
   const { isPro, subscribe } = useSubscription()
   const [loading, setLoading] = useState(true)
   const [trades, setTrades] = useState<any[]>([])
@@ -22,7 +25,16 @@ export default function MetricsPage() {
 
   // Fetch trades when component mounts
   useEffect(() => {
-    fetchTrades()
+    // Check if demo mode
+    const isDemoMode = !user || user.id === 'demo-user'
+    
+    if (isDemoMode) {
+      // Load comprehensive sample trades for demo mode
+      setTrades(COMPREHENSIVE_SAMPLE_TRADES)
+      setLoading(false)
+    } else {
+      fetchTrades()
+    }
   }, [])
 
   const fetchTrades = async () => {

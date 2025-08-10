@@ -20,8 +20,11 @@ import { formatCurrency } from '@/lib/calculations'
 import { useSettings } from '@/lib/settings'
 import { safeToFixed } from '@/lib/utils/safe-format'
 import type { Trade } from '@/lib/db-memory'
+import { COMPREHENSIVE_SAMPLE_TRADES } from '@/lib/comprehensive-sample-trades'
+import { useAuthUser } from '@/lib/auth-wrapper'
 
 export default function TimeAnalysisPage() {
+  const { user } = useAuthUser()
   const { settings } = useSettings()
   const [trades, setTrades] = useState<Trade[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -34,8 +37,44 @@ export default function TimeAnalysisPage() {
   })
 
   useEffect(() => {
-    fetchTrades()
+    // Check if demo mode
+    const isDemoMode = !user || user.id === 'demo-user'
+    
+    if (isDemoMode) {
+      // Load comprehensive sample trades for demo mode
+      const sampleTrades = COMPREHENSIVE_SAMPLE_TRADES as Trade[]
+      setTrades(sampleTrades)
+      calculateStats(sampleTrades)
+      setIsLoading(false)
+    } else {
+      fetchTrades()
+    }
   }, [])
+
+  const calculateStats = (trades: Trade[]) => {
+    if (trades.length > 0) {
+      const holdTimeStats = TimeAnalysisService.getHoldTimeStats(trades)
+      const hourlyStats = TimeAnalysisService.getHourlyStats(trades)
+      const dayStats = TimeAnalysisService.getDayOfWeekStats(trades)
+      const frequencyStats = TimeAnalysisService.getTradeFrequency(trades)
+      
+      const bestHour = hourlyStats.length > 0 ? hourlyStats.reduce((best, curr) => 
+        curr.totalPnL > best.totalPnL ? curr : best
+      , hourlyStats[0]) : { hour: 0, totalPnL: 0 }
+      
+      const bestDay = dayStats.length > 0 ? dayStats.reduce((best, curr) => 
+        curr.totalPnL > best.totalPnL ? curr : best
+      , dayStats[0]) : { dayName: 'Monday', totalPnL: 0 }
+      
+      setQuickStats({
+        avgHoldTime: holdTimeStats?.avgHoldTime || 0,
+        bestHour: bestHour?.hour || 0,
+        bestDay: bestDay?.dayName || 'Monday',
+        totalTradingDays: frequencyStats?.tradingDays || 0,
+        avgTradesPerDay: frequencyStats?.avgTradesPerDay || 0
+      })
+    }
+  }
 
   const fetchTrades = async () => {
     try {
@@ -47,30 +86,7 @@ export default function TimeAnalysisPage() {
       const data = await res.json()
       const trades = data.trades || []
       setTrades(trades)
-      
-      // Calculate quick stats
-      if (trades.length > 0) {
-        const holdTimeStats = TimeAnalysisService.getHoldTimeStats(trades)
-        const hourlyStats = TimeAnalysisService.getHourlyStats(trades)
-        const dayStats = TimeAnalysisService.getDayOfWeekStats(trades)
-        const frequencyStats = TimeAnalysisService.getTradeFrequency(trades)
-        
-        const bestHour = hourlyStats.length > 0 ? hourlyStats.reduce((best, curr) => 
-          curr.totalPnL > best.totalPnL ? curr : best
-        , hourlyStats[0]) : { hour: 0, totalPnL: 0 }
-        
-        const bestDay = dayStats.length > 0 ? dayStats.reduce((best, curr) => 
-          curr.totalPnL > best.totalPnL ? curr : best
-        , dayStats[0]) : { dayName: 'Monday', totalPnL: 0 }
-        
-        setQuickStats({
-          avgHoldTime: holdTimeStats?.avgHoldTime || 0,
-          bestHour: bestHour?.hour || 0,
-          bestDay: bestDay?.dayName || 'Monday',
-          totalTradingDays: frequencyStats?.tradingDays || 0,
-          avgTradesPerDay: frequencyStats?.avgTradesPerDay || 0
-        })
-      }
+      calculateStats(trades)
     } catch (error) {
       console.error('Failed to fetch trades:', error)
     } finally {

@@ -18,15 +18,27 @@ import {
   Zap
 } from 'lucide-react'
 import type { Trade } from '@/lib/db-memory'
+import { COMPREHENSIVE_SAMPLE_TRADES } from '@/lib/comprehensive-sample-trades'
+import { useAuthUser } from '@/lib/auth-wrapper'
 
 export default function BehavioralPage() {
+  const { user } = useAuthUser()
   const [trades, setTrades] = useState<Trade[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [metrics, setMetrics] = useState<BehavioralMetrics | null>(null)
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d')
 
   useEffect(() => {
-    fetchTrades()
+    // Check if demo mode
+    const isDemoMode = !user || user.id === 'demo-user'
+    
+    if (isDemoMode) {
+      // Load comprehensive sample trades for demo mode
+      setTrades(COMPREHENSIVE_SAMPLE_TRADES as Trade[])
+      setIsLoading(false)
+    } else {
+      fetchTrades()
+    }
   }, [])
 
   useEffect(() => {
