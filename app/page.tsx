@@ -12,12 +12,45 @@ import {
   CheckCircle,
   ArrowRight,
   Star,
-  Trophy
+  Trophy,
+  Gift
 } from 'lucide-react'
+import { useAffiliate } from '@/components/affiliate-provider'
+import { useEffect, useState } from 'react'
 
 export default function Home() {
+  const { affiliateCode } = useAffiliate()
+  const [showReferralBanner, setShowReferralBanner] = useState(false)
+
+  useEffect(() => {
+    // Show referral banner if user came through an affiliate
+    if (affiliateCode) {
+      setShowReferralBanner(true)
+    }
+  }, [affiliateCode])
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+      {/* Referral Banner */}
+      {showReferralBanner && affiliateCode && (
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-6">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Gift className="h-5 w-5" />
+              <span className="font-medium">
+                Special offer from <strong>{affiliateCode}</strong>! Get 20% off your first month.
+              </span>
+            </div>
+            <button 
+              onClick={() => setShowReferralBanner(false)}
+              className="text-white/80 hover:text-white"
+              aria-label="Close banner"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Navigation */}
       <nav className="flex justify-between items-center p-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-3">

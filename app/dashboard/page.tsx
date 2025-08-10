@@ -36,7 +36,7 @@ import { safeToFixed } from '@/lib/utils/safe-format'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { Trade } from '@/lib/db-memory'
 import { SAMPLE_TRADES } from '@/lib/sample-trades'
-import { useAuth } from '@/lib/auth-wrapper'
+import { useAuthUser } from '@/lib/auth-wrapper'
 
 interface DashboardStats {
   totalTrades: number
@@ -58,7 +58,7 @@ interface DashboardStats {
 export default function VisualDashboardPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
+  const { user } = useAuthUser()
   const { settings } = useSettings()
   const [trades, setTrades] = useState<Trade[]>([])
   const [stats, setStats] = useState<DashboardStats>({

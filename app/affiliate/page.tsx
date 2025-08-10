@@ -348,9 +348,13 @@ export default function AffiliatePage() {
                     <CardDescription>Tools and resources</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-between">
-                      Generate Custom Link
-                      <ChevronRight className="h-4 w-4" />
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-between"
+                      onClick={() => window.open('/affiliate/stats?code=VOLT50', '_blank')}
+                    >
+                      View Your Tracking Links
+                      <ExternalLink className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" className="w-full justify-between">
                       View Analytics Dashboard

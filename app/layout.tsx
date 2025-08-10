@@ -5,6 +5,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { SubscriptionProvider } from '@/lib/subscription'
 import { ThemeProvider } from '@/lib/theme-provider'
 import { AuthProvider } from '@/lib/auth-wrapper'
+import { AffiliateProvider } from '@/components/affiliate-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,9 +33,11 @@ export default function RootLayout({
           <body className={inter.className}>
             <AuthProvider>
               <ThemeProvider>
-                <SubscriptionProvider>
-                  {children}
-                </SubscriptionProvider>
+                <AffiliateProvider>
+                  <SubscriptionProvider>
+                    {children}
+                  </SubscriptionProvider>
+                </AffiliateProvider>
               </ThemeProvider>
             </AuthProvider>
           </body>
@@ -49,9 +52,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <ThemeProvider>
-            <SubscriptionProvider>
-              {children}
-            </SubscriptionProvider>
+            <AffiliateProvider>
+              <SubscriptionProvider>
+                {children}
+              </SubscriptionProvider>
+            </AffiliateProvider>
           </ThemeProvider>
         </AuthProvider>
       </body>

@@ -605,6 +605,33 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      case 'trackAffiliate': {
+        // Track affiliate referral on user signup
+        try {
+          const { affiliateCode, userId } = body
+          
+          if (!affiliateCode || !userId) {
+            return NextResponse.json({ success: false })
+          }
+          
+          // Update user with referral code
+          await prisma.user.update({
+            where: { id: userId },
+            data: { referredBy: affiliateCode }
+          })
+          
+          console.log(`User ${userId} referred by affiliate: ${affiliateCode}`)
+          
+          return NextResponse.json({ 
+            success: true, 
+            message: 'Affiliate referral tracked' 
+          })
+        } catch (error) {
+          console.error('trackAffiliate error:', error)
+          return NextResponse.json({ success: false })
+        }
+      }
+      
       default:
         return new NextResponse('Unknown action', { status: 400 })
     }
