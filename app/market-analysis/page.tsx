@@ -13,7 +13,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { MarketAnalysisService } from '@/lib/services/market-analysis-service'
-import { findUserByClerkId, findTradesByUserId, type Trade } from '@/lib/db-memory'
+import { type Trade } from '@/lib/db-memory'
+import { COMPREHENSIVE_SAMPLE_TRADES } from '@/lib/comprehensive-sample-trades'
+import { useAuthUser } from '@/lib/auth-wrapper'
 import { motion } from 'framer-motion'
 import { 
   TrendingUp,
@@ -38,55 +40,75 @@ const TIME_PERIODS = [
 ] as const
 
 export default function MarketAnalysisPage() {
+  const { user } = useAuthUser()
   const [loading, setLoading] = useState(true)
   const [trades, setTrades] = useState<Trade[]>([])
   const [timePeriod, setTimePeriod] = useState<string>('30d')
   const [activeTab, setActiveTab] = useState('overview')
 
   useEffect(() => {
-    fetchData()
+    // Check if demo mode
+    const isDemoMode = !user || user.id === 'demo-user'
+    
+    if (isDemoMode) {
+      // Load comprehensive sample trades for demo mode
+      filterTradesByPeriod(COMPREHENSIVE_SAMPLE_TRADES as Trade[])
+    } else {
+      fetchData()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timePeriod])
+  }, [timePeriod, user])
+
+  const filterTradesByPeriod = (allTrades: Trade[]) => {
+    let filteredTrades = [...allTrades]
+    
+    // Filter by time period
+    if (timePeriod !== 'all') {
+      const now = new Date()
+      let startDate: Date
+      
+      switch (timePeriod) {
+        case '7d':
+          startDate = subDays(now, 7)
+          break
+        case '30d':
+          startDate = subDays(now, 30)
+          break
+        case '90d':
+          startDate = subDays(now, 90)
+          break
+        case '1y':
+          startDate = subYears(now, 1)
+          break
+        default:
+          startDate = new Date(0)
+      }
+      
+      filteredTrades = filteredTrades.filter(trade => 
+        isAfter(new Date(trade.entryTime || trade.createdAt), startDate)
+      )
+    }
+
+    setTrades(filteredTrades)
+    setLoading(false)
+  }
 
   const fetchData = async () => {
     try {
       setLoading(true)
-      const user = await findUserByClerkId('demo-user')
-      if (!user) return
-
-      let allTrades = await findTradesByUserId(user.id)
+      const response = await fetch('/api/route', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getTrades' })
+      })
       
-      // Filter by time period
-      if (timePeriod !== 'all') {
-        const now = new Date()
-        let startDate: Date
-        
-        switch (timePeriod) {
-          case '7d':
-            startDate = subDays(now, 7)
-            break
-          case '30d':
-            startDate = subDays(now, 30)
-            break
-          case '90d':
-            startDate = subDays(now, 90)
-            break
-          case '1y':
-            startDate = subYears(now, 1)
-            break
-          default:
-            startDate = new Date(0)
-        }
-        
-        allTrades = allTrades.filter(trade => 
-          isAfter(new Date(trade.entryTime || trade.createdAt), startDate)
-        )
-      }
-
-      setTrades(allTrades)
+      if (!response.ok) throw new Error('Failed to fetch trades')
+      
+      const data = await response.json()
+      filterTradesByPeriod(data.trades || [])
     } catch (error) {
       console.error('Failed to fetch market analysis data:', error)
-    } finally {
+      setTrades([])
       setLoading(false)
     }
   }
