@@ -15,9 +15,12 @@ import {
 import { calculateMarketPnL } from '@/lib/market-knowledge'
 import { formatCurrency } from '@/lib/calculations'
 import { useSettings } from '@/lib/settings'
+import { COMPREHENSIVE_SAMPLE_TRADES } from '@/lib/comprehensive-sample-trades'
+import { useAuthUser } from '@/lib/auth-wrapper'
 
 export default function PnLReportPage() {
   const router = useRouter()
+  const { user } = useAuthUser()
   const { settings } = useSettings()
   const [loading, setLoading] = useState(true)
   const [trades, setTrades] = useState<any[]>([])
@@ -25,8 +28,17 @@ export default function PnLReportPage() {
   const [selectedMarket, setSelectedMarket] = useState<string>('all')
 
   useEffect(() => {
-    fetchTrades()
-  }, [])
+    // Check if demo mode
+    const isDemoMode = !user || user.id === 'demo-user'
+    
+    if (isDemoMode) {
+      // Load comprehensive sample trades for demo mode
+      setTrades(COMPREHENSIVE_SAMPLE_TRADES)
+      setLoading(false)
+    } else {
+      fetchTrades()
+    }
+  }, [user])
 
   const fetchTrades = async () => {
     try {

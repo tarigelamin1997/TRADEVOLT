@@ -14,6 +14,8 @@ import {
   Clock,
 } from "lucide-react"
 import { calculateMarketPnL } from '@/lib/market-knowledge'
+import { COMPREHENSIVE_SAMPLE_TRADES } from '@/lib/comprehensive-sample-trades'
+import { useAuthUser } from '@/lib/auth-wrapper'
 
 interface Trade {
   id: string
@@ -31,13 +33,23 @@ interface Trade {
 
 export default function MarketAnalysisPage() {
   const router = useRouter()
+  const { user } = useAuthUser()
   const [trades, setTrades] = useState<Trade[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedMarket, setSelectedMarket] = useState<string>('all')
 
   useEffect(() => {
-    fetchTrades()
-  }, [])
+    // Check if demo mode
+    const isDemoMode = !user || user.id === 'demo-user'
+    
+    if (isDemoMode) {
+      // Load comprehensive sample trades for demo mode
+      setTrades(COMPREHENSIVE_SAMPLE_TRADES as Trade[])
+      setIsLoading(false)
+    } else {
+      fetchTrades()
+    }
+  }, [user])
 
   const fetchTrades = async () => {
     try {
