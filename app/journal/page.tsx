@@ -901,6 +901,7 @@ export default function UnifiedJournalPage() {
                     {(() => {
                       const cells = []
                       let weekPnL = 0
+                      let weekTradeCount = 0
                       let currentWeekDay = startingDayOfWeek
                       
                       for (let i = 0; i < daysInMonth; i++) {
@@ -911,6 +912,7 @@ export default function UnifiedJournalPage() {
                         const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString()
                         
                         weekPnL += dayPnL
+                        weekTradeCount += dayTrades.length
                         currentWeekDay++
                         
                         cells.push(
@@ -941,7 +943,7 @@ export default function UnifiedJournalPage() {
                         )
                         
                         // Add weekly Net P&L cell at the end of each week
-                        if (currentWeekDay === 7 || i === daysInMonth - 1) {
+                        if (currentWeekDay === 7) {
                           cells.push(
                             <div 
                               key={`week-${i}`}
@@ -953,8 +955,8 @@ export default function UnifiedJournalPage() {
                                 }
                               `}
                             >
-                              <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                Week Total
+                              <div className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                                {weekTradeCount} trade{weekTradeCount !== 1 ? 's' : ''}
                               </div>
                               <div className={`text-sm font-bold ${
                                 weekPnL >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
@@ -965,22 +967,46 @@ export default function UnifiedJournalPage() {
                           )
                           
                           // Reset for next week
-                          if (currentWeekDay === 7) {
-                            weekPnL = 0
-                            currentWeekDay = 0
-                          }
+                          weekPnL = 0
+                          weekTradeCount = 0
+                          currentWeekDay = 0
                         }
                       }
                       
                       // Fill remaining cells if last week is incomplete
-                      while (currentWeekDay > 0 && currentWeekDay < 7) {
+                      if (currentWeekDay > 0) {
+                        while (currentWeekDay < 7) {
+                          cells.push(
+                            <div 
+                              key={`empty-end-${currentWeekDay}`} 
+                              className="bg-white dark:bg-gray-900 p-2 min-h-[80px]"
+                            />
+                          )
+                          currentWeekDay++
+                        }
+                        
+                        // Add the final week's Net P&L in the correct column
                         cells.push(
                           <div 
-                            key={`empty-end-${currentWeekDay}`} 
-                            className="bg-white dark:bg-gray-900 p-2 min-h-[80px]"
-                          />
+                            key={`week-final`}
+                            className={`
+                              bg-gradient-to-r p-2 min-h-[80px] flex flex-col justify-center items-center
+                              ${weekPnL >= 0 
+                                ? 'from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/30' 
+                                : 'from-red-50 to-red-100 dark:from-red-950/20 dark:to-red-900/30'
+                              }
+                            `}
+                          >
+                            <div className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                              {weekTradeCount} trade{weekTradeCount !== 1 ? 's' : ''}
+                            </div>
+                            <div className={`text-sm font-bold ${
+                              weekPnL >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
+                            }`}>
+                              {formatCurrency(weekPnL, settings)}
+                            </div>
+                          </div>
                         )
-                        currentWeekDay++
                       }
                       
                       return cells
