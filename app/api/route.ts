@@ -102,17 +102,50 @@ export async function POST(request: NextRequest) {
     switch (body.action) {
       case 'getTrades': {
         try {
-          // Get or create user
+          const userIdentifier = clerkId || 'demo-user'
+          const isDemo = !clerkId || userIdentifier === 'demo-user'
+          
+          console.log('Getting trades for user:', userIdentifier, 'Demo mode:', isDemo)
+          
+          // If demo mode, use memory database
+          if (isDemo) {
+            try {
+              const memoryDb = await import('@/lib/db-memory')
+              const result = await memoryDb.getUserWithTrades(userIdentifier)
+              
+              console.log(`Found ${result.trades.length} trades in memory`)
+              
+              return NextResponse.json({ 
+                trades: result.trades,
+                user: result.user ? {
+                  id: result.user.id,
+                  email: result.user.email,
+                  isPaid: false
+                } : null,
+                source: 'memory'
+              })
+            } catch (memError) {
+              console.error('Memory DB error:', memError)
+              // Return empty trades for demo
+              return NextResponse.json({ 
+                trades: [],
+                user: null,
+                source: 'memory'
+              })
+            }
+          }
+          
+          // Get or create user for authenticated users
           let user = await prisma.user.findUnique({
-            where: { clerkId },
+            where: { clerkId: userIdentifier },
             include: { trades: true }
           })
           
           if (!user) {
             user = await prisma.user.create({
               data: {
-                clerkId,
-                email: body.email || `${clerkId}@placeholder.com`,
+                clerkId: userIdentifier,
+                email: body.email || `${userIdentifier}@placeholder.com`,
                 isPaid: false
               },
               include: { trades: true }
@@ -139,20 +172,67 @@ export async function POST(request: NextRequest) {
       
       case 'addTrade': {
         try {
-          console.log('Adding trade for clerkId:', clerkId)
-          console.log('Trade data:', body.trade)
+          // Handle both formats: body.trade (from trade form) and direct trade data (from sample loader)
+          const tradeData = body.trade || body
           
-          // Get or create user
+          // For demo/sample data, use a demo user if no clerkId
+          const userIdentifier = clerkId || 'demo-user'
+          const isDemo = !clerkId || userIdentifier === 'demo-user'
+          
+          console.log('Adding trade for user:', userIdentifier, 'Demo mode:', isDemo)
+          console.log('Trade data:', tradeData)
+          
+          // If demo mode or no clerkId, use memory database
+          if (isDemo) {
+            try {
+              const memoryDb = await import('@/lib/db-memory')
+              
+              // Ensure demo user exists
+              let user = await memoryDb.findUserByClerkId(userIdentifier)
+              if (!user) {
+                user = await memoryDb.createUser({
+                  clerkId: userIdentifier,
+                  email: 'demo@tradevolt.com'
+                })
+              }
+              
+              // Create trade in memory
+              const trade = await memoryDb.createTrade({
+                userId: user.id,
+                symbol: tradeData.symbol,
+                type: tradeData.type,
+                entry: tradeData.entry,
+                exit: tradeData.exit || null,
+                quantity: tradeData.quantity,
+                notes: tradeData.notes || null,
+                marketType: tradeData.marketType || null,
+                entryTime: tradeData.entryTime || null,
+                exitTime: tradeData.exitTime || null,
+                createdAt: tradeData.createdAt || new Date().toISOString()
+              })
+              
+              console.log('Trade created in memory for demo user:', trade.id)
+              return NextResponse.json({ trade, source: 'memory' })
+            } catch (memError) {
+              console.error('Memory DB error:', memError)
+              return NextResponse.json(
+                { error: 'Failed to add demo trade' }, 
+                { status: 500 }
+              )
+            }
+          }
+          
+          // Get or create user in Prisma for authenticated users
           let user = await prisma.user.findUnique({
-            where: { clerkId }
+            where: { clerkId: userIdentifier }
           })
           
           if (!user) {
             console.log('Creating new user')
             user = await prisma.user.create({
               data: {
-                clerkId,
-                email: body.email || `${clerkId}@placeholder.com`,
+                clerkId: userIdentifier,
+                email: body.email || `${userIdentifier}@placeholder.com`,
                 isPaid: false
               }
             })
@@ -163,15 +243,16 @@ export async function POST(request: NextRequest) {
           const trade = await prisma.trade.create({
             data: {
               userId: user.id,
-              symbol: body.trade.symbol,
-              type: body.trade.type,
-              entry: body.trade.entry,
-              exit: body.trade.exit || null,
-              quantity: body.trade.quantity,
-              notes: body.trade.notes || null,
-              marketType: body.trade.marketType || null,
-              entryTime: body.trade.entryTime ? new Date(body.trade.entryTime) : null,
-              exitTime: body.trade.exitTime ? new Date(body.trade.exitTime) : null
+              symbol: tradeData.symbol,
+              type: tradeData.type,
+              entry: tradeData.entry,
+              exit: tradeData.exit || null,
+              quantity: tradeData.quantity,
+              notes: tradeData.notes || null,
+              marketType: tradeData.marketType || null,
+              entryTime: tradeData.entryTime ? new Date(tradeData.entryTime) : null,
+              exitTime: tradeData.exitTime ? new Date(tradeData.exitTime) : null,
+              createdAt: tradeData.createdAt ? new Date(tradeData.createdAt) : new Date()
             }
           })
           
