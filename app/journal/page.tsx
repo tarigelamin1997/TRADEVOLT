@@ -862,12 +862,14 @@ export default function UnifiedJournalPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-                    {/* Day headers */}
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div className="grid grid-cols-8 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
+                    {/* Day headers with Net P&L column */}
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Net P&L'].map(day => (
                       <div 
                         key={day} 
-                        className="bg-gray-50 dark:bg-gray-800 p-2 text-center text-sm font-medium"
+                        className={`bg-gray-50 dark:bg-gray-800 p-2 text-center text-sm font-medium ${
+                          day === 'Net P&L' ? 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300' : ''
+                        }`}
                       >
                         {day}
                       </div>
@@ -881,41 +883,108 @@ export default function UnifiedJournalPage() {
                       />
                     ))}
                     
-                    {/* Calendar days */}
-                    {Array.from({ length: daysInMonth }, (_, i) => {
-                      const date = new Date(year, month, i + 1)
-                      const dayPnL = getPnLForDate(date)
-                      const dayTrades = getTradesForDate(date)
-                      const isToday = date.toDateString() === today.toDateString()
-                      const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString()
+                    {/* Add Net P&L cell for first week if it has empty days */}
+                    {startingDayOfWeek > 0 && (() => {
+                      let firstWeekPnL = 0
+                      let firstWeekDaysCount = 7 - startingDayOfWeek
                       
-                      return (
-                        <button
-                          key={i + 1}
-                          onClick={() => setSelectedDate(date)}
-                          className={`
-                            bg-white dark:bg-gray-900 p-2 min-h-[80px] text-left
-                            hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors
-                            ${isToday ? 'ring-2 ring-blue-500' : ''}
-                            ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
-                          `}
-                        >
-                          <div className="font-medium text-sm mb-1">{i + 1}</div>
-                          {dayTrades.length > 0 && (
-                            <>
-                              <div className="text-xs text-gray-500 dark:text-gray-400">
-                                {dayTrades.length} trade{dayTrades.length !== 1 ? 's' : ''}
+                      // Calculate P&L for the first week
+                      for (let i = 0; i < firstWeekDaysCount && i < daysInMonth; i++) {
+                        const date = new Date(year, month, i + 1)
+                        firstWeekPnL += getPnLForDate(date)
+                      }
+                      
+                      return null // We'll handle this in the main calendar loop
+                    })()}
+                    
+                    {/* Calendar days with weekly Net P&L */}
+                    {(() => {
+                      const cells = []
+                      let weekPnL = 0
+                      let currentWeekDay = startingDayOfWeek
+                      
+                      for (let i = 0; i < daysInMonth; i++) {
+                        const date = new Date(year, month, i + 1)
+                        const dayPnL = getPnLForDate(date)
+                        const dayTrades = getTradesForDate(date)
+                        const isToday = date.toDateString() === today.toDateString()
+                        const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString()
+                        
+                        weekPnL += dayPnL
+                        currentWeekDay++
+                        
+                        cells.push(
+                          <button
+                            key={i + 1}
+                            onClick={() => setSelectedDate(date)}
+                            className={`
+                              bg-white dark:bg-gray-900 p-2 min-h-[80px] text-left
+                              hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors
+                              ${isToday ? 'ring-2 ring-blue-500' : ''}
+                              ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                            `}
+                          >
+                            <div className="font-medium text-sm mb-1">{i + 1}</div>
+                            {dayTrades.length > 0 && (
+                              <>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  {dayTrades.length} trade{dayTrades.length !== 1 ? 's' : ''}
+                                </div>
+                                <div className={`text-xs font-bold ${
+                                  dayPnL >= 0 ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                  {formatCurrency(dayPnL, settings)}
+                                </div>
+                              </>
+                            )}
+                          </button>
+                        )
+                        
+                        // Add weekly Net P&L cell at the end of each week
+                        if (currentWeekDay === 7 || i === daysInMonth - 1) {
+                          cells.push(
+                            <div 
+                              key={`week-${i}`}
+                              className={`
+                                bg-gradient-to-r p-2 min-h-[80px] flex flex-col justify-center items-center
+                                ${weekPnL >= 0 
+                                  ? 'from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/30' 
+                                  : 'from-red-50 to-red-100 dark:from-red-950/20 dark:to-red-900/30'
+                                }
+                              `}
+                            >
+                              <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                Week Total
                               </div>
-                              <div className={`text-xs font-bold ${
-                                dayPnL >= 0 ? 'text-green-600' : 'text-red-600'
+                              <div className={`text-sm font-bold ${
+                                weekPnL >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
                               }`}>
-                                {formatCurrency(dayPnL, settings)}
+                                {formatCurrency(weekPnL, settings)}
                               </div>
-                            </>
-                          )}
-                        </button>
-                      )
-                    })}
+                            </div>
+                          )
+                          
+                          // Reset for next week
+                          if (currentWeekDay === 7) {
+                            weekPnL = 0
+                            currentWeekDay = 0
+                          }
+                        }
+                      }
+                      
+                      // Fill remaining cells if last week is incomplete
+                      while (currentWeekDay > 0 && currentWeekDay < 7) {
+                        cells.push(
+                          <div 
+                            key={`empty-end-${currentWeekDay}`} 
+                            className="bg-white dark:bg-gray-900 p-2 min-h-[80px]"
+                          />
+                        )
+                        currentWeekDay++
+                      }
+                      
+                      return cells
+                    })()}
                   </div>
                   
                   {/* Selected date trades */}
