@@ -142,7 +142,7 @@ export default function LoadSampleDataPage() {
 
             {/* What's Included */}
             <div className="border rounded-lg p-4 space-y-3">
-              <h3 className="font-semibold">What's Included:</h3>
+              <h3 className="font-semibold">What&apos;s Included:</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
