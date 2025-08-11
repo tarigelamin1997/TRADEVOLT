@@ -231,7 +231,7 @@ export default function HelpPage() {
                   <CardContent className="space-y-4">
                     {filteredFAQ.length === 0 ? (
                       <p className="text-muted-foreground text-center py-8">
-                        No results found for "{searchQuery}"
+                        No results found for &quot;{searchQuery}&quot;
                       </p>
                     ) : (
                       filteredFAQ.map((item, index) => (

@@ -67,6 +67,7 @@ export default function FeedbackAdminPage() {
 
   useEffect(() => {
     fetchFeedback()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType, filterStatus, filterSeverity])
 
   const fetchFeedback = async () => {
