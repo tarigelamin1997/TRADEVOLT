@@ -72,7 +72,8 @@ export function CSVImportWizard({ isOpen, onClose, onImport }: CSVImportWizardPr
   const autoDetectMappings = useCallback((headers: string[]) => {
     const mappings: Record<string, string> = {}
     
-    [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS].forEach(({ field, patterns }) => {
+    const allFields = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS]
+    allFields.forEach(({ field, patterns }) => {
       for (const header of headers) {
         const normalizedHeader = header.toLowerCase().replace(/[^a-z0-9]/g, '')
         for (const pattern of patterns) {
@@ -132,6 +133,7 @@ export function CSVImportWizard({ isOpen, onClose, onImport }: CSVImportWizardPr
       setFile(files[0])
       parseCSV(files[0])
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Process and import trades
@@ -358,7 +360,7 @@ export function CSVImportWizard({ isOpen, onClose, onImport }: CSVImportWizardPr
                 <CardHeader>
                   <CardTitle>Column Mapping</CardTitle>
                   <CardDescription>
-                    Map your CSV columns to TradeVolt fields. We've auto-detected some mappings.
+                    Map your CSV columns to TradeVolt fields. We&apos;ve auto-detected some mappings.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">

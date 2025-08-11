@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { SidebarLayout } from '@/components/sidebar-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -458,6 +459,7 @@ export default function FeedbackAdminPage() {
                     <div>
                       <Label>Screenshot</Label>
                       <div className="mt-2">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
                           src={selectedFeedback.screenshotUrl} 
                           alt="User screenshot" 
