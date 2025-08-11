@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+// RadioGroup will be implemented with native HTML
 import { Card, CardContent } from '@/components/ui/card'
 import { Download, FileText, FileSpreadsheet, Calendar, Filter } from 'lucide-react'
 import { quickToast } from '@/lib/toast-utils'
@@ -274,33 +274,47 @@ export function ExportTrades({ trades, isOpen, onClose }: ExportTradesProps) {
           {/* Format Selection */}
           <div>
             <Label>Export Format</Label>
-            <RadioGroup 
-              value={exportFormat} 
-              onValueChange={(value: any) => setExportFormat(value)}
-              className="mt-2"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="pdf" id="pdf" />
-                <Label htmlFor="pdf" className="flex items-center cursor-pointer">
+            <div className="mt-2 space-y-2">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="pdf"
+                  checked={exportFormat === 'pdf'}
+                  onChange={(e) => setExportFormat(e.target.value as any)}
+                  className="rounded-full"
+                />
+                <span className="flex items-center">
                   <FileText className="h-4 w-4 mr-2 text-red-600" />
                   PDF Report (with statistics)
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="csv" id="csv" />
-                <Label htmlFor="csv" className="flex items-center cursor-pointer">
+                </span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="csv"
+                  checked={exportFormat === 'csv'}
+                  onChange={(e) => setExportFormat(e.target.value as any)}
+                  className="rounded-full"
+                />
+                <span className="flex items-center">
                   <FileSpreadsheet className="h-4 w-4 mr-2 text-green-600" />
                   CSV (Excel compatible)
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="json" id="json" />
-                <Label htmlFor="json" className="flex items-center cursor-pointer">
+                </span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="json"
+                  checked={exportFormat === 'json'}
+                  onChange={(e) => setExportFormat(e.target.value as any)}
+                  className="rounded-full"
+                />
+                <span className="flex items-center">
                   <FileText className="h-4 w-4 mr-2 text-blue-600" />
                   JSON (for developers)
-                </Label>
-              </div>
-            </RadioGroup>
+                </span>
+              </label>
+            </div>
           </div>
 
           {/* Date Range */}

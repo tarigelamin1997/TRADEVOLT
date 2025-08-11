@@ -157,6 +157,7 @@ export const showToast = {
 
 // Quick actions
 export const quickToast = {
+  // Success messages
   saved: () => showToast.success('Changes saved successfully'),
   deleted: () => showToast.success('Item deleted successfully'),
   copied: () => showToast.success('Copied to clipboard'),
@@ -165,4 +166,16 @@ export const quickToast = {
   importSuccess: (count: number) => showToast.success(`Successfully imported ${count} trades`),
   exportSuccess: () => showToast.success('Export completed successfully'),
   settingsUpdated: () => showToast.success('Settings updated successfully'),
+  
+  // Error messages
+  error: (message: string) => showToast.error(message),
+  
+  // Warning messages
+  warning: (message: string) => showToast.warning(message),
+  
+  // Info messages
+  info: (message: string) => showToast.info(message),
+  
+  // Generic success
+  success: (message: string) => showToast.success(message),
 }

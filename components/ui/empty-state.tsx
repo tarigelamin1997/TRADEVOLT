@@ -45,7 +45,7 @@ export function EmptyState({
         {action && (
           <Button
             onClick={action.onClick}
-            variant={action.variant || 'default'}
+            variant={(action.variant === 'secondary' ? 'outline' : action.variant) || 'default'}
             size="sm"
           >
             {action.label}
