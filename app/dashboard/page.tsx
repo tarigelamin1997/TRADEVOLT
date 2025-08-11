@@ -1,8 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { SidebarLayout } from '@/components/sidebar-layout'
+import { SidebarLayout, SidebarTrigger } from '@/components/sidebar-layout'
 import { Button } from '@/components/ui/button'
+import { LoadingSpinner, CardSkeleton } from '@/components/ui/loading-spinner'
+import { OnboardingWizard } from '@/components/onboarding-wizard'
+import { QuickTour } from '@/components/quick-tour'
+import { QuickAddTrade } from '@/components/quick-add-trade'
 import { TradeFormEnhanced } from '@/components/trade-form-enhanced'
 import { RadialGauge } from '@/components/charts/radial-gauge'
 import { EquityCurveChart } from '@/components/charts/equity-curve'
@@ -209,9 +213,25 @@ export default function VisualDashboardPage() {
   if (isLoading) {
     return (
       <SidebarLayout>
-        <div className="flex flex-col items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          <p className="mt-4 text-muted-foreground">Loading your trades...</p>
+        <div className="min-h-screen">
+          {/* Mobile Header */}
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b lg:hidden">
+            <div className="flex items-center gap-4 p-4">
+              <SidebarTrigger />
+              <h1 className="text-lg font-semibold">Dashboard</h1>
+            </div>
+          </div>
+          
+          <div className="p-6 space-y-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {[...Array(4)].map((_, i) => (
+                <CardSkeleton key={i} />
+              ))}
+            </div>
+            <div className="flex items-center justify-center py-12">
+              <LoadingSpinner size="lg" text="Loading your trading data..." />
+            </div>
+          </div>
         </div>
       </SidebarLayout>
     )
@@ -220,6 +240,23 @@ export default function VisualDashboardPage() {
   return (
     <SidebarLayout>
       <div className="min-h-screen overflow-y-auto">
+        {/* Onboarding Wizard for new users */}
+        <OnboardingWizard />
+        
+        {/* Quick Tour for feature discovery */}
+        <QuickTour />
+        
+        {/* Quick Add Trade Button */}
+        <QuickAddTrade onAdd={handleTradeAdded} />
+        
+        {/* Mobile Header */}
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b lg:hidden">
+          <div className="flex items-center gap-4 p-4">
+            <SidebarTrigger />
+            <h1 className="text-lg font-semibold">Dashboard</h1>
+          </div>
+        </div>
+        
         <div className="space-y-6 p-6">
         {/* Demo Mode Banner */}
         {isDemoMode && (
