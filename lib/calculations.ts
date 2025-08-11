@@ -36,8 +36,23 @@ export function calculatePnLWithCommission(
   return basePnL - totalCommission
 }
 
+// Simple currency formatter (no settings required)
+export function formatCurrencySimple(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount)
+}
+
 // Format currency based on user settings
-export function formatCurrency(amount: number, settings: UserSettings): string {
+export function formatCurrency(amount: number, settings?: UserSettings): string {
+  // If no settings provided, use simple formatter
+  if (!settings) {
+    return formatCurrencySimple(amount)
+  }
+  
   const symbol = getCurrencySymbol(settings.trading.accountCurrency)
   const formatted = safeToFixed(amount, settings.display.numberFormat.decimalPlaces)
   
