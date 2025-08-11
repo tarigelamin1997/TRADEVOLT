@@ -129,7 +129,7 @@ export function FeedbackWidget() {
       title,
       description,
       severity: feedbackType === 'bug' ? severity : undefined,
-      screenshot,
+      screenshot: screenshot || undefined,
       systemInfo: getSystemInfo(),
       appContext: {
         currentPath: pathname,
