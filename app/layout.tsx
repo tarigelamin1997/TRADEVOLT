@@ -6,6 +6,8 @@ import { SubscriptionProvider } from '@/lib/subscription'
 import { ThemeProvider } from '@/lib/theme-provider'
 import { AuthProvider } from '@/lib/auth-wrapper'
 import { AffiliateProvider } from '@/components/affiliate-provider'
+import { FeedbackWidget } from '@/components/feedback/feedback-widget'
+import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,6 +37,8 @@ export default function RootLayout({
               <ThemeProvider>
                 <AffiliateProvider>
                   <SubscriptionProvider>
+                    <Toaster position="top-right" />
+                    <FeedbackWidget />
                     {children}
                   </SubscriptionProvider>
                 </AffiliateProvider>
@@ -54,6 +58,8 @@ export default function RootLayout({
           <ThemeProvider>
             <AffiliateProvider>
               <SubscriptionProvider>
+                <Toaster position="top-right" />
+                <FeedbackWidget />
                 {children}
               </SubscriptionProvider>
             </AffiliateProvider>

@@ -356,3 +356,69 @@ model AffiliateTierHistory {
   @@index([affiliateId])
   @@index([createdAt])
 }
+
+// Feedback System Models
+model Feedback {
+  id               String   @id @default(cuid())
+  
+  // User Information
+  userId           String?
+  userEmail        String?
+  
+  // Feedback Details
+  type             String   // bug, feature, general
+  title            String
+  description      String   @db.Text
+  severity         String?  // critical, high, medium, low (for bugs)
+  
+  // Screenshots and Context
+  screenshotUrl    String?
+  systemInfo       Json?    // browser, OS, viewport, userAgent
+  appContext       Json?    // currentPath, timestamp, etc.
+  
+  // Status and Processing
+  status           String   @default("new") // new, triaged, in_progress, resolved, closed
+  priority         Int      @default(0)     // Calculated priority score
+  riceScore        Float?   // RICE prioritization score
+  
+  // GitHub Integration
+  githubIssueId    String?
+  githubIssueUrl   String?
+  
+  // Internal Notes
+  internalNotes    String?  @db.Text
+  assignedTo       String?
+  
+  // Resolution
+  resolution       String?  @db.Text
+  resolvedAt       DateTime?
+  resolvedBy       String?
+  
+  // Timestamps
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  votes            FeedbackVote[]
+  
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+model FeedbackVote {
+  id               String   @id @default(cuid())
+  feedbackId       String
+  feedback         Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  
+  userId           String
+  voteType         String   // up, down
+  
+  createdAt        DateTime @default(now())
+  
+  @@unique([feedbackId, userId])
+  @@index([feedbackId])
+  @@index([userId])
+}
