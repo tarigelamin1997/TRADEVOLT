@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { useScreenshot } from 'use-react-screenshot'
+import Image from 'next/image'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -360,7 +361,7 @@ export function FeedbackWidget() {
                   onChange={(e) => setUserEmail(e.target.value)}
                 />
                 <p className="text-xs text-gray-500">
-                  Provide your email if you'd like us to follow up on your feedback
+                  Provide your email if you&apos;d like us to follow up on your feedback
                 </p>
               </div>
             )}
@@ -370,10 +371,12 @@ export function FeedbackWidget() {
               <Label>Screenshot (optional)</Label>
               {screenshot ? (
                 <div className="relative">
-                  <img 
+                  <Image 
                     src={screenshot} 
                     alt="Screenshot" 
-                    className="w-full rounded-lg border"
+                    width={600}
+                    height={400}
+                    className="w-full h-auto rounded-lg border"
                   />
                   <button
                     onClick={() => setScreenshot(null)}
@@ -406,7 +409,7 @@ export function FeedbackWidget() {
               <div className="flex items-start gap-2">
                 <AlertCircle className="h-4 w-4 text-gray-500 mt-0.5" />
                 <div className="text-xs text-gray-600 dark:text-gray-400">
-                  We'll automatically include your browser, OS, and current page information to help us better understand your feedback.
+                  We&apos;ll automatically include your browser, OS, and current page information to help us better understand your feedback.
                 </div>
               </div>
             </div>

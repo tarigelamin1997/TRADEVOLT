@@ -49,7 +49,7 @@ export default function TimeAnalysisPage() {
     } else {
       fetchTrades()
     }
-  }, [user])
+  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const calculateStats = (trades: Trade[]) => {
     if (trades.length > 0) {

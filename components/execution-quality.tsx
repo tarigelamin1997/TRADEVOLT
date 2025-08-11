@@ -58,7 +58,7 @@ export function ExecutionQuality({ trades, settings }: ExecutionQualityProps) {
 
   useEffect(() => {
     calculateMetrics()
-  }, [trades, timeRange])
+  }, [trades, timeRange]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const calculateMetrics = () => {
     // Filter trades based on time range
