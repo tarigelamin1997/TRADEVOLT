@@ -213,7 +213,7 @@ export function FeedbackWidget() {
 
       {/* Feedback Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {getFeedbackIcon()}
@@ -276,7 +276,7 @@ export function FeedbackWidget() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-gray-900 backdrop-blur-none">
                     <SelectItem value="critical">
                       <div className="flex items-center gap-2">
                         <div className={cn("px-2 py-1 rounded text-xs font-medium", getSeverityColor('critical'))}>
