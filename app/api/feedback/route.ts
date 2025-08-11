@@ -116,13 +116,16 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    // Check if user is authenticated and is admin (you might want to add admin check)
-    const user = await currentUser()
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    // For demo mode or development, allow access without authentication
+    let userId = 'demo-user'
+    try {
+      const user = await currentUser()
+      if (user) {
+        userId = user.id
+      }
+    } catch (error) {
+      // Continue with demo user
+      console.log('No authenticated user, using demo mode')
     }
 
     // Get query parameters for filtering

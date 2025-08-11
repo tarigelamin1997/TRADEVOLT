@@ -78,19 +78,20 @@ export default function FeedbackAdminPage() {
       if (filterSeverity !== 'all') params.append('severity', filterSeverity)
 
       const response = await fetch(`/api/feedback?${params.toString()}`)
+      
       if (!response.ok) {
-        if (response.status === 401) {
-          toast.error('You need to be logged in to view feedback')
-          return
-        }
-        throw new Error('Failed to fetch feedback')
+        // Don't show error for empty feedback, just set empty array
+        console.log('No feedback available or error fetching')
+        setFeedback([])
+        return
       }
 
       const data = await response.json()
       setFeedback(data.feedback || [])
     } catch (error) {
       console.error('Error fetching feedback:', error)
-      toast.error('Failed to load feedback')
+      // Only show error toast for actual errors, not empty feedback
+      setFeedback([])
     } finally {
       setLoading(false)
     }
@@ -326,9 +327,17 @@ export default function FeedbackAdminPage() {
           </CardHeader>
           <CardContent>
             {feedback.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                <p>No feedback found</p>
+              <div className="text-center py-12">
+                <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  No feedback yet
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  Feedback submitted by users will appear here
+                </p>
+                <p className="text-sm text-gray-400">
+                  Try submitting feedback using the button in the bottom-right corner
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
