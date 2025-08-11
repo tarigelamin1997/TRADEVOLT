@@ -44,7 +44,8 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
-  Users
+  Users,
+  MessageSquare
 } from "lucide-react"
 import { cn } from '@/lib/utils'
 
@@ -60,6 +61,7 @@ const mainMenuItems = [
   { icon: PieChart, label: 'Market Analysis', href: '/analysis' },
   { icon: DollarSign, label: 'P&L Report', href: '/pnl' },
   { icon: Users, label: 'Affiliate', href: '/affiliate' },
+  { icon: MessageSquare, label: 'Feedback Admin', href: '/admin/feedback' },
   { icon: Settings, label: 'Settings', href: '/settings' }
 ]
 
